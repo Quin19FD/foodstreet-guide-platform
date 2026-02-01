@@ -1,50 +1,24 @@
-# 📍 Smart Food Street QR Guide Platform
+# 🍜 FoodStreet Guide Platform
 
-> Hướng dẫn ẩm thực đường phố thông minh - Kiến trúc Monorepo + Microservices + Next.js 15
+> Nền tảng hướng dẫn ẩm thực đường phố thông minh dựa trên QR Code và GPS
 
-## 📖 Giới thiệu
+Ứng dụng web giúp người dùng khám phá ẩm thực đường phố bằng cách quét mã QR tại các khu phố ẩm thực, với tính năng định vị GPS, thuyết minh đa ngôn ngữ và đặt món trực tuyến.
 
-Nền tảng giúp người dùng khám phá ẩm thực đường phố thông qua:
-- **QR Code** - Quét mã để kích hoạt nội dung khu phố
-- **GPS** - Tự động nhận diện vị trí và gợi ý POI gần nhất
-- **Audio Guide** - Thuyết minh đa ngôn ngữ (Text-to-Speech)
-- **Online Payment** - Đặt món và thanh toán qua VietQR / VNPay
+## 📋 Tổng quan
 
-## 🏗️ Kiến trúc
-
-```
-foodstreet-guide-platform/
-├── apps/
-│   ├── web/              # Next.js 15 Web App (Port 4000)
-│   ├── admin/            # Admin Dashboard (Port 4001)
-│   └── mobile/           # React Native App (coming soon)
-├── services/             # NestJS Microservices
-│   ├── auth-service/     # Authentication (Port 3001)
-│   ├── district-service/ # District Management (Port 3002)
-│   ├── poi-service/      # POI/Store Management (Port 3003)
-│   ├── location-service/ # GPS/Location (Port 3004)
-│   ├── tts-service/      # Text-to-Speech (Port 3005)
-│   ├── media-service/    # Media Storage (Port 3006)
-│   ├── analytics-service/# Analytics (Port 3007)
-│   ├── qr-service/       # QR Generation (Port 3008)
-│   ├── payment-service/  # Payment Gateway (Port 3009)
-│   └── order-service/    # Order Management (Port 3010)
-├── packages/
-│   ├── shared-types/     # TypeScript types
-│   ├── utils/            # Utility functions
-│   └── config/           # Configuration
-└── infrastructure/
-    ├── docker/           # Docker Compose
-    └── nginx/            # API Gateway (Port 3000)
-```
+FoodStreet Guide là một WebApp cho phép người dùng:
+- **Quét QR Code** tại khu phố để kích hoạt nội dung hướng dẫn
+- **Định vị GPS** tự động nhận diện vị trí và gợi ý gian hàng gần nhất
+- **Nghe thuyết minh** đa ngôn giới thiệu về các món ăn đặc sắc
+- **Đặt món trực tuyến** và thanh toán qua VietQR / VNPay
 
 ## 🚀 Bắt đầu
 
 ### Yêu cầu
 
-- **Node.js** >= 22.0.0
-- **pnpm** >= 9.0.0
-- **Docker** (cho PostgreSQL, Redis, MinIO)
+- Node.js >= 22.0.0
+- pnpm >= 9.0.0
+- PostgreSQL (cho database)
 
 ### Cài đặt
 
@@ -59,181 +33,159 @@ pnpm install
 # Copy file environment variables
 cp .env.example .env
 
-# Khởi động infrastructure (PostgreSQL, Redis, MinIO)
-pnpm docker:up
+# Thiết lập database
+pnpm db:push
 ```
 
-### Chạy development
+### Chạy project
 
 ```bash
-# Chạy tất cả apps và services
+# Chạy development server
 pnpm dev
 
-# Chạy riêng lẻ
-pnpm dev:web          # Web App
-pnpm dev:admin        # Admin Dashboard
-pnpm dev:services     # Tất cả Microservices
+# Build cho production
+pnpm build
+
+# Chạy production server
+pnpm start
 ```
 
-### Truy cập ứng dụng
+Mở [http://localhost:3000](http://localhost:3000) để xem ứng dụng.
 
-| Service | URL | Credentials |
-|---------|-----|-------------|
-| Web App | http://localhost:4000 | - |
-| Admin Dashboard | http://localhost:4001 | - |
-| API Gateway | http://localhost:3000 | - |
-| MinIO Console | http://localhost:9001 | minioadmin / minioadmin |
-| pgAdmin | http://localhost:5050 | admin@foodstreet.local / admin |
+## 🏗️ Kiến trúc dự án
 
-## 📦 Packages
-
-### @foodstreet/shared-types
-TypeScript types chia sẻ giữa frontend và backend:
-- User, District, POI types
-- Order, Payment types
-- API Response types
-
-### @foodstreet/utils
-Utility functions:
-- `calculateDistance()` - Tính khoảng cách GPS (Haversine)
-- `formatCurrency()` - Format tiền tệ VND
-- `slugify()` - Tạo slug từ string
-- `generateId()` - Tạo UUID v4
-
-### @foodstreet/config
-Cấu hình chung cho toàn project:
-- API endpoints
-- Database connection
-- Payment gateway config
-- Map services config
-
-## 🔌 API Endpoints
-
-### Auth Service (`/api/auth`)
 ```
-POST   /api/auth/register     Đăng ký
-POST   /api/auth/login        Đăng nhập
-POST   /api/auth/refresh      Làm mới token
-GET    /api/auth/profile      Thông tin user (JWT)
+foodstreet-guide-platform/
+├── app/                    # Next.js App Router
+│   ├── (map)/             # Map related pages
+│   ├── (order)/           # Order related pages
+│   ├── globals.css        # Global styles
+│   ├── layout.tsx         # Root layout
+│   └── page.tsx           # Home page
+├── components/            # React components
+│   ├── features/          # Feature-specific components
+│   ├── layouts/           # Layout components (Header, Footer)
+│   └── ui/                # UI components (Button, Card, ...)
+├── infrastructure/        # Infrastructure configurations
+│   └── docker/            # Docker configurations
+├── lib/                   # Utility functions
+├── public/                # Static assets
+├── src/                   # Source code
+│   ├── application/       # Application layer
+│   ├── domain/            # Domain logic
+│   └── infrastructure/    # Infrastructure implementations
+└── tests/                 # E2E tests with Playwright
 ```
 
-### District Service (`/api/districts`)
-```
-GET    /api/districts         Danh sách khu phố
-GET    /api/districts/:id     Chi tiết khu phố
-POST   /api/districts         Tạo khu phố (Admin)
-PUT    /api/districts/:id     Cập nhật khu phố
-DELETE /api/districts/:id     Xóa khu phố
-```
-
-### POI Service (`/api/pois`)
-```
-GET    /api/pois              Danh sách gian hàng
-GET    /api/pois/:id          Chi tiết gian hàng
-GET    /api/pois/:id/menu     Menu món ăn
-POST   /api/pois              Tạo gian hàng (Admin)
-```
-
-### Location Service (`/api/location`)
-```
-POST   /api/location/nearby   POI gần nhất
-POST   /api/location/within   POI trong bán kính
-```
-
-### Payment Service (`/api/payment`)
-```
-POST   /api/payment/vietqr    Tạo QR VietQR
-POST   /api/payment/vnpay     Tạo URL VNPay
-POST   /api/payment/momo      Tạo URL MoMo
-POST   /api/payment/callback  Webhook callback
-```
-
-### Order Service (`/api/orders`)
-```
-GET    /api/orders            Danh sách đơn hàng
-GET    /api/orders/:id        Chi tiết đơn hàng
-POST   /api/orders            Tạo đơn hàng
-PUT    /api/orders/:id/status Cập nhật trạng thái
-```
-
-## 🗄️ Database
-
-### PostgreSQL
-- **Primary Database** - User, District, POI, Order, Transaction
-- **Port:** 5432
-- **Database:** foodstreet
-
-### Redis
-- **Cache** - Session, POI data, TTS cache
-- **Pub/Sub** - Real-time order updates
-- **Port:** 6379
-
-### MinIO
-- **Object Storage** - Images, Audio files
-- **Port:** 9000 (API), 9001 (Console)
-
-## 🔐 Payment Gateways
-
-| Gateway | Status | Sandbox |
-|---------|--------|---------|
-| VietQR | ✅ Active | https://api.vietqr.io |
-| VNPay | ✅ Active | https://sandbox.vnpayment.vn |
-| MoMo | 🔶 Optional | https://test-payment.momo.vn |
-| ZaloPay | 🔶 Optional | https://sb-openapi.zalopay.vn |
-
-## 📱 Tech Stack
+## 🛠️ Công nghệ
 
 ### Frontend
-- **Next.js** 15 với App Router
-- **TypeScript** 5
-- **TailwindCSS** + shadcn/ui
-- **TanStack Query** (React Query)
-- **Zustand** (State management)
-- **Mapbox GL JS** (Maps)
+- **Next.js 15** - React framework với App Router
+- **TypeScript** - Type-safe JavaScript
+- **Tailwind CSS** - Utility-first CSS framework
+- **Lucide React** - Icon library
+- **Mapbox GL JS** - Interactive maps
 
-### Backend
-- **NestJS** (Microservices)
-- **PostgreSQL** + Prisma/TypeORM
-- **Redis** (Cache)
-- **JWT** (Authentication)
-- **Passport** (Authorization)
+### UI Components
+- **Radix UI** - Headless UI components
+- **class-variance-authority** - Component variants
+- **tailwind-merge** - Merge Tailwind classes
 
-### DevOps
-- **Docker** + Docker Compose
-- **Nginx** (API Gateway)
-- **Turborepo** (Monorepo)
-- **pnpm** (Package manager)
+### Backend & Database
+- **Prisma** - ORM cho TypeScript
+- **PostgreSQL** - Database
+- **Zustand** - State management
+- **TanStack Query** - Data fetching & caching
 
-## 📝 Development Scripts
+### Testing
+- **Playwright** - E2E testing
+- **Biome** - Linting & Formatting
+
+## 📦 Các scripts
 
 ```bash
-pnpm dev              # Chạy dev mode tất cả
-pnpm build            # Build tất cả
-pnpm lint             # Lint tất cả
-pnpm docker:up        # Khởi động Docker infrastructure
-pnpm docker:down      # Dừng Docker infrastructure
-pnpm clean            # Clean build artifacts
+# Development
+pnpm dev              # Start dev server
+
+# Building
+pnpm build            # Build for production
+pnpm start            # Start production server
+
+# Code quality
+pnpm lint             # Check code with Biome
+pnpm lint:fix         # Fix code issues
+pnpm format           # Format code
+pnpm typecheck        # Check TypeScript types
+
+# Database
+pnpm db:generate      # Generate Prisma client
+pnpm db:push          # Push schema to database
+pnpm db:migrate       # Run database migrations
+pnpm db:studio        # Open Prisma Studio
+
+# Testing
+pnpm test             # Run Playwright tests
+pnpm test:ui          # Run tests with UI
+pnpm test:e2e         # Run E2E tests
+
+# Docker
+pnpm docker:up        # Start Docker services
+pnpm docker:down      # Stop Docker services
 ```
 
-## 📚 Tài liệu
+## 🎨 Giao diện
 
-- [project.md](project.md) - Chi tiết yêu cầu dự án
-- [TASKS.md](TASKS.md) - Danh sách công việc cần làm
+Dự án sử dụng hệ thống design theme với các màu:
+- **Primary** - Màu chính (xanh lá #16a34a)
+- **Secondary** - Màu phụ
+- **Muted** - Màu nhạt cho background
+- **Destructive** - Màu cho hành động hủy
 
-## 🗺️ Roadmap
+## 🌐 Tính năng chính
 
-- [x] Khởi tạo monorepo structure
-- [x] Auth Service cơ bản
-- [x] Web App cơ bản
-- ] ] District Service
-- [ ] POI Service
-- [ ] Location Service
-- [ ] TTS Service
-- [ ] Payment Service
-- [ ] Order Service
-- [ ] Admin Dashboard
-- [ ] Mobile App (React Native)
+### Người dùng
+- [x] Trang chủ với giới thiệu tính năng
+- [x] Header với navigation responsive
+- [x] Footer với links
+- [ ] Quét QR Code
+- [ ] Bản đồ với Mapbox
+- [ ] Xem danh sách gian hàng
+- [ ] Thuyết minh đa ngôn ngữ
+- [ ] Giỏ hàng
+- [ ] Thanh toán online
+
+### Quản trị
+- [ ] Dashboard
+- [ ] Quản lý khu phố
+- [ ] Quản lý gian hàng (POI)
+- [ ] Quản lý menu món ăn
+- [ ] Quản lý đơn hàng
+- [ ] Thống kê & báo cáo
+
+## 📝 Hướng phát triển
+
+Dự án theo mô hình **Clean Architecture** với các layer:
+- **Domain Layer** - Business logic thuần túy
+- **Application Layer** - Use cases & orchestration
+- **Infrastructure Layer** - External integrations
+
+## 🤝 Đóng góp
+
+1. Fork dự án
+2. Tạo branch mới (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Mở Pull Request
 
 ## 📄 License
 
-MIT
+Dự án được phát triển cho mục đích học tập và nghiên cứu.
+
+## 🔗 Liên hệ
+
+- **Project Seminar** - University Project
+- **Issues** - GitHub Issues
+
+---
+
+Built with ❤️ using Next.js, TypeScript, and Tailwind CSS
