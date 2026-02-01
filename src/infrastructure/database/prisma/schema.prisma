@@ -1,0 +1,261 @@
+// Prisma Schema for FoodStreet Guide Platform
+
+generator client {
+  provider = "prisma-client-js";
+}
+
+datasource db {
+  provider = "postgresql";
+  url      = env("DATABASE_URL");
+}
+
+// ============================================================================
+// User & Auth
+// ============================================================================
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  password    String
+  name        String
+  phoneNumber String?
+  avatarUrl   String?
+  role        UserRole @default(USER)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  orders      Order[]
+  payments    Payment[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  VENDOR
+}
+
+// ============================================================================
+// District (Khu phố)
+// ============================================================================
+
+model District {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String
+  latitude    Float
+  longitude   Float
+  address     String?
+  qrCode      String   @unique
+  imageUrl    String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  pois        POI[]
+
+  @@map("districts")
+}
+
+// ============================================================================
+// POI (Point of Interest - Gian hàng)
+// ============================================================================
+
+model POI {
+  id          String      @id @default(cuid())
+  districtId  String
+  name        String
+  slug        String
+  description String
+  category    POICategory
+  latitude    Float
+  longitude   Float
+  imageUrl    String?
+  audioUrl    String?
+  audioScript String?     @db.Text
+  priceMin    Int
+  priceMax    Int
+  rating      Float       @default(0)
+  isOpen      Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  // Relations
+  district    District    @relation(fields: [districtId], references: [id], onDelete: Cascade)
+  orders      Order[]
+  menuItems   MenuItem[]
+
+  @@unique([districtId, slug])
+  @@index([districtId])
+  @@index([latitude, longitude])
+  @@map("pois")
+}
+
+enum POICategory {
+  FOOD
+  DRINK
+  SNACK
+  DESSERT
+}
+
+// ============================================================================
+// Menu Items
+// ============================================================================
+
+model MenuItem {
+  id          String   @id @default(cuid())
+  poiId       String
+  name        String
+  description String?
+  price       Int
+  imageUrl    String?
+  isAvailable Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  poi         POI      @relation(fields: [poiId], references: [id], onDelete: Cascade)
+  orderItems  OrderItem[]
+
+  @@index([poiId])
+  @@map("menu_items")
+}
+
+// ============================================================================
+// Orders
+// ============================================================================
+
+model Order {
+  id           String       @id @default(cuid())
+  userId       String
+  poiId        String
+  totalAmount  Int
+  status       OrderStatus @default(PENDING)
+  paymentMethod PaymentMethod
+  paymentStatus PaymentStatus @default(PENDING)
+  pickupCode   String       @unique
+  notes        String?
+  estimatedReadyTime DateTime?
+  completedAt  DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  // Relations
+  user         User         @relation(fields: [userId], references: [id])
+  poi          POI          @relation(fields: [poiId], references: [id])
+  items        OrderItem[]
+  payment      Payment?
+
+  @@index([userId])
+  @@index([poiId])
+  @@index([status])
+  @@map("orders")
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  READY
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  VIETQR
+  VNPAY
+  MOMO
+  CASH
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+// ============================================================================
+// Order Items
+// ============================================================================
+
+model OrderItem {
+  id          String   @id @default(cuid())
+  orderId     String
+  menuItemId  String
+  quantity    Int
+  unitPrice   Int
+  totalPrice  Int
+  notes       String?
+
+  // Relations
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem    MenuItem @relation(fields: [menuItemId], references: [id])
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+// ============================================================================
+// Payments
+// ============================================================================
+
+model Payment {
+  id             String        @id @default(cuid())
+  orderId        String        @unique
+  amount         Int
+  provider       PaymentProvider
+  status         PaymentStatus @default(PENDING)
+  transactionId  String?       @unique
+  qrCodeUrl      String?
+  metadata       Json?
+  returnUrl      String
+  cancelUrl      String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  // Relations
+  order          Order         @relation(fields: [orderId], references: [id])
+
+  @@index([transactionId])
+  @@map("payments")
+}
+
+enum PaymentProvider {
+  VIETQR
+  VNPAY
+  MOMO
+}
+
+// ============================================================================
+// Analytics & Logs (Optional)
+// ============================================================================
+
+model PageView {
+  id        String   @id @default(cuid())
+  path      String
+  userId    String?
+  sessionId String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("page_views")
+}
+
+model POIView {
+  id        String   @id @default(cuid())
+  poiId     String
+  userId    String?
+  duration  Int?     // seconds
+  createdAt DateTime @default(now())
+
+  @@index([poiId])
+  @@index([createdAt])
+  @@map("poi_views")
+}
