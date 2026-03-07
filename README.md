@@ -1,22 +1,30 @@
-# Smart Food Street Guide Platform
+# Project Title
 
-Nền tảng quản trị và khám phá ẩm thực theo **QR + GPS**.
+Smart Food Street Guide Platform
 
-## 1. Project Summary
+## Description
 
-Project gồm 2 phần chính:
+Nền tảng quản lý và khám phá ẩm thực theo QR + GPS, gồm:
 
-- **Admin CMS**: quản lý District, POI, Tour, Media, Audio Guide, Translation, Analytics.
-- **Web Application**: trải nghiệm người dùng cuối theo vị trí thực (GPS), hiển thị POI gần nhất và Audio Guide.
+- Admin CMS để quản lý District, POI, Food Tour, Media, Audio Guide, Translation.
+- Web Application cho người dùng khám phá POI theo vị trí thực.
 
-Backend đang tổ chức theo hướng service-based trong cùng codebase:
+Hiện trạng codebase đang theo hướng microservice-style scaffold (service-based trong cùng Next.js app).
 
-- **API Gateway route**: `app/api/gateway/[service]/[...path]`
-- Service modules: `auth`, `poi`, `tour`, `media`, `audio-guide`, `translation`, `location`
+## Features
 
-Lưu ý: hiện trạng runtime là **microservice-style scaffold** (modular monolith), chưa tách thành nhiều service deploy độc lập.
+- Admin Dashboard
+- POI Management
+- District Management
+- Food Tour Management
+- Media Library
+- Audio Guide Management
+- Translation Management
+- Analytics Overview
+- Web map exploration (scan, districts, pois, tours)
+- API Gateway route: `/api/gateway/[service]/[...path]`
 
-## 2. Tech Stack
+## Tech Stack
 
 - Next.js 15 (App Router)
 - TypeScript
@@ -24,114 +32,31 @@ Lưu ý: hiện trạng runtime là **microservice-style scaffold** (modular mon
 - Prisma
 - Playwright
 
-## 3. Prerequisites
-
-- Node.js `>= 22`
-- pnpm `>= 9`
-
-## 4. Environment Setup
-
-Tạo file `.env` từ `.env.example` (nếu chưa có), tối thiểu cấu hình:
-
-- `DATABASE_URL`
-- `NEXT_PUBLIC_MAPBOX_TOKEN` (nếu dùng map thật)
-- `JWT_SECRET` (cho auth flow)
-
-## 5. Install & Run
+## Installation
 
 ```bash
 pnpm install
+```
+
+Yêu cầu môi trường:
+
+- Node.js >= 22
+- pnpm >= 9
+
+## Run Project
+
+```bash
 pnpm dev
 ```
 
-Mặc định app chạy tại:
+Mở trên trình duyệt:
 
-- `http://localhost:3000` (redirect về admin dashboard)
+- `http://localhost:3000`
 - `http://localhost:3000/admin/dashboard`
 
-## 6. Available Scripts
+## Authors
 
-```bash
-pnpm dev         # run development server
-pnpm build       # production build
-pnpm start       # run production server
-pnpm typecheck   # TypeScript check
-pnpm lint        # biome check
-pnpm test        # playwright tests
-```
-
-## 7. Main Routes
-
-### 7.1 Admin CMS
-
-- `/admin/dashboard`
-- `/admin/districts`
-- `/admin/pois`
-- `/admin/tours`
-- `/admin/media`
-- `/admin/audio-guides`
-- `/admin/translations`
-- `/admin/analytics`
-- `/admin/settings`
-
-### 7.2 User Web App
-
-- `/map`
-- `/scan`
-- `/districts`
-- `/pois`
-- `/tours`
-
-## 8. Code Structure
-
-```text
-app/                    # Next.js routes: admin, user, api
-  (admin)/              # admin source pages
-  admin/                # public admin URL wrappers (/admin/*)
-  (map)/                # user-facing pages
-  api/gateway/          # gateway route
-
-components/             # shared UI/layout components
-lib/                    # utility helpers
-
-src/
-  application/          # DTOs, contracts, service interfaces
-  domain/               # entities, value objects
-  infrastructure/       # gateway router, storage, prisma infra schema
-  shared/               # shared config/utils
-
-prisma/                 # primary Prisma schema/config
-tests/                  # e2e tests
-```
-
-## 9. Architecture Notes
-
-- Source of architecture scope: `SYSTEM_ARCHITECTURE.md`
-- Codebase map: `CODEBASE_STRUCTURE.md`
-- Scope cleanup notes: `SCOPE_CLEANUP_CHECKLIST.md`
-
-## 10. Troubleshooting
-
-### 10.1 Route 404 sau khi đổi cấu trúc route
-
-```bash
-# stop dev server first
-rm -rf .next
-pnpm dev
-```
-
-(Windows PowerShell)
-
-```powershell
-Remove-Item -Recurse -Force .next
-pnpm dev
-```
-
-### 10.2 SWC/version mismatch khi build
-
-```bash
-pnpm install
-pnpm dev
-```
-
-Nếu cần, xóa cache `.next` rồi chạy lại.
+- Nguyễn Hoàng Quyên - 3122410351
+- Cao Tiến Cường - 3122410043
+- Đỗ Mai Anh - 3122410006
+- Nguyễn Tuấn Vũ - 3122410483

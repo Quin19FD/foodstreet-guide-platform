@@ -1,213 +1,385 @@
-# 📍 Smart Food Street QR Guide (Microservice Web App)
+
+---
+
+# 📍 Smart Food Street CMS & GPS Guide Platform
 
 ## 1. Tổng quan dự án
 
-Ứng dụng web (WebApp) hướng dẫn ẩm thực khu phố thông minh dựa trên **QR Code + GPS**.  
-Người dùng chỉ cần **quét QR của khu phố**, hệ thống sẽ tự động:
+Smart Food Street CMS & GPS Guide Platform là một hệ thống quản lý nội dung và khám phá ẩm thực dựa trên vị trí địa lý (GPS), được thiết kế cho các khu phố ẩm thực, chợ đêm và khu du lịch ẩm thực.
 
-- Hiển thị các **gian hàng ẩm thực (POI – Point of Interest)**
-- Tự động nhận biết **vị trí người dùng**
-- Hiển thị thông tin gian hàng gần nhất
-- **Đọc thuyết minh bằng giọng nói đa ngôn ngữ (Text-to-Speech)**
+Hệ thống cho phép quản trị viên quản lý các gian hàng ẩm thực, các tiện ích hỗ trợ và xây dựng các tuyến tham quan ẩm thực thông qua một **hệ thống quản trị nội dung (CMS)**. Dữ liệu này sau đó được sử dụng bởi **ứng dụng web dành cho người dùng cuối** để cung cấp trải nghiệm khám phá ẩm thực dựa trên vị trí thực tế của người dùng.
 
-Ứng dụng phù hợp cho:
-- Du lịch ẩm thực
-- Khu phố đi bộ
-- Food street / night market
-- Smart tourism
+Hệ thống sử dụng mô hình **Point of Interest (POI)** để đại diện cho các gian hàng ẩm thực hoặc các tiện ích trong khu phố.
 
----
+Mỗi POI được gắn với các thông tin sau:
 
-## 2. Luồng hoạt động chính (User Flow)
+* Tọa độ GPS (latitude / longitude)
+* Nội dung mô tả
+* Hình ảnh minh họa
+* Nội dung thuyết minh (Audio Guide)
+* Dữ liệu đa ngôn ngữ
 
-1. Người dùng **quét QR Code của khu phố**
-2. App lấy `district_id`
-3. App định vị người dùng bằng **GPS**
-4. Xác định **POI (gian hàng) gần nhất**
-5. Gọi **Store / POI Service**
-6. Hiển thị thông tin gian hàng
-7. Gọi **TTS Service → đọc thuyết minh**
-8. Người dùng di chuyển → vị trí thay đổi → POI thay đổi → lặp lại
+Kiến trúc hệ thống được thiết kế theo mô hình **Microservice**, cho phép các chức năng chính của hệ thống được triển khai dưới dạng các service độc lập nhằm tăng khả năng mở rộng, bảo trì và phát triển trong tương lai.
 
 ---
 
-## 3. Chức năng chính
+# 2. Mục tiêu hệ thống
 
-### 3.1 Chức năng cho người dùng
+## 2.1 Mục tiêu chính
 
-- Quét QR để kích hoạt nội dung
-- Hiển thị:
-  - Danh sách gian hàng (POI)
-  - Thông tin chi tiết gian hàng
-  - Ảnh minh họa
-  - Mô tả văn bản
-  - Link bản đồ (Google Maps / Mapbox)
-- Định vị người dùng trên bản đồ
-- Hiển thị tất cả POI trong khu phố
-- Highlight POI gần nhất
-- Xem chi tiết từng POI
-- Tự động thuyết minh bằng **Text-to-Speech**
-- Hỗ trợ **đa ngôn ngữ**
-- Tự động chuyển POI khi người dùng di chuyển
-- **Thanh toán online**:
-  - Mua món ăn trực tiếp trên app
-  - Thanh toán qua QR Code (VietQR / VNPay)
-  - Lịch sử giao dịch
-  - Đặt món trước (Pre-order)
+Xây dựng một nền tảng quản lý nội dung cho các khu phố ẩm thực thông minh, cho phép quản trị viên:
+
+* Quản lý các gian hàng ẩm thực
+* Quản lý các tiện ích phục vụ du khách
+* Tạo và quản lý các tuyến tham quan ẩm thực (Food Tour)
+* Quản lý nội dung thuyết minh cho từng điểm tham quan
+
+Toàn bộ dữ liệu được quản lý thông qua **giao diện bản đồ trực quan**, giúp việc quản lý vị trí các POI trở nên dễ dàng và trực quan hơn.
 
 ---
 
-### 3.2 Hệ thống thanh toán online
+## 2.2 Mục tiêu phụ
 
-- Đặt món từ gian hàng (POI)
-- Giỏ hàng tính toán
-- Thanh toán qua:
-  - **VietQR** (quét mã ngân hàng)
-  - **VNPay** (gateway)
-  - **MoMo / ZaloPay** ( ví điện tử - tùy chọn)
-- Xác thực giao dịch an toàn
-- Thông báo đặt món thành công đến gian hàng
-- Quét mã QR tại quầy để nhận món
-- Đánh giá sau giao dịch
+Ngoài chức năng quản trị nội dung, hệ thống cũng hướng đến các mục tiêu sau:
+
+* Quản lý POI dựa trên **tọa độ GPS**
+* Hỗ trợ **đa ngôn ngữ** cho khách du lịch quốc tế
+* Cung cấp **Audio Guide tự động**
+* Hỗ trợ **khám phá gian hàng thông qua bản đồ**
+* Cho phép xây dựng **Food Tour** bằng cách kết hợp nhiều POI
 
 ---
 
-### 3.3 Hệ thống thuyết minh (Audio Guide)
+# 3. Luồng hoạt động chính (User Flow)
 
-- Danh sách điểm thuyết minh (POI)
-- Nội dung thuyết minh dạng:
-  - Text
-  - Script TTS
-  - Audio sinh tự động
-- Đọc tự động khi người dùng đến gần POI
-- Chọn ngôn ngữ thuyết minh
+## 3.1 Luồng người dùng
 
----
+1. Người dùng **quét QR Code của khu phố ẩm thực**
+2. Hệ thống mở **Smart Food Street Web Application**
+3. Hệ thống:
 
-## 4. Hệ thống quản trị nội dung (CMS / Admin)
+   * tự động nhận diện ngôn ngữ của thiết bị
+   * hoặc cho phép người dùng chọn ngôn ngữ
+4. Ứng dụng yêu cầu **quyền truy cập GPS**
+5. Hệ thống xác định **vị trí hiện tại của người dùng**
+6. Bản đồ hiển thị:
 
-### 4.1 Quản lý nội dung
+   * vị trí người dùng
+   * các POI trong khu phố
+7. Người dùng có thể:
 
-- Quản lý khu phố (District)
-- Quản lý POI (Gian hàng)
-- Quản lý:
-  - Mô tả văn bản
-  - Ảnh minh họa
-  - Script TTS
-  - Audio
-- Quản lý bản dịch đa ngôn ngữ
-- Quản lý QR Code kích hoạt nội dung
-- Quản lý tour / tuyến tham quan
-- Quản lý **Menu món ăn** theo gian hàng
-- Quản lý **Đơn hàng**:
-  - Xem đơn hàng mới
-  - Xác nhận / từ chối đơn
-  - Cập nhật trạng thái chuẩn bị
-  - Thông báo khi món xong
+   * xem POI gần nhất
+   * khám phá các gian hàng
+   * tìm kiếm món ăn
+8. Khi người dùng đến gần một POI:
+
+   * hệ thống hiển thị thông tin gian hàng
+   * kích hoạt **Audio Guide**
+9. Khi người dùng tiếp tục di chuyển:
+
+   * hệ thống cập nhật vị trí GPS
+   * xác định POI gần nhất mới
+   * cập nhật nội dung hiển thị
 
 ---
 
-### 4.3 Quản lý thanh toán
+# 4. Chức năng hệ thống
 
-- Cấu hình cổng thanh toán:
-  - VietQR
-  - VNPay
-  - MoMo / ZaloPay
-- Xem lịch sử giao dịch
-- Báo cáo doanh thu
-- Xuất báo cáo Excel / PDF
+## 4.1 Admin Content Management System (CMS)
+
+Admin CMS là hệ thống quản trị nội dung dành cho quản trị viên, cho phép quản lý toàn bộ dữ liệu của khu phố ẩm thực.
 
 ---
 
-### 4.4 Analytics & Data
+### 4.1.1 Xác thực quản trị viên
 
-- Lưu lịch sử sử dụng (ẩn danh)
-- Phân tích dữ liệu:
-  - Top POI được nghe nhiều nhất
-  - Thời gian trung bình nghe 1 POI
-  - Heatmap vị trí người dùng
-  - Tuyến di chuyển phổ biến
-  - **Top món ăn bán chạy**
-  - **Doanh thu theo gian hàng / khu vực**
-  - **Thống kê đơn hàng thành công / hủy**
-- Báo cáo theo thời gian / khu vực
+Hệ thống cung cấp cơ chế xác thực cơ bản cho quản trị viên.
+
+Các chức năng bao gồm:
+
+* Đăng nhập bằng **username và password**
+* Quản lý **session đăng nhập**
+* Chức năng **đăng xuất**
 
 ---
 
-## 5. Kiến trúc hệ thống (Microservice)
+### 4.1.2 Quản lý POI (Points of Interest)
 
-### 5.1 Frontend
+Quản trị viên có thể tạo và quản lý các POI đại diện cho các gian hàng ẩm thực hoặc tiện ích hỗ trợ.
 
-- WebApp
-- Công nghệ:
-  - **Next.js**
-  - **TypeScript**
-- Chức năng:
-  - Quét QR
-  - Bản đồ
-  - Hiển thị POI
-  - Audio Guide
-  - Giỏ hàng & Thanh toán
+#### Tạo POI
 
----
+POI có thể được tạo bằng:
 
-### 5.2 Backend (Microservices)
+* Click trực tiếp trên bản đồ
+* Nhập thủ công tọa độ **latitude / longitude**
 
-| Service | Chức năng |
-|------|---------|
-| Auth Service | Xác thực, phân quyền |
-| District Service | Quản lý khu phố |
-| POI / Store Service | Gian hàng, thông tin |
-| Location Service | Xử lý GPS |
-| TTS Service | Sinh giọng nói |
-| Media Service | Ảnh, Audio |
-| Analytics Service | Phân tích dữ liệu |
-| QR Service | Sinh & quản lý QR |
-| Payment Service | Thanh toán online, đơn hàng |
-| Order Service | Quản lý giỏ hàng, đặt món |
+#### Chỉnh sửa POI
 
----
+Thông tin POI bao gồm:
 
-## 6. Công nghệ đề xuất
+* Tên gian hàng
+* Mô tả
+* Tọa độ
+* Bán kính hiển thị
+* Loại POI
+* Hình ảnh
+* Nội dung thuyết minh
 
-### Frontend
-- Next.js + TypeScript
-- Mapbox / Google Maps
-- Web Speech API (fallback)
-- Responsive WebApp
+#### Upload hình ảnh
 
-### Backend
-- Node.js / NestJS
-- REST / GraphQL
-- PostgreSQL
-- Redis (cache)
-- Object Storage (Audio, Image)
-- **Payment Gateway**:
-  - VNPay SDK
-  - VietQR API
-  - MoMo / ZaloPay API (tùy chọn)
+* Upload ảnh gian hàng
+* Quản lý thư viện ảnh
+* Cập nhật ảnh minh họa cho POI
 
-### DevOps
-- Docker
-- Docker Compose / Kubernetes
-- CI/CD
-- Nginx / API Gateway
+#### Tìm kiếm và lọc POI
+
+* Tìm POI theo tên
+* Lọc theo loại
+* Lọc theo khu vực trên bản đồ
+
+#### Xóa POI
+
+* Xóa POI khỏi hệ thống
+* Tự động xóa POI khỏi các tour liên quan (cascade deletion)
 
 ---
 
-## 7. Mục tiêu dự án
+### 4.1.3 Phân loại POI
 
-- Xây dựng nền tảng **du lịch ẩm thực thông minh**
-- Tăng trải nghiệm người dùng bằng **tự động hóa & âm thanh**
-- Dễ mở rộng cho nhiều khu phố / thành phố
-- Phù hợp triển khai thực tế
+POI được phân thành hai nhóm chính.
+
+#### 1. Food Stall
+
+Đại diện cho các gian hàng ẩm thực trong khu phố.
+
+Ví dụ:
+
+* Street food
+* Đặc sản địa phương
+* Món ăn truyền thống
+
+Thông tin bao gồm:
+
+* Tên gian hàng
+* Mô tả món ăn
+* Hình ảnh
+* Nội dung thuyết minh
 
 ---
 
-## 8. Hướng phát triển tương lai
+#### 2. Supporting Facilities
 
-- AI gợi ý tour ẩm thực
-- Nhận diện hành vi người dùng
-- Offline mode
-- Mobile App (React Native / Flutter)
-- Cá nhân hóa nội dung theo người dùng
+Các tiện ích phục vụ du khách.
+
+Ví dụ:
+
+* WC
+* ATM
+* Bãi gửi xe
+* Quầy thông tin
+* Khu nghỉ chân
+
+---
+
+### 4.1.4 Quản lý Food Tour
+
+Quản trị viên có thể tạo các tuyến tham quan ẩm thực (Food Tour).
+
+Chức năng bao gồm:
+
+* Tạo tour mới
+* Chỉnh sửa tour
+* Thêm POI vào tour
+* Xóa POI khỏi tour
+* Sắp xếp thứ tự POI bằng **drag-and-drop**
+
+Thông tin tour bao gồm:
+
+* Tên tour
+* Mô tả
+* Thời lượng
+* Hình ảnh
+* Danh sách POI
+
+---
+
+### 4.1.5 Hệ thống Audio Guide
+
+Hệ thống hỗ trợ thuyết minh tự động cho từng POI.
+
+Các chức năng bao gồm:
+
+* Nhập **script thuyết minh**
+* Tạo **audio bằng Text-to-Speech**
+* Quản lý audio theo từng POI
+
+---
+
+### 4.1.6 Quản lý đa ngôn ngữ
+
+Hệ thống hỗ trợ quản lý nội dung bằng nhiều ngôn ngữ.
+
+Quản trị viên có thể quản lý bản dịch cho:
+
+* Tên POI
+* Mô tả
+* Nội dung thuyết minh
+
+Ví dụ ngôn ngữ hỗ trợ:
+
+* Tiếng Việt
+* Tiếng Anh
+* Tiếng Trung
+* Tiếng Hàn
+
+---
+
+# 5. Smart Food Street Web Application
+
+Đây là ứng dụng web dành cho người dùng cuối giúp khám phá khu phố ẩm thực.
+
+---
+
+## 5.1 Bản đồ tương tác
+
+Ứng dụng hiển thị bản đồ khu phố ẩm thực.
+
+Chức năng bao gồm:
+
+* Hiển thị tất cả POI
+* Hiển thị vị trí người dùng
+* Hiển thị khoảng cách đến POI
+* Highlight POI gần nhất
+
+---
+
+## 5.2 GPS Positioning
+
+Ứng dụng sử dụng GPS của thiết bị để:
+
+* Xác định vị trí người dùng
+* Cập nhật vị trí theo thời gian thực
+* Tính khoảng cách đến các POI
+
+---
+
+## 5.3 Xem thông tin gian hàng
+
+Khi người dùng chọn một POI, hệ thống hiển thị:
+
+* Tên gian hàng
+* Mô tả món ăn
+* Hình ảnh
+* Nội dung thuyết minh
+* Khoảng cách từ vị trí hiện tại
+
+---
+
+## 5.4 Audio Guide
+
+Người dùng có thể nghe thuyết minh cho từng POI.
+
+Chức năng:
+
+* Text-to-Speech
+* Phát audio tự động khi đến gần POI
+* Tạm dừng / phát lại
+* Chọn ngôn ngữ
+
+---
+
+## 5.5 Tìm kiếm và khám phá
+
+Người dùng có thể:
+
+* Tìm kiếm gian hàng theo tên
+* Lọc gian hàng theo loại
+* Xem danh sách POI
+* Xem gian hàng gần nhất
+* Xem gợi ý Food Tour
+
+---
+
+## 5.6 Cập nhật POI theo chuyển động
+
+Hệ thống theo dõi vị trí người dùng theo thời gian thực.
+
+Khi người dùng di chuyển:
+
+1. Cập nhật vị trí GPS
+2. Tính khoảng cách đến các POI
+3. Xác định POI gần nhất
+4. Hiển thị thông tin POI
+5. Kích hoạt Audio Guide
+
+---
+
+# 6. Kiến trúc hệ thống (Microservice Architecture)
+
+Hệ thống được thiết kế theo **kiến trúc Microservice**, trong đó mỗi chức năng chính được triển khai dưới dạng một service độc lập.
+
+Các service giao tiếp với nhau thông qua **REST API**.
+
+```
+Admin CMS (Next.js Dashboard)
+        │
+        │ REST API
+        ▼
+     API Gateway
+        │
+ ┌─────────────────────────────┐
+ │        Microservices        │
+ │                             │
+ │  Auth Service               │
+ │  POI Service                │
+ │  Tour Service               │
+ │  Media Service              │
+ │  Audio Guide Service        │
+ │  Translation Service        │
+ │  Location Service           │
+ │                             │
+ └─────────────────────────────┘
+        │
+        ▼
+     PostgreSQL
+        │
+        ▼
+Smart Food Street Web Application
+(GPS Food Exploration App)
+```
+
+---
+
+# 7. Công nghệ đề xuất
+
+## Frontend
+
+* Next.js
+* TypeScript
+* TailwindCSS
+* Leaflet / Mapbox
+* Web Speech API
+
+---
+
+## Backend
+
+* Node.js
+* NestJS
+* Microservice Architecture
+* REST API
+* Prisma ORM
+* PostgreSQL
+
+---
+
+## DevOps
+
+* Docker
+* Docker Compose
+* Nginx / API Gateway
+* CI/CD Pipeline
+
+---
+
