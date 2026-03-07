@@ -4,11 +4,11 @@
  * These interfaces define the contracts for infrastructure implementations.
  */
 
-import type { Order } from "@/domain/entities/order";
-import type { Payment } from "@/domain/entities/payment";
 import type { POI } from "@/domain/entities/poi";
 import type { User } from "@/domain/entities/user";
-import type { PaymentCallbackDTO } from "../dtos/payment.dto";
+import type { AudioGuideResponseDTO } from "../dtos/audio-guide.dto";
+import type { TourResponseDTO } from "../dtos/tour.dto";
+import type { TranslationResponseDTO } from "../dtos/translation.dto";
 
 // Authentication Services
 export interface IAuthService {
@@ -47,40 +47,44 @@ export interface ILocationService {
   reverseGeocode(latitude: number, longitude: number): Promise<string>;
 }
 
-// Order Services
-export interface IOrderService {
-  create(data: Omit<Order, "id" | "createdAt" | "updatedAt">): Promise<Order>;
-  findById(id: string): Promise<Order | null>;
-  findByUser(userId: string): Promise<Order[]>;
-  findByPOI(poiId: string): Promise<Order[]>;
-  updateStatus(id: string, status: Order["status"]): Promise<Order>;
+// Tour Services
+export interface ITourService {
+  findAll(): Promise<TourResponseDTO[]>;
+  create(data: {
+    name: string;
+    description: string;
+    durationMinutes: number;
+    poiIds: string[];
+  }): Promise<TourResponseDTO>;
+  reorderStops(tourId: string, poiIds: string[]): Promise<TourResponseDTO>;
 }
 
-// Payment Services
-export interface IPaymentService {
-  createPayment(data: {
-    orderId: string;
-    amount: number;
-    provider: Payment["provider"];
-    returnUrl: string;
-    cancelUrl: string;
-  }): Promise<Payment>;
-  processCallback(callback: PaymentCallbackDTO): Promise<Payment>;
-  getStatus(paymentId: string): Promise<Payment["status"]>;
+// Media Services
+export interface IMediaService {
+  uploadPOIImage(file: File, poiId: string): Promise<string>;
+  deleteMedia(url: string): Promise<void>;
 }
 
-export interface IVietQRService {
-  generateQR(amount: number, orderId: string): Promise<string>;
-  verifyPayment(transactionId: string): Promise<boolean>;
+// Audio Guide Services
+export interface IAudioGuideService {
+  findByPOI(poiId: string): Promise<AudioGuideResponseDTO[]>;
+  saveScript(data: {
+    poiId: string;
+    language: string;
+    scriptText: string;
+  }): Promise<AudioGuideResponseDTO>;
 }
 
-export interface IVNPayService {
-  createPaymentUrl(data: {
-    amount: number;
-    orderId: string;
-    returnUrl: string;
-  }): Promise<string>;
-  verifyCallback(params: Record<string, string>): Promise<boolean>;
+// Translation Services
+export interface ITranslationService {
+  findByEntity(entityType: "POI" | "AUDIO_GUIDE" | "TOUR", entityId: string): Promise<TranslationResponseDTO[]>;
+  upsert(data: {
+    entityType: "POI" | "AUDIO_GUIDE" | "TOUR";
+    entityId: string;
+    language: string;
+    field: string;
+    value: string;
+  }): Promise<TranslationResponseDTO>;
 }
 
 // Storage Services

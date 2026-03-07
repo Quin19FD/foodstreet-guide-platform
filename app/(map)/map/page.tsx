@@ -5,8 +5,16 @@
  */
 
 import { MainLayout } from "@/components/layouts/main-layout";
+import { mockPlatformService } from "@/application/services/mock-platform";
 
 export default function MapPage() {
+  const pois = mockPlatformService.poi.listAll();
+  const nearest = mockPlatformService.location.nearestPOI({
+    latitude: 10.7757,
+    longitude: 106.7011,
+    districtId: "d1",
+  });
+
   return (
     <MainLayout>
       <div className="h-full space-y-4">
@@ -19,9 +27,29 @@ export default function MapPage() {
 
         {/* Map Container */}
         <div className="h-[calc(100vh-200px)] bg-muted rounded-lg flex items-center justify-center">
-          <div className="text-center text-muted-foreground">
+          <div className="text-center text-muted-foreground px-4">
             <p className="text-lg">Bản đồ sẽ hiển thị tại đây</p>
-            <p className="text-sm mt-2">Mapbox GL JS integration pending</p>
+            <p className="text-sm mt-2">Hiển thị vị trí người dùng + toàn bộ POI + khoảng cách</p>
+            {nearest && (
+              <p className="text-sm mt-3">
+                POI gần nhất hiện tại: <span className="font-semibold text-foreground">{nearest.name}</span>
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="rounded-lg border bg-card p-4">
+            <h2 className="font-semibold">Audio Guide</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Tự động phát khi vào bán kính POI, hỗ trợ chọn ngôn ngữ và phát lại/tạm dừng.
+            </p>
+          </div>
+          <div className="rounded-lg border bg-card p-4">
+            <h2 className="font-semibold">POI đang hiển thị</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Tổng số điểm: {pois.length}
+            </p>
           </div>
         </div>
       </div>

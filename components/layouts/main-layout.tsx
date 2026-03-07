@@ -24,8 +24,8 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
             <Link href="/pois" className="transition-colors hover:text-primary">
               Danh sách
             </Link>
-            <Link href="/orders" className="transition-colors hover:text-primary">
-              Đơn hàng
+            <Link href="/tours" className="transition-colors hover:text-primary">
+              Food Tour
             </Link>
           </nav>
           <div className="ml-auto flex items-center space-x-4">

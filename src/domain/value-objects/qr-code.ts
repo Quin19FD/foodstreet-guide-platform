@@ -7,7 +7,7 @@
 
 export interface QRCodeProps {
   data: string;
-  type: "district" | "poi" | "order" | "payment";
+  type: "district" | "poi";
 }
 
 export class QRCode {
@@ -46,7 +46,7 @@ export class QRCode {
    * Parse QR code from string
    */
   static fromString(value: string): QRCode | null {
-    const match = value.match(/^(district|poi|order|payment):(.+)$/);
+    const match = value.match(/^(district|poi):(.+)$/);
     if (!match) return null;
 
     return new QRCode({

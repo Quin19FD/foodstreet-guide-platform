@@ -26,18 +26,6 @@ export const config = {
     refreshTokenExpiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN ?? "30d",
   },
 
-  payment: {
-    vnpay: {
-      tmnCode: process.env.VNPAY_TMN_CODE ?? "",
-      hashSecret: process.env.VNPAY_HASH_SECRET ?? "",
-      baseUrl: process.env.VNPAY_BASE_URL ?? "https://sandbox.vnpayment.vn",
-    },
-    vietqr: {
-      apiKey: process.env.VIETQR_API_KEY ?? "",
-      baseUrl: process.env.VIETQR_BASE_URL ?? "https://api.vietqr.io",
-    },
-  },
-
   storage: {
     endpoint: process.env.STORAGE_ENDPOINT ?? "",
     accessKey: process.env.STORAGE_ACCESS_KEY ?? "",
