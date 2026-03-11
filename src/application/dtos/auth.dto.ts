@@ -12,6 +12,7 @@ export interface RegisterRequestDTO {
   password: string;
   name: string;
   phoneNumber?: string;
+  avatarUrl?: string;
 }
 
 export interface AuthResponseDTO {
@@ -20,11 +21,23 @@ export interface AuthResponseDTO {
     email: string;
     name: string;
     role: string;
+    phoneNumber?: string;
+    avatarUrl?: string;
+    createdAt: Date;
   };
   accessToken: string;
-  refreshToken: string;
+  refreshToken?: string;
 }
 
 export interface RefreshTokenRequestDTO {
   refreshToken: string;
+}
+
+export interface ResetPasswordRequestDTO {
+  email: string;
+}
+
+export interface ResetPasswordConfirmDTO {
+  token: string;
+  newPassword: string;
 }

@@ -6,19 +6,19 @@
 
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import {
   BarChart3,
   Compass,
   Headphones,
   ImageIcon,
-  LayoutDashboard,
   Languages,
+  LayoutDashboard,
   LogOut,
   MapPin,
   Settings,
 } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const mainNavItems = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },

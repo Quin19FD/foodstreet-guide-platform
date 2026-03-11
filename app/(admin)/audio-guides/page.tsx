@@ -1,5 +1,5 @@
-import { AdminLayout } from "@/components/layouts/admin-layout";
 import { mockPlatformService } from "@/application/services/mock-platform";
+import { AdminLayout } from "@/components/layouts/admin-layout";
 
 export default function AdminAudioGuidesPage() {
   const pois = mockPlatformService.poi.listAll();

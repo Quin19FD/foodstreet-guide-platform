@@ -1,16 +1,28 @@
+/**
+ * DTOs for POI Translations (Multi-language support)
+ */
+
 export interface TranslationRequestDTO {
-  entityType: "POI" | "AUDIO_GUIDE" | "TOUR";
-  entityId: string;
+  poiId: string;
   language: string;
-  field: string;
-  value: string;
+  name?: string;
+  description?: string;
+  audioScript?: string;
 }
 
 export interface TranslationResponseDTO {
   id: string;
-  entityType: "POI" | "AUDIO_GUIDE" | "TOUR";
-  entityId: string;
+  poiId: string;
   language: string;
-  field: string;
-  value: string;
+  name?: string;
+  description?: string;
+  audioScript?: string;
+  updatedAt: Date;
+}
+
+export interface LanguageDTO {
+  code: string;
+  name: string;
+  nativeName: string;
+  flag?: string;
 }

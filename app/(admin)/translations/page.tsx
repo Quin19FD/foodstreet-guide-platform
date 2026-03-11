@@ -1,5 +1,5 @@
-import { AdminLayout } from "@/components/layouts/admin-layout";
 import { mockPlatformService } from "@/application/services/mock-platform";
+import { AdminLayout } from "@/components/layouts/admin-layout";
 
 export default function AdminTranslationsPage() {
   const translations = mockPlatformService.translation.list();
@@ -22,7 +22,9 @@ export default function AdminTranslationsPage() {
             <tbody>
               {translations.map((item) => (
                 <tr key={item.id} className="border-b last:border-0">
-                  <td className="px-4 py-3">{item.entityType}:{item.entityId}</td>
+                  <td className="px-4 py-3">
+                    {item.entityType}:{item.entityId}
+                  </td>
                   <td className="px-4 py-3">{item.field}</td>
                   <td className="px-4 py-3">{item.language}</td>
                   <td className="px-4 py-3">{item.value}</td>

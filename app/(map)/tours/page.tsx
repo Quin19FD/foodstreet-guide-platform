@@ -1,5 +1,5 @@
-import { MainLayout } from "@/components/layouts/main-layout";
 import { mockPlatformService } from "@/application/services/mock-platform";
+import { MainLayout } from "@/components/layouts/main-layout";
 
 export default function ToursPage() {
   const tours = mockPlatformService.tour.list();

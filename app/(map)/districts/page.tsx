@@ -1,5 +1,5 @@
-import { MainLayout } from "@/components/layouts/main-layout";
 import { mockPlatformService } from "@/application/services/mock-platform";
+import { MainLayout } from "@/components/layouts/main-layout";
 import Link from "next/link";
 
 export default function DistrictsPage() {

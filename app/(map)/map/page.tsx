@@ -4,8 +4,8 @@
  * Main map view showing POIs nearby.
  */
 
-import { MainLayout } from "@/components/layouts/main-layout";
 import { mockPlatformService } from "@/application/services/mock-platform";
+import { MainLayout } from "@/components/layouts/main-layout";
 
 export default function MapPage() {
   const pois = mockPlatformService.poi.listAll();
@@ -32,7 +32,8 @@ export default function MapPage() {
             <p className="text-sm mt-2">Hiển thị vị trí người dùng + toàn bộ POI + khoảng cách</p>
             {nearest && (
               <p className="text-sm mt-3">
-                POI gần nhất hiện tại: <span className="font-semibold text-foreground">{nearest.name}</span>
+                POI gần nhất hiện tại:{" "}
+                <span className="font-semibold text-foreground">{nearest.name}</span>
               </p>
             )}
           </div>
@@ -47,9 +48,7 @@ export default function MapPage() {
           </div>
           <div className="rounded-lg border bg-card p-4">
             <h2 className="font-semibold">POI đang hiển thị</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Tổng số điểm: {pois.length}
-            </p>
+            <p className="mt-2 text-sm text-muted-foreground">Tổng số điểm: {pois.length}</p>
           </div>
         </div>
       </div>

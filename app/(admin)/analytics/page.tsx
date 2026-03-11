@@ -1,5 +1,5 @@
-import { AdminLayout } from "@/components/layouts/admin-layout";
 import { mockPlatformService } from "@/application/services/mock-platform";
+import { AdminLayout } from "@/components/layouts/admin-layout";
 
 export default function AdminAnalyticsPage() {
   const totalPOI = mockPlatformService.poi.listAll().length;

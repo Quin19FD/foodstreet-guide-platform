@@ -1,31 +1,44 @@
 // Prisma Schema for FoodStreet Guide Platform
+// Synchronized with PostgreSQL database schema
 
 generator client {
-  provider = "prisma-client-js";
+  provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql";
-  url      = env("DATABASE_URL");
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 // ============================================================================
-// User & Auth
+// User & Authentication
 // ============================================================================
 
 model User {
-  id          String   @id @default(cuid())
-  email       String   @unique
-  password    String
-  name        String
-  phoneNumber String?
-  avatarUrl   String?
-  role        UserRole @default(USER)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                       String    @id @db.Uuid
+  email                    String    @unique
+  password                 String
+  name                     String
+  phoneNumber              String?   @map("phone_number")
+  avatarUrl                String?   @map("avatar_url")
+  role                     UserRole  @default(USER)
+  isActive                 Boolean   @default(true) @map("is_active")
+  createdAt                DateTime  @default(now()) @map("created_at")
+  updatedAt                DateTime  @updatedAt @map("updated_at")
+  lastLogin                DateTime? @map("last_login")
+  refreshTokenHash         String?   @map("refresh_token_hash")
+  refreshTokenExpiry       DateTime? @map("refresh_token_expiry")
+  resetPasswordTokenHash   String?   @map("reset_password_token_hash")
+  resetPasswordTokenExpiry DateTime? @map("reset_password_token_expiry")
 
   // Relations
+  favoritePois             FavoritePOI[]
+  reviews                  Review[]
+  searchHistory            SearchHistory[]
+  userActivity             UserActivity[]
+  pageViews                PageView[]
+  poiViews                 POIView[]
+
   @@map("users")
 }
 
@@ -40,18 +53,18 @@ enum UserRole {
 // ============================================================================
 
 model District {
-  id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique
-  description String
-  latitude    Float
-  longitude   Float
-  address     String?
-  qrCode      String   @unique
-  imageUrl    String?
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id          String    @id @db.Uuid
+  name        String    @db.VarChar(255)
+  slug        String    @unique @db.VarChar(255)
+  description String?   @db.Text
+  latitude    Float?    @db.DoublePrecision
+  longitude   Float?    @db.DoublePrecision
+  address     String?   @db.Text
+  qrCode      String?   @unique @map("qr_code") @db.VarChar(255)
+  imageUrl    String?   @map("image_url")
+  isActive    Boolean   @default(true) @map("is_active")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
 
   // Relations
   pois        POI[]
@@ -64,39 +77,47 @@ model District {
 // ============================================================================
 
 model POI {
-  id          String      @id @default(cuid())
-  districtId  String
-  name        String
-  slug        String
-  description String
-  category    POICategory
-  latitude    Float
-  longitude   Float
-  imageUrl    String?
-  audioUrl    String?
-  audioScript String?     @db.Text
-  priceMin    Int
-  priceMax    Int
-  rating      Float       @default(0)
-  isOpen      Boolean     @default(true)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id          String    @id @db.Uuid
+  districtId  String    @map("district_id") @db.Uuid
+  name        String    @db.VarChar(255)
+  slug        String?   @db.VarChar(255)
+  category    String?   @db.VarChar(50)
+  latitude    Float?    @db.DoublePrecision
+  longitude   Float?    @db.DoublePrecision
+  priceMin    Int?      @map("price_min")
+  priceMax    Int?      @map("price_max")
+  rating      Float     @default(0)
+  isOpen      Boolean   @default(true) @map("is_open")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
 
   // Relations
-  district    District    @relation(fields: [districtId], references: [id], onDelete: Cascade)
-  menuItems   MenuItem[]
+  district         District      @relation(fields: [districtId], references: [id], onDelete: Cascade)
+  images           POIImage[]
+  menuItems        MenuItem[]
+  translations     POITranslation[]
+  favoritePois     FavoritePOI[]
+  reviews          Review[]
+  poiViews         POIView[]
 
   @@unique([districtId, slug])
-  @@index([districtId])
-  @@index([latitude, longitude])
   @@map("pois")
 }
 
-enum POICategory {
-  FOOD
-  DRINK
-  SNACK
-  DESSERT
+// ============================================================================
+// POI Images
+// ============================================================================
+
+model POIImage {
+  id          String  @id @db.Uuid
+  poiId       String  @map("poi_id") @db.Uuid
+  imageUrl    String  @map("image_url")
+  description String?
+
+  // Relations
+  poi         POI     @relation(fields: [poiId], references: [id], onDelete: Cascade)
+
+  @@map("poi_images")
 }
 
 // ============================================================================
@@ -104,47 +125,164 @@ enum POICategory {
 // ============================================================================
 
 model MenuItem {
-  id          String   @id @default(cuid())
-  poiId       String
-  name        String
+  id          String   @id @db.Uuid
+  poiId       String   @map("poi_id") @db.Uuid
+  name        String?  @db.VarChar(255)
   description String?
-  price       Int
-  imageUrl    String?
-  isAvailable Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  price       Int?
+  imageUrl    String?  @map("image_url")
+  isAvailable Boolean  @default(true) @map("is_available")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
   // Relations
   poi         POI      @relation(fields: [poiId], references: [id], onDelete: Cascade)
 
-  @@index([poiId])
   @@map("menu_items")
 }
 
 // ============================================================================
-// Analytics & Logs (Optional)
+// POI Translations (Multi-language support)
+// ============================================================================
+
+model POITranslation {
+  id           String  @id @db.Uuid
+  poiId        String  @map("poi_id") @db.Uuid
+  language     String  @db.VarChar(10)
+  name         String? @db.VarChar(255)
+  description  String?
+  audioScript  String? @map("audio_script")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  poi          POI           @relation(fields: [poiId], references: [id], onDelete: Cascade)
+  audios       POIAudio[]
+
+  @@map("poi_translations")
+}
+
+// ============================================================================
+// POI Audio (Audio guides for translations)
+// ============================================================================
+
+model POIAudio {
+  id            String  @id @db.Uuid
+  translationId String  @map("translation_id") @db.Uuid
+  audioUrl      String  @map("audio_url")
+  isActive      Boolean @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  // Relations
+  translation   POITranslation @relation(fields: [translationId], references: [id], onDelete: Cascade)
+
+  @@map("poi_audios")
+}
+
+// ============================================================================
+// Favorite POIs
+// ============================================================================
+
+model FavoritePOI {
+  id        String   @id @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  poiId     String   @map("poi_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  poi       POI      @relation(fields: [poiId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, poiId])
+  @@map("favorite_pois")
+}
+
+// ============================================================================
+// Reviews
+// ============================================================================
+
+model Review {
+  id        String   @id @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  poiId     String   @map("poi_id") @db.Uuid
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  poi       POI      @relation(fields: [poiId], references: [id], onDelete: Cascade)
+
+  @@index([poiId])
+  @@map("reviews")
+}
+
+// ============================================================================
+// Analytics & Logs
 // ============================================================================
 
 model PageView {
-  id        String   @id @default(cuid())
+  id        String   @id @db.Uuid
   path      String
-  userId    String?
-  sessionId String?
+  userId    String?  @map("user_id") @db.Uuid
+  sessionId String?  @map("session_id") @db.VarChar(255)
   metadata  Json?
-  createdAt DateTime @default(now())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([createdAt])
   @@map("page_views")
 }
 
 model POIView {
-  id        String   @id @default(cuid())
-  poiId     String
-  userId    String?
-  duration  Int?     // seconds
-  createdAt DateTime @default(now())
+  id        String   @id @db.Uuid
+  poiId     String   @map("poi_id") @db.Uuid
+  userId    String?  @map("user_id") @db.Uuid
+  duration  Int?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  poi       POI      @relation(fields: [poiId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([poiId])
   @@index([createdAt])
   @@map("poi_views")
+}
+
+// ============================================================================
+// Search History
+// ============================================================================
+
+model SearchHistory {
+  id        String   @id @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  keyword   String   @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([keyword])
+  @@index([createdAt])
+  @@map("search_history")
+}
+
+// ============================================================================
+// User Activity
+// ============================================================================
+
+model UserActivity {
+  id        String   @id @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  action    String   @db.VarChar(50)
+  targetType String? @map("target_type") @db.VarChar(50)
+  targetId  String?  @map("target_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_activity")
 }

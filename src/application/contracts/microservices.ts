@@ -67,14 +67,34 @@ export interface ServiceEndpoint {
 export const SYSTEM_ENDPOINTS: ServiceEndpoint[] = [
   { service: "auth", method: "POST", path: "/login", description: "Admin login" },
   { service: "auth", method: "POST", path: "/logout", description: "Admin logout" },
-  { service: "poi", method: "GET", path: "/districts/:districtId/pois", description: "List POI by district" },
+  {
+    service: "poi",
+    method: "GET",
+    path: "/districts/:districtId/pois",
+    description: "List POI by district",
+  },
   { service: "poi", method: "GET", path: "/pois", description: "Search and filter POI" },
   { service: "tour", method: "GET", path: "/tours", description: "List food tours" },
   { service: "tour", method: "POST", path: "/tours", description: "Create tour" },
   { service: "media", method: "POST", path: "/upload", description: "Upload media asset" },
-  { service: "audio-guide", method: "GET", path: "/poi/:poiId", description: "Get audio guide by POI" },
-  { service: "audio-guide", method: "POST", path: "/tts/generate", description: "Generate TTS audio" },
+  {
+    service: "audio-guide",
+    method: "GET",
+    path: "/poi/:poiId",
+    description: "Get audio guide by POI",
+  },
+  {
+    service: "audio-guide",
+    method: "POST",
+    path: "/tts/generate",
+    description: "Generate TTS audio",
+  },
   { service: "translation", method: "GET", path: "/translations", description: "Get translations" },
-  { service: "translation", method: "POST", path: "/translations", description: "Upsert translation" },
+  {
+    service: "translation",
+    method: "POST",
+    path: "/translations",
+    description: "Upsert translation",
+  },
   { service: "location", method: "POST", path: "/nearest-poi", description: "Resolve nearest POI" },
 ];

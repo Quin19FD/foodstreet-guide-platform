@@ -105,7 +105,10 @@ export default function AdminDashboardPage() {
             <section className="rounded-2xl border border-slate-200">
               <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
                 <h2 className="text-sm font-semibold text-slate-700">Recent POI Activities</h2>
-                <Link href="/admin/pois" className="text-xs font-medium text-orange-600 hover:underline">
+                <Link
+                  href="/admin/pois"
+                  className="text-xs font-medium text-orange-600 hover:underline"
+                >
                   View All
                 </Link>
               </div>
@@ -201,7 +204,9 @@ function StatCard({
   return (
     <div className="rounded-2xl border border-slate-200 p-4">
       <div className="mb-2 flex items-center justify-between">
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-50">{icon}</div>
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-50">
+          {icon}
+        </div>
         <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
           Live
         </span>

@@ -6,25 +6,18 @@
  */
 
 import type { Location } from "../value-objects/location";
-import type { Money } from "../value-objects/money";
 
-export type POICategory = "food" | "drink" | "snack" | "dessert";
+export type POICategory = "FOOD" | "DRINK" | "SNACK" | "DESSERT" | string;
 
 export interface POIProps {
   id: string;
   districtId: string;
   name: string;
-  slug: string;
-  description: string;
-  category: POICategory;
-  location: Location;
-  imageUrl?: string;
-  audioUrl?: string;
-  audioScript?: string;
-  priceRange: {
-    min: Money;
-    max: Money;
-  };
+  slug?: string;
+  category?: POICategory;
+  location?: Location;
+  priceMin?: number;
+  priceMax?: number;
   rating: number;
   isOpen: boolean;
   createdAt: Date;
@@ -35,17 +28,11 @@ export class POI {
   readonly id: string;
   readonly districtId: string;
   readonly name: string;
-  readonly slug: string;
-  readonly description: string;
-  readonly category: POICategory;
-  readonly location: Location;
-  readonly imageUrl?: string;
-  readonly audioUrl?: string;
-  readonly audioScript?: string;
-  readonly priceRange: {
-    min: Money;
-    max: Money;
-  };
+  readonly slug?: string;
+  readonly category?: POICategory;
+  readonly location?: Location;
+  readonly priceMin?: number;
+  readonly priceMax?: number;
   readonly rating: number;
   readonly isOpen: boolean;
   readonly createdAt: Date;
@@ -56,20 +43,28 @@ export class POI {
     this.districtId = props.districtId;
     this.name = props.name;
     this.slug = props.slug;
-    this.description = props.description;
     this.category = props.category;
     this.location = props.location;
-    this.imageUrl = props.imageUrl;
-    this.audioUrl = props.audioUrl;
-    this.audioScript = props.audioScript;
-    this.priceRange = props.priceRange;
+    this.priceMin = props.priceMin;
+    this.priceMax = props.priceMax;
     this.rating = props.rating;
     this.isOpen = props.isOpen;
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;
   }
 
-  hasAudio(): boolean {
-    return !!this.audioUrl && !!this.audioScript;
+  getPriceRange(): { min: number; max: number } | undefined {
+    if (this.priceMin !== undefined && this.priceMax !== undefined) {
+      return { min: this.priceMin, max: this.priceMax };
+    }
+    return undefined;
+  }
+
+  getCoordinates(): Location | undefined {
+    return this.location;
+  }
+
+  getCategory(): string {
+    return this.category || "FOOD";
   }
 }

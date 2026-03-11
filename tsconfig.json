@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": [
-      "ES2022",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "jsx": "preserve",
     "module": "ESNext",
     "moduleResolution": "bundler",
@@ -18,31 +14,14 @@
     "forceConsistentCasingInFileNames": true,
     "incremental": true,
     "paths": {
-      "@/*": [
-        "./*",
-        "./src/*"
-      ],
-      "@/components/*": [
-        "./components/*"
-      ],
-      "@/app/*": [
-        "./app/*"
-      ],
-      "@/lib/*": [
-        "./lib/*"
-      ],
-      "@/domain/*": [
-        "./src/domain/*"
-      ],
-      "@/application/*": [
-        "./src/application/*"
-      ],
-      "@/infrastructure/*": [
-        "./src/infrastructure/*"
-      ],
-      "@/shared/*": [
-        "./src/shared/*"
-      ]
+      "@/*": ["./*", "./src/*"],
+      "@/components/*": ["./components/*"],
+      "@/app/*": ["./app/*"],
+      "@/lib/*": ["./lib/*"],
+      "@/domain/*": ["./src/domain/*"],
+      "@/application/*": ["./src/application/*"],
+      "@/infrastructure/*": ["./src/infrastructure/*"],
+      "@/shared/*": ["./src/shared/*"]
     },
     "plugins": [
       {
@@ -51,14 +30,6 @@
     ],
     "isolatedModules": true
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    ".next/types/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "tests"
-  ]
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules", "tests"]
 }

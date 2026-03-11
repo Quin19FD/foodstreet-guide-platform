@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { QrCode, MapPin, User, Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { MapPin, Menu, QrCode, User, X } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 const navItems = [
-  { label: 'Quét QR', href: '/scan', icon: QrCode },
-  { label: 'Khu phố', href: '/districts', icon: MapPin },
+  { label: "Quét QR", href: "/scan", icon: QrCode },
+  { label: "Khu phố", href: "/districts", icon: MapPin },
 ];
 
 export function Header() {
@@ -36,8 +36,8 @@ export function Header() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  'flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary',
-                  pathname === item.href ? 'text-primary' : 'text-muted-foreground'
+                  "flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary",
+                  pathname === item.href ? "text-primary" : "text-muted-foreground"
                 )}
               >
                 <Icon className="h-4 w-4" />
@@ -64,11 +64,7 @@ export function Header() {
           className="md:hidden"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
-          {mobileMenuOpen ? (
-            <X className="h-6 w-6" />
-          ) : (
-            <Menu className="h-6 w-6" />
-          )}
+          {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           <span className="sr-only">Toggle menu</span>
         </Button>
       </div>
@@ -85,8 +81,8 @@ export function Header() {
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className={cn(
-                    'flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary',
-                    pathname === item.href ? 'text-primary' : 'text-muted-foreground'
+                    "flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary",
+                    pathname === item.href ? "text-primary" : "text-muted-foreground"
                   )}
                 >
                   <Icon className="h-4 w-4" />

@@ -20,7 +20,8 @@ export default function AdminSettingsPage() {
         <div className="rounded-xl border border-slate-200 p-4">
           <h2 className="font-semibold">Map</h2>
           <p className="mt-2 text-sm text-slate-600">
-            Default Center: {config.map.defaultCenter.latitude}, {config.map.defaultCenter.longitude}
+            Default Center: {config.map.defaultCenter.latitude},{" "}
+            {config.map.defaultCenter.longitude}
           </p>
           <p className="mt-1 text-sm text-slate-600">Default Zoom: {config.map.defaultZoom}</p>
         </div>

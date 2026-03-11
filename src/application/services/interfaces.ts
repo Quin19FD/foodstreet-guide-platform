@@ -77,7 +77,10 @@ export interface IAudioGuideService {
 
 // Translation Services
 export interface ITranslationService {
-  findByEntity(entityType: "POI" | "AUDIO_GUIDE" | "TOUR", entityId: string): Promise<TranslationResponseDTO[]>;
+  findByEntity(
+    entityType: "POI" | "AUDIO_GUIDE" | "TOUR",
+    entityId: string
+  ): Promise<TranslationResponseDTO[]>;
   upsert(data: {
     entityType: "POI" | "AUDIO_GUIDE" | "TOUR";
     entityId: string;
