@@ -68,3 +68,11 @@ export function calculateDistance(lat1: number, lon1: number, lat2: number, lon2
 export function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 }
+
+/**
+ * Class names utility (cn)
+ * Combines clsx and tailwind-merge
+ */
+export function cn(...classes: (string | undefined | null | false)[]): string {
+  return classes.filter(Boolean).join(" ");
+}
