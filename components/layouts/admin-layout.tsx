@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Admin Layout
  *
  * Layout for admin dashboard pages.
@@ -18,7 +18,8 @@ import {
   Settings,
 } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 
 const mainNavItems = [
   { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -34,8 +35,62 @@ const systemNavItems = [
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
+type AdminMeResponse = {
+  user: {
+    id: string;
+    email: string;
+    name: string;
+    role: string;
+  };
+};
+
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const [admin, setAdmin] = useState<AdminMeResponse["user"] | null>(null);
+
+  const adminInitial = useMemo(() => {
+    const source = admin?.name?.trim() || "Admin";
+    return source.slice(0, 1).toUpperCase();
+  }, [admin?.name]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    (async () => {
+      const me = await fetch("/api/auth/me").catch(() => null);
+      if (me?.ok) {
+        const data = (await me.json().catch(() => null)) as AdminMeResponse | null;
+        if (isMounted && data?.user) setAdmin(data.user);
+        return;
+      }
+
+      const refreshed = await fetch("/api/auth/refresh", { method: "POST" }).catch(() => null);
+      if (!refreshed?.ok) {
+        router.replace("/login");
+        return;
+      }
+
+      const meAfter = await fetch("/api/auth/me").catch(() => null);
+      if (!meAfter?.ok) {
+        router.replace("/login");
+        return;
+      }
+
+      const data = (await meAfter.json().catch(() => null)) as AdminMeResponse | null;
+      if (isMounted && data?.user) setAdmin(data.user);
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [router]);
+
+  const handleLogout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" }).catch(() => null);
+    router.replace("/login");
+  };
 
   return (
     <div className="min-h-screen bg-[#f6f7fb] text-slate-800">
@@ -104,14 +159,20 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             <div className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2.5">
               <div className="flex items-center gap-3">
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-teal-600 text-sm font-semibold text-white">
-                  A
+                  {adminInitial}
                 </div>
                 <div>
-                  <p className="text-sm font-semibold leading-4">Admin User</p>
-                  <p className="text-xs text-slate-500">System Admin</p>
+                  <p className="text-sm font-semibold leading-4">{admin?.name ?? "Admin User"}</p>
+                  <p className="text-xs text-slate-500">{admin?.email ?? "System Admin"}</p>
                 </div>
               </div>
-              <button type="button" className="text-slate-400 transition hover:text-slate-700">
+              <button
+                type="button"
+                className="text-slate-400 transition hover:text-slate-700"
+                onClick={handleLogout}
+                title="Đăng xuất"
+                aria-label="Logout"
+              >
                 <LogOut className="h-4 w-4" />
               </button>
             </div>

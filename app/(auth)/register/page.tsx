@@ -1,79 +1,45 @@
-﻿"use client";
+"use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
-import styles from "./login.module.css";
+import styles from "../login/login.module.css";
 
 type AuthErrorResponse = {
   error?: string;
-  retryAfterSeconds?: number;
   issues?: Array<{ message?: string }>;
 };
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const nextPath = useMemo(() => searchParams.get("next") ?? "/admin/dashboard", [searchParams]);
   const dotKeys = useMemo(() => Array.from({ length: 12 }, (_, idx) => `dot-${idx}`), []);
 
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isAutoChecking, setIsAutoChecking] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const isBusy = isLoading || isAutoChecking;
-
   const emailTrimmed = useMemo(() => email.trim(), [email]);
-
-  const togglePassword = () => {
-    setShowPassword((prev) => !prev);
-  };
+  const nameTrimmed = useMemo(() => name.trim(), [name]);
 
   const validateClient = (): string | null => {
+    if (!nameTrimmed) return "Tên không được để trống";
     if (!emailTrimmed) return "Email không được để trống";
-    // Regex đơn giản (frontend). Backend vẫn validate bằng zod.
     const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrimmed);
     if (!isEmail) return "Email không đúng định dạng";
     if (!password) return "Mật khẩu không được để trống";
+    if (password.length < 8) return "Mật khẩu phải có ít nhất 8 ký tự";
+    if (password !== confirmPassword) return "Xác nhận mật khẩu không khớp";
     return null;
   };
 
-  useEffect(() => {
-    let isMounted = true;
-
-    (async () => {
-      setIsAutoChecking(true);
-      setErrorMessage(null);
-
-      try {
-        const me = await fetch("/api/auth/me", { method: "GET" });
-        if (me.ok) {
-          router.replace(nextPath);
-          return;
-        }
-
-        const refreshed = await fetch("/api/auth/refresh", { method: "POST" });
-        if (refreshed.ok) {
-          router.replace(nextPath);
-        }
-      } catch {
-        // ignore
-      } finally {
-        if (isMounted) setIsAutoChecking(false);
-      }
-    })();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [nextPath, router]);
-
-  const handleLogin = async (event: React.FormEvent) => {
+  const handleRegister = async (event: React.FormEvent) => {
     event.preventDefault();
     setErrorMessage(null);
 
@@ -85,10 +51,10 @@ export default function LoginPage() {
 
     setIsLoading(true);
     try {
-      const res = await fetch("/api/auth/login", {
+      const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email: emailTrimmed, password, rememberMe }),
+        body: JSON.stringify({ email: emailTrimmed, name: nameTrimmed, password, rememberMe }),
       });
 
       if (res.ok) {
@@ -97,14 +63,8 @@ export default function LoginPage() {
       }
 
       const data = (await res.json().catch(() => null)) as AuthErrorResponse | null;
-      if (res.status === 429) {
-        const seconds = data?.retryAfterSeconds ?? 60;
-        setErrorMessage(`Bạn đã nhập sai quá nhiều lần. Vui lòng thử lại sau ${seconds}s.`);
-        return;
-      }
-
       const issueMessage = data?.issues?.[0]?.message;
-      setErrorMessage(issueMessage ?? data?.error ?? "Đăng nhập thất bại");
+      setErrorMessage(issueMessage ?? data?.error ?? "Đăng ký thất bại");
     } finally {
       setIsLoading(false);
     }
@@ -117,7 +77,6 @@ export default function LoginPage() {
         <div className={styles.leftBg} />
         <div className={styles.leftOverlay} />
 
-        {/* Logo */}
         <div className={styles.logoBadge}>
           <div className={styles.logoIcon}>🍜</div>
           <div className={styles.logoText}>
@@ -126,26 +85,23 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Decorative dots */}
         <div className={styles.dotsStrip}>
           {dotKeys.map((key) => (
             <span key={key} />
           ))}
         </div>
 
-        {/* Bottom content */}
         <div className={styles.leftContent}>
-          <div className={styles.tagLine}>Nền tảng quản lý</div>
+          <div className={styles.tagLine}>Khởi tạo hệ thống</div>
           <h1 className={styles.slogan}>
-            Nơi hương vị
+            Tạo
             <br />
-            <em>trở thành</em>
+            <em>admin</em>
             <br />
-            câu chuyện.
+            đầu tiên.
           </h1>
           <p className={styles.motto}>
-            Kết nối thực khách với những khu phố ẩm thực sống động nhất — từng con phố, từng hương
-            thơm, từng ký ức đáng nhớ.
+            Chỉ dùng cho lần thiết lập ban đầu. Sau khi đã có admin, hệ thống sẽ chặn tự đăng ký.
           </p>
         </div>
       </div>
@@ -155,20 +111,34 @@ export default function LoginPage() {
         <div className={styles.cornerDeco} />
         <div className={styles.cornerDecoBl} />
 
-        {/* Header */}
         <div className={styles.formHeader}>
           <p className={styles.formEyebrow}>Cổng quản trị</p>
           <h2 className={styles.formTitle}>
-            Đăng nhập<span>.</span>
+            Đăng ký<span>.</span>
           </h2>
-          <p className={styles.formSub}>Dành riêng cho quản trị viên hệ thống.</p>
+          <p className={styles.formSub}>Tạo tài khoản admin đầu tiên để đăng nhập.</p>
         </div>
 
-        {/* Form */}
-        <form className={styles.form} onSubmit={handleLogin}>
-          {/* Email */}
+        <form className={styles.form} onSubmit={handleRegister}>
           <div className={styles.field}>
-            <label htmlFor="email">Tài khoản</label>
+            <label htmlFor="name">Họ và tên</label>
+            <div className={styles.inputWrap}>
+              <span className={styles.icon}>👤</span>
+              <input
+                id="name"
+                placeholder="Nguyễn Văn A"
+                className={styles.input}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                autoComplete="name"
+                disabled={isLoading}
+              />
+            </div>
+          </div>
+
+          <div className={styles.field}>
+            <label htmlFor="email">Email</label>
             <div className={styles.inputWrap}>
               <span className={styles.icon}>✉</span>
               <input
@@ -180,41 +150,47 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 autoComplete="username"
-                disabled={isBusy}
+                disabled={isLoading}
               />
             </div>
           </div>
 
-          {/* Password */}
           <div className={styles.field}>
             <label htmlFor="password">Mật khẩu</label>
             <div className={styles.inputWrap}>
               <span className={styles.icon}>🔒</span>
               <input
-                type={showPassword ? "text" : "password"}
+                type="password"
                 id="password"
                 placeholder="••••••••••"
                 className={styles.input}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                autoComplete="current-password"
-                disabled={isBusy}
+                autoComplete="new-password"
+                disabled={isLoading}
               />
-              <button
-                type="button"
-                className={styles.togglePw}
-                onClick={togglePassword}
-                title="Hiện/Ẩn mật khẩu"
-                aria-label="Toggle password"
-                disabled={isBusy}
-              >
-                👁
-              </button>
             </div>
           </div>
 
-          {/* Error */}
+          <div className={styles.field}>
+            <label htmlFor="confirmPassword">Xác nhận mật khẩu</label>
+            <div className={styles.inputWrap}>
+              <span className={styles.icon}>🔁</span>
+              <input
+                type="password"
+                id="confirmPassword"
+                placeholder="••••••••••"
+                className={styles.input}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                autoComplete="new-password"
+                disabled={isLoading}
+              />
+            </div>
+          </div>
+
           {errorMessage ? (
             <div
               className={styles.field}
@@ -225,7 +201,6 @@ export default function LoginPage() {
             </div>
           ) : null}
 
-          {/* Options */}
           <div className={styles.optionsRow}>
             <label className={styles.remember}>
               <input
@@ -233,43 +208,29 @@ export default function LoginPage() {
                 className={styles.rememberCheckbox}
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                disabled={isBusy}
+                disabled={isLoading}
               />
               <span className={styles.checkmark} />
               <span className={styles.rememberText}>Ghi nhớ đăng nhập</span>
             </label>
-            <a href="/login" className={styles.forgotLink}>
-              Quên mật khẩu?
+            <a href="/admin/login" className={styles.forgotLink} aria-label="Back to login">
+              Quay lại đăng nhập
             </a>
           </div>
 
-          {/* Submit */}
-          <button type="submit" className={styles.btnLogin} disabled={isBusy}>
+          <button type="submit" className={styles.btnLogin} disabled={isLoading}>
             <span className={styles.btnInner}>
-              <span>
-                {isAutoChecking
-                  ? "Đang kiểm tra phiên..."
-                  : isLoading
-                    ? "Đang xác thực..."
-                    : "Đăng nhập ngay"}
-              </span>
-              <span>{isBusy ? "⟳" : "→"}</span>
+              <span>{isLoading ? "Đang tạo tài khoản..." : "Tạo tài khoản"}</span>
+              <span>{isLoading ? "⟳" : "→"}</span>
             </span>
           </button>
         </form>
 
-        <div style={{ marginTop: 14, textAlign: "center" }}>
-          <a href="/register" className={styles.forgotLink}>
-            Chưa có tài khoản? Đăng ký
-          </a>
-        </div>
-
-        {/* Footer */}
         <div className={styles.formFooter}>
           <p>
-            Chỉ dành cho <strong>quản trị viên được uỷ quyền</strong>.
+            Lưu ý: Nếu hệ thống đã có admin, API sẽ từ chối đăng ký.
             <br />
-            Mọi hoạt động được ghi lại và giám sát.
+            Hãy dùng tài khoản hiện có để đăng nhập.
           </p>
         </div>
 

@@ -1,10 +1,15 @@
-/**
+﻿/**
  * DTOs (Data Transfer Objects) for Authentication
  */
 
 export interface LoginRequestDTO {
   email: string;
   password: string;
+  /**
+   * Nếu true: lưu refresh token cookie dạng persistent (đóng/mở trình duyệt vẫn còn).
+   * Nếu false/undefined: refresh cookie dạng session (đóng trình duyệt sẽ mất).
+   */
+  rememberMe?: boolean;
 }
 
 export interface RegisterRequestDTO {

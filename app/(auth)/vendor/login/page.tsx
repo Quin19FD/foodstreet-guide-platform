@@ -1,9 +1,9 @@
-﻿"use client";
+"use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
-import styles from "./login.module.css";
+import styles from "../../login/login.module.css";
 
 type AuthErrorResponse = {
   error?: string;
@@ -11,11 +11,11 @@ type AuthErrorResponse = {
   issues?: Array<{ message?: string }>;
 };
 
-export default function LoginPage() {
+export default function VendorLoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const nextPath = useMemo(() => searchParams.get("next") ?? "/admin/dashboard", [searchParams]);
+  const nextPath = useMemo(() => searchParams.get("next") ?? "/vendor", [searchParams]);
   const dotKeys = useMemo(() => Array.from({ length: 12 }, (_, idx) => `dot-${idx}`), []);
 
   const [email, setEmail] = useState("");
@@ -27,7 +27,6 @@ export default function LoginPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const isBusy = isLoading || isAutoChecking;
-
   const emailTrimmed = useMemo(() => email.trim(), [email]);
 
   const togglePassword = () => {
@@ -36,7 +35,6 @@ export default function LoginPage() {
 
   const validateClient = (): string | null => {
     if (!emailTrimmed) return "Email không được để trống";
-    // Regex đơn giản (frontend). Backend vẫn validate bằng zod.
     const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrimmed);
     if (!isEmail) return "Email không đúng định dạng";
     if (!password) return "Mật khẩu không được để trống";
@@ -51,13 +49,13 @@ export default function LoginPage() {
       setErrorMessage(null);
 
       try {
-        const me = await fetch("/api/auth/me", { method: "GET" });
+        const me = await fetch("/api/vendor/auth/me", { method: "GET" });
         if (me.ok) {
           router.replace(nextPath);
           return;
         }
 
-        const refreshed = await fetch("/api/auth/refresh", { method: "POST" });
+        const refreshed = await fetch("/api/vendor/auth/refresh", { method: "POST" });
         if (refreshed.ok) {
           router.replace(nextPath);
         }
@@ -85,7 +83,7 @@ export default function LoginPage() {
 
     setIsLoading(true);
     try {
-      const res = await fetch("/api/auth/login", {
+      const res = await fetch("/api/vendor/auth/login", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ email: emailTrimmed, password, rememberMe }),
@@ -112,69 +110,60 @@ export default function LoginPage() {
 
   return (
     <div className={styles.wrapper}>
-      {/* LEFT PANEL */}
       <div className={styles.left}>
         <div className={styles.leftBg} />
         <div className={styles.leftOverlay} />
 
-        {/* Logo */}
         <div className={styles.logoBadge}>
-          <div className={styles.logoIcon}>🍜</div>
+          <div className={styles.logoIcon}>🏪</div>
           <div className={styles.logoText}>
             Phố Ẩm Thực
-            <span className={styles.logoTextSub}>Culinary District</span>
+            <span className={styles.logoTextSub}>Vendor Portal</span>
           </div>
         </div>
 
-        {/* Decorative dots */}
         <div className={styles.dotsStrip}>
           {dotKeys.map((key) => (
             <span key={key} />
           ))}
         </div>
 
-        {/* Bottom content */}
         <div className={styles.leftContent}>
-          <div className={styles.tagLine}>Nền tảng quản lý</div>
+          <div className={styles.tagLine}>Dành cho gian hàng</div>
           <h1 className={styles.slogan}>
-            Nơi hương vị
+            Quản lý
             <br />
-            <em>trở thành</em>
+            <em>gian hàng</em>
             <br />
-            câu chuyện.
+            dễ dàng.
           </h1>
           <p className={styles.motto}>
-            Kết nối thực khách với những khu phố ẩm thực sống động nhất — từng con phố, từng hương
-            thơm, từng ký ức đáng nhớ.
+            Nếu tài khoản đang chờ duyệt, bạn sẽ chưa thể đăng nhập cho đến khi admin phê duyệt.
           </p>
         </div>
       </div>
 
-      {/* RIGHT PANEL */}
       <div className={styles.right}>
         <div className={styles.cornerDeco} />
         <div className={styles.cornerDecoBl} />
 
-        {/* Header */}
         <div className={styles.formHeader}>
-          <p className={styles.formEyebrow}>Cổng quản trị</p>
+          <p className={styles.formEyebrow}>Vendor Portal</p>
           <h2 className={styles.formTitle}>
             Đăng nhập<span>.</span>
           </h2>
-          <p className={styles.formSub}>Dành riêng cho quản trị viên hệ thống.</p>
+          <p className={styles.formSub}>Dành cho chủ gian hàng đã được phê duyệt.</p>
         </div>
 
-        {/* Form */}
         <form className={styles.form} onSubmit={handleLogin}>
-          {/* Email */}
           <div className={styles.field}>
-            <label htmlFor="email">Tài khoản</label>
+            <label htmlFor="email">Email</label>
             <div className={styles.inputWrap}>
               <span className={styles.icon}>✉</span>
               <input
                 type="email"
                 id="email"
-                placeholder="admin@foodstreet.vn"
+                placeholder="vendor@foodstreet.vn"
                 className={styles.input}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -185,7 +174,6 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Password */}
           <div className={styles.field}>
             <label htmlFor="password">Mật khẩu</label>
             <div className={styles.inputWrap}>
@@ -214,7 +202,6 @@ export default function LoginPage() {
             </div>
           </div>
 
-          {/* Error */}
           {errorMessage ? (
             <div
               className={styles.field}
@@ -225,7 +212,6 @@ export default function LoginPage() {
             </div>
           ) : null}
 
-          {/* Options */}
           <div className={styles.optionsRow}>
             <label className={styles.remember}>
               <input
@@ -238,12 +224,11 @@ export default function LoginPage() {
               <span className={styles.checkmark} />
               <span className={styles.rememberText}>Ghi nhớ đăng nhập</span>
             </label>
-            <a href="/login" className={styles.forgotLink}>
-              Quên mật khẩu?
+            <a href="/vendor/register" className={styles.forgotLink}>
+              Đăng ký gian hàng
             </a>
           </div>
 
-          {/* Submit */}
           <button type="submit" className={styles.btnLogin} disabled={isBusy}>
             <span className={styles.btnInner}>
               <span>
@@ -258,18 +243,9 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div style={{ marginTop: 14, textAlign: "center" }}>
-          <a href="/register" className={styles.forgotLink}>
-            Chưa có tài khoản? Đăng ký
-          </a>
-        </div>
-
-        {/* Footer */}
         <div className={styles.formFooter}>
           <p>
-            Chỉ dành cho <strong>quản trị viên được uỷ quyền</strong>.
-            <br />
-            Mọi hoạt động được ghi lại và giám sát.
+            Tài khoản vendor cần được <strong>admin phê duyệt</strong> trước khi sử dụng.
           </p>
         </div>
 

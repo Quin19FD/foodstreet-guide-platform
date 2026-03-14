@@ -6,6 +6,7 @@
  */
 
 export type UserRole = "USER" | "ADMIN" | "VENDOR";
+export type UserStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 export interface UserProps {
   id: string;
@@ -13,6 +14,10 @@ export interface UserProps {
   password: string;
   name: string;
   role: UserRole;
+  status: UserStatus;
+  rejectionReason?: string;
+  approvedBy?: string;
+  approvedAt?: Date;
   phoneNumber?: string;
   avatarUrl?: string;
   isActive: boolean;
@@ -31,6 +36,10 @@ export class User {
   readonly password: string;
   readonly name: string;
   readonly role: UserRole;
+  readonly status: UserStatus;
+  readonly rejectionReason?: string;
+  readonly approvedBy?: string;
+  readonly approvedAt?: Date;
   readonly phoneNumber?: string;
   readonly avatarUrl?: string;
   readonly isActive: boolean;
@@ -48,6 +57,10 @@ export class User {
     this.password = props.password;
     this.name = props.name;
     this.role = props.role;
+    this.status = props.status;
+    this.rejectionReason = props.rejectionReason;
+    this.approvedBy = props.approvedBy;
+    this.approvedAt = props.approvedAt;
     this.phoneNumber = props.phoneNumber;
     this.avatarUrl = props.avatarUrl;
     this.isActive = props.isActive;
