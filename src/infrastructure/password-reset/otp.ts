@@ -11,8 +11,7 @@ export function hashOtp(otp: string, pepper: string): string {
 }
 
 export function constantTimeEqualHex(a: string, b: string): boolean {
-  const aBuf = Buffer.from(a);
-  const bBuf = Buffer.from(b);
+  const aBuf = Buffer.from(a, "hex");
+  const bBuf = Buffer.from(b, "hex");
   return aBuf.length === bBuf.length && timingSafeEqual(aBuf, bBuf);
 }
-

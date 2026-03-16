@@ -162,13 +162,6 @@ export default function ForgotPasswordPage() {
         <div className={styles.cornerDeco} />
         <div className={styles.cornerDecoBl} />
 
-        <div className={styles.formHeader}>
-          <p className={styles.formEyebrow}>Cổng quản trị</p>
-          <h2 className={styles.formTitle}>
-            Quên mật khẩu<span>.</span>
-          </h2>
-          <p className={styles.formSub}>Nhập email để nhận OTP và đặt lại mật khẩu.</p>
-        </div>
 
         <div className={styles.form}>
           <div className={styles.field}>
