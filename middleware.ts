@@ -21,6 +21,8 @@ export function middleware(request: NextRequest) {
 
   // Public auth pages
   if (pathname === "/admin/login") return NextResponse.next();
+  if (pathname === "/admin/register") return NextResponse.next();
+  if (pathname === "/admin/forgot-password") return NextResponse.next();
   if (pathname === "/vendor/login" || pathname === "/vendor/register") return NextResponse.next();
 
   if (pathname === "/admin" || pathname.startsWith("/admin/")) {

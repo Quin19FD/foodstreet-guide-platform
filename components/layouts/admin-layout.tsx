@@ -14,6 +14,7 @@ import {
   Languages,
   LayoutDashboard,
   LogOut,
+  ScrollText,
   MapPin,
   Settings,
 } from "lucide-react";
@@ -32,6 +33,7 @@ const systemNavItems = [
   { href: "/admin/audio-guides", label: "Audio Guides", icon: Headphones },
   { href: "/admin/translations", label: "Translations", icon: Languages },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/admin/activity-logs", label: "Activity Logs", icon: ScrollText },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
@@ -59,22 +61,24 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     let isMounted = true;
 
     (async () => {
-      const me = await fetch("/api/auth/me").catch(() => null);
+      const me = await fetch("/api/admin/session/me").catch(() => null);
       if (me?.ok) {
         const data = (await me.json().catch(() => null)) as AdminMeResponse | null;
         if (isMounted && data?.user) setAdmin(data.user);
         return;
       }
 
-      const refreshed = await fetch("/api/auth/refresh", { method: "POST" }).catch(() => null);
+      const refreshed = await fetch("/api/admin/session/refresh", { method: "POST" }).catch(
+        () => null
+      );
       if (!refreshed?.ok) {
-        router.replace("/login");
+        router.replace("/admin/login");
         return;
       }
 
-      const meAfter = await fetch("/api/auth/me").catch(() => null);
+      const meAfter = await fetch("/api/admin/session/me").catch(() => null);
       if (!meAfter?.ok) {
-        router.replace("/login");
+        router.replace("/admin/login");
         return;
       }
 
@@ -88,8 +92,8 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   }, [router]);
 
   const handleLogout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" }).catch(() => null);
-    router.replace("/login");
+    await fetch("/api/admin/session/logout", { method: "POST" }).catch(() => null);
+    router.replace("/admin/login");
   };
 
   return (
@@ -163,7 +167,6 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                 </div>
                 <div>
                   <p className="text-sm font-semibold leading-4">{admin?.name ?? "Admin User"}</p>
-                  <p className="text-xs text-slate-500">{admin?.email ?? "System Admin"}</p>
                 </div>
               </div>
               <button
@@ -186,10 +189,18 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         </main>
       </div>
       <div className="md:hidden">
-        <div className="border-b border-slate-200 bg-white px-4 py-3">
+        <div className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3">
           <Link href="/admin/dashboard" className="text-sm font-semibold">
             Smart Food Street CMS
           </Link>
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700"
+            onClick={handleLogout}
+          >
+            <LogOut className="h-4 w-4" />
+            Đăng xuất
+          </button>
         </div>
       </div>
     </div>
