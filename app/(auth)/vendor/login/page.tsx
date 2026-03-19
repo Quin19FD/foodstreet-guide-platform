@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
-import styles from "../../login/login.module.css";
+import styles from "./login.module.css";
 
 type AuthErrorResponse = {
   error?: string;

@@ -1,0 +1,567 @@
+/* Login Page Styles */
+.wrapper {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.left {
+  position: relative;
+  flex: 1.1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 52px 48px;
+}
+
+.leftBg {
+  position: absolute;
+  inset: 0;
+  background-image: url('https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1200&q=80');
+  background-size: cover;
+  background-position: center;
+  transform: scale(1.04);
+  animation: zoomBg 18s ease-in-out infinite alternate;
+}
+
+@keyframes zoomBg {
+  from {
+    transform: scale(1.04);
+  }
+  to {
+    transform: scale(1.12);
+  }
+}
+
+.leftOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    160deg,
+    rgba(13, 13, 13, 0.35) 0%,
+    rgba(13, 13, 13, 0.1) 30%,
+    rgba(232, 97, 10, 0.18) 65%,
+    rgba(13, 13, 13, 0.92) 100%
+  );
+}
+
+.logoBadge {
+  position: absolute;
+  top: 40px;
+  left: 48px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 2;
+}
+
+.logoIcon {
+  width: 40px;
+  height: 40px;
+  background: #e8610a;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+}
+
+.logoText {
+  color: #f5f0eb;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 1.1;
+}
+
+.logoTextSub {
+  display: block;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-weight: 300;
+  font-size: 0.68rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #ff8c38;
+}
+
+.leftContent {
+  position: relative;
+  z-index: 2;
+  animation: fadeUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tagLine {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #e8610a;
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 5px 14px 5px 10px;
+  border-radius: 2px;
+  margin-bottom: 20px;
+}
+
+.tagLine::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  background: #fff;
+  border-radius: 50%;
+}
+
+.slogan {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2.4rem, 3.5vw, 3.4rem);
+  font-weight: 900;
+  color: #f5f0eb;
+  line-height: 1.13;
+  letter-spacing: -0.01em;
+  margin-bottom: 20px;
+  margin: 0 0 20px 0;
+}
+
+.slogan em {
+  font-style: italic;
+  color: #ff8c38;
+}
+
+.motto {
+  color: rgba(245, 240, 235, 0.62);
+  font-size: 0.88rem;
+  font-weight: 300;
+  line-height: 1.7;
+  max-width: 380px;
+  border-left: 2px solid #e8610a;
+  padding-left: 16px;
+}
+
+.dotsStrip {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 3;
+  padding-right: 0;
+}
+
+.dotsStrip span {
+  display: block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #e8610a;
+  opacity: 0.7;
+}
+
+.dotsStrip span:nth-child(even) {
+  opacity: 0.25;
+}
+
+.right {
+  width: 440px;
+  min-width: 380px;
+  background: #0d0d0d;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 48px;
+  position: relative;
+  border-left: 1px solid #222;
+  animation: slidein 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes slidein {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.cornerDeco {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 120px;
+  height: 120px;
+  border-top: 2px solid #e8610a;
+  border-right: 2px solid #e8610a;
+  opacity: 0.35;
+}
+
+.cornerDecoBl {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 80px;
+  height: 80px;
+  border-bottom: 2px solid #e8610a;
+  border-left: 2px solid #e8610a;
+  opacity: 0.2;
+}
+
+.formHeader {
+  width: 100%;
+  margin-bottom: 36px;
+  text-align: left;
+}
+
+.formEyebrow {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #e8610a;
+  margin-bottom: 10px;
+}
+
+.formTitle {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #f5f0eb;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.formTitle span {
+  color: #e8610a;
+}
+
+.formSub {
+  margin-top: 8px;
+  font-size: 0.82rem;
+  color: #888;
+  font-weight: 300;
+}
+
+.form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.field label {
+  font-size: 0.73rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #666;
+  transition: color 0.2s;
+}
+
+.field:focus-within label {
+  color: #ff8c38;
+}
+
+.inputWrap {
+  position: relative;
+}
+
+.inputWrap .icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 15px;
+  color: #444;
+  pointer-events: none;
+  transition: color 0.2s;
+}
+
+.field:focus-within .icon {
+  color: #e8610a;
+}
+
+.input {
+  width: 100%;
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 6px;
+  color: #f5f0eb;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 400;
+  padding: 13px 14px 13px 42px;
+  outline: none;
+  transition: border-color 0.25s, box-shadow 0.25s;
+  box-sizing: border-box;
+}
+
+.input::placeholder {
+  color: #3d3d3d;
+}
+
+.input:focus {
+  border-color: #e8610a;
+  box-shadow: 0 0 0 3px rgba(232, 97, 10, 0.12);
+}
+
+.togglePw {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #444;
+  font-size: 14px;
+  transition: color 0.2s;
+  padding: 4px;
+}
+
+.togglePw:hover {
+  color: #e8610a;
+}
+
+.optionsRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.remember {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.rememberCheckbox {
+  display: none;
+}
+
+.checkmark {
+  width: 17px;
+  height: 17px;
+  border: 1.5px solid #333;
+  border-radius: 4px;
+  position: relative;
+  transition: border-color 0.2s, background 0.2s;
+  flex-shrink: 0;
+}
+
+.remember input:checked ~ .checkmark {
+  background: #e8610a;
+  border-color: #e8610a;
+}
+
+.remember input:checked ~ .checkmark::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 1.5px;
+  width: 5px;
+  height: 9px;
+  border: 2px solid #fff;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
+}
+
+.rememberText {
+  font-size: 0.78rem;
+  color: #555;
+}
+
+.forgotLink {
+  font-size: 0.78rem;
+  color: #e8610a;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.forgotLink:hover {
+  opacity: 0.7;
+}
+
+.btnLogin {
+  position: relative;
+  width: 100%;
+  padding: 15px;
+  background: #e8610a;
+  color: #fff;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: background 0.25s, transform 0.18s;
+}
+
+.btnLogin::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  transition: transform 0.55s ease;
+}
+
+.btnLogin:hover::before {
+  transform: translateX(100%);
+}
+
+.btnLogin:hover {
+  background: #d4560a;
+  transform: translateY(-1px);
+}
+
+.btnLogin:active {
+  transform: translateY(0);
+}
+
+.btnLogin:disabled {
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.btnInner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0;
+}
+
+.divider hr {
+  flex: 1;
+  border: none;
+  border-top: 1px solid #222;
+}
+
+.divider span {
+  font-size: 0.7rem;
+  color: #333;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.formFooter {
+  margin-top: 28px;
+  text-align: center;
+}
+
+.formFooter p {
+  font-size: 0.75rem;
+  color: #333;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.formFooter strong {
+  color: #e8610a;
+  font-weight: 500;
+}
+
+.verBadge {
+  position: absolute;
+  bottom: 28px;
+  right: 48px;
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #2a2a2a;
+}
+
+.rightAfter {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.018;
+  pointer-events: none;
+}
+
+/* Responsive */
+@media (max-width: 860px) {
+  .wrapper {
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+  }
+
+  .left {
+    flex: none;
+    height: 52vw;
+    min-height: 240px;
+    max-height: 340px;
+    padding: 28px 24px;
+  }
+
+  .logoBadge {
+    top: 24px;
+    left: 24px;
+  }
+
+  .slogan {
+    font-size: 1.8rem;
+  }
+
+  .dotsStrip {
+    display: none;
+  }
+
+  .right {
+    width: 100%;
+    min-width: unset;
+    padding: 44px 28px 52px;
+    border-left: none;
+    border-top: 1px solid #222;
+  }
+
+  .cornerDeco {
+    display: none;
+  }
+}

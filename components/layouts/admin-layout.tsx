@@ -14,9 +14,10 @@ import {
   Languages,
   LayoutDashboard,
   LogOut,
-  ScrollText,
   MapPin,
+  ScrollText,
   Settings,
+  Store,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -27,6 +28,7 @@ const mainNavItems = [
   { href: "/admin/pois", label: "POI Management", icon: MapPin },
   { href: "/admin/tours", label: "Food Tour Management", icon: Compass },
   { href: "/admin/media", label: "Media Library", icon: ImageIcon },
+  { href: "/admin/vendors", label: "Vendor Management", icon: Store },
 ];
 
 const systemNavItems = [
