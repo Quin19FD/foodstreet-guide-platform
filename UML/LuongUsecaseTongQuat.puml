@@ -1,0 +1,77 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+actor ADMIN as Admin
+actor VENDOR as Vendor
+actor USER as User
+
+rectangle "Hệ thống FoodStreet" {
+
+  ' ================= ĐĂNG KÝ / ĐĂNG NHẬP =================
+  User --> (Đăng ký tài khoản)
+  Vendor --> (Đăng ký tài khoản Vendor)
+
+  Admin --> (Duyệt tài khoản Vendor)
+
+  ' ================= ADMIN =================
+  Admin --> (Quản lý tài khoản User)
+  Admin --> (Quản lý tài khoản Vendor)
+  Admin --> (Khóa / Mở khóa tài khoản)
+
+  Admin --> (Kiểm duyệt POI)
+  Admin --> (Phân quyền & kiểm soát truy cập)
+  Admin --> (Quản lý dữ liệu hệ thống)
+  Admin --> (Xem thống kê hệ thống)
+
+  ' ================= VENDOR =================
+  Vendor --> (Tạo mới POI)
+  Vendor --> (Cập nhật thông tin POI)
+  Vendor --> (Quản lý POI của mình)
+
+  Vendor --> (Upload hình ảnh POI)
+  Vendor --> (Upload bản dịch riêng)
+  Vendor --> (Upload audio thuyết minh riêng)
+
+  Vendor --> (Theo dõi trạng thái POI)
+  Vendor --> (Xem thống kê POI)
+
+  ' ================= USER =================
+  User --> (Xem POI gần nhất)
+  User --> (Tìm kiếm POI)
+  User --> (Xem chi tiết POI)
+  User --> (Xem hình ảnh POI)
+
+  User --> (Xem POI trên bản đồ)
+  User --> (Tìm đường đến POI)
+
+  User --> (Nghe thuyết minh POI)
+  User --> (Chọn ngôn ngữ thuyết minh)
+  User --> (Tự động phát thuyết minh khi đến gần POI)
+
+  ' ================= INCLUDE / EXTEND =================
+  (Đăng ký tài khoản Vendor) --> (Duyệt tài khoản Vendor) : <<include>>
+
+  (Quản lý tài khoản Vendor) --> (Duyệt tài khoản Vendor) : <<include>>
+  (Quản lý tài khoản User) --> (Khóa / Mở khóa tài khoản) : <<include>>
+
+  (Quản lý POI của mình) --> (Tạo mới POI) : <<include>>
+  (Quản lý POI của mình) --> (Cập nhật thông tin POI) : <<include>>
+
+  (Tạo mới POI) --> (Kiểm duyệt POI) : <<include>>
+  (Cập nhật thông tin POI) --> (Kiểm duyệt POI) : <<extend>>
+
+  (Cập nhật thông tin POI) --> (Upload hình ảnh POI) : <<include>>
+  (Cập nhật thông tin POI) --> (Upload bản dịch riêng) : <<include>>
+  (Cập nhật thông tin POI) --> (Upload audio thuyết minh riêng) : <<include>>
+
+  (Xem chi tiết POI) --> (Xem hình ảnh POI) : <<include>>
+  (Xem chi tiết POI) --> (Nghe thuyết minh POI) : <<include>>
+
+  (Nghe thuyết minh POI) --> (Chọn ngôn ngữ thuyết minh) : <<include>>
+  (Tự động phát thuyết minh khi đến gần POI) --> (Nghe thuyết minh POI) : <<extend>>
+  (Xem POI trên bản đồ) --> (Tìm đường đến POI) : <<extend>>
+}
+
+@enduml

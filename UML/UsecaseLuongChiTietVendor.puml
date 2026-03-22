@@ -1,0 +1,25 @@
+@startuml
+left to right direction
+actor Vendor
+
+rectangle "FoodStreet - Vendor" {
+
+  Vendor --> (Đăng ký tài khoản Vendor)
+  (Đăng ký tài khoản Vendor) --> (Chờ Admin duyệt) : <<include>>
+
+  Vendor --> (Đăng nhập hệ thống)
+
+  Vendor --> (Quản lý POI của mình)
+
+  (Quản lý POI của mình) --> (Tạo mới POI) : <<include>>
+  (Tạo mới POI) --> (Gửi POI chờ duyệt) : <<include>>
+
+  (Quản lý POI của mình) --> (Cập nhật POI đã duyệt) : <<include>>
+  (Cập nhật POI đã duyệt) --> (Upload hình ảnh POI) : <<include>>
+  (Cập nhật POI đã duyệt) --> (Upload bản dịch riêng) : <<include>>
+  (Cập nhật POI đã duyệt) --> (Upload audio thuyết minh riêng) : <<include>>
+
+  Vendor --> (Theo dõi trạng thái POI)
+  Vendor --> (Xem thống kê POI)
+}
+@enduml

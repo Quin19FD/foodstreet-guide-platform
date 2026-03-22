@@ -1,0 +1,25 @@
+@startuml
+left to right direction
+actor Admin
+
+rectangle "FoodStreet - Admin" {
+
+  Admin --> (Đăng nhập hệ thống)
+
+  Admin --> (Quản lý tài khoản User)
+  (Quản lý tài khoản User) --> (Xem danh sách User) : <<include>>
+  (Quản lý tài khoản User) --> (Khóa / Mở khóa User) : <<include>>
+
+  Admin --> (Quản lý tài khoản Vendor)
+  (Quản lý tài khoản Vendor) --> (Duyệt đăng ký Vendor) : <<include>>
+  (Quản lý tài khoản Vendor) --> (Khóa / Mở khóa Vendor) : <<include>>
+
+  Admin --> (Kiểm duyệt POI)
+  (Kiểm duyệt POI) --> (Xem nội dung POI) : <<include>>
+  (Kiểm duyệt POI) --> (Phê duyệt POI) : <<include>>
+  (Kiểm duyệt POI) --> (Từ chối POI) : <<extend>>
+
+  Admin --> (Phân quyền & kiểm soát truy cập)
+  Admin --> (Xem thống kê hệ thống)
+}
+@enduml

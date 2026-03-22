@@ -1,0 +1,25 @@
+@startuml
+left to right direction
+actor User
+
+rectangle "FoodStreet - User" {
+
+  User --> (Đăng ký tài khoản)
+  User --> (Đăng nhập hệ thống)
+
+  User --> (Xem POI đã được duyệt)
+  (Xem POI đã được duyệt) --> (Xem POI gần nhất) : <<include>>
+  (Xem POI đã được duyệt) --> (Tìm kiếm POI) : <<include>>
+
+  User --> (Xem chi tiết POI)
+  (Xem chi tiết POI) --> (Xem hình ảnh POI) : <<include>>
+  (Xem chi tiết POI) --> (Chọn ngôn ngữ thuyết minh) : <<include>>
+  (Xem chi tiết POI) --> (Nghe thuyết minh POI) : <<include>>
+
+  User --> (Xem POI trên bản đồ)
+  (Xem POI trên bản đồ) --> (Tìm đường đến POI) : <<include>>
+
+  User --> (Tự động phát thuyết minh khi đến gần POI)
+  (Tự động phát thuyết minh khi đến gần POI) --> (Nghe thuyết minh POI) : <<extend>>
+}
+@enduml
