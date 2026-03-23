@@ -18,8 +18,8 @@ rectangle "Hệ thống FoodStreet" {
   ' ================= ADMIN =================
   Admin --> (Quản lý tài khoản User)
   Admin --> (Quản lý tài khoản Vendor)
-  Admin --> (Khóa / Mở khóa tài khoản)
 
+  Admin --> (Quản lý TOUR)
   Admin --> (Kiểm duyệt POI)
   Admin --> (Phân quyền & kiểm soát truy cập)
   Admin --> (Quản lý dữ liệu hệ thống)
@@ -39,8 +39,8 @@ rectangle "Hệ thống FoodStreet" {
 
   ' ================= USER =================
   User --> (Xem POI gần nhất)
-  User --> (Tìm kiếm POI)
-  User --> (Xem chi tiết POI)
+  User --> (Tìm kiếm POI hoặc TOUR)
+  User --> (Xem chi tiết POI hoặc TOUR)
   User --> (Xem hình ảnh POI)
 
   User --> (Xem POI trên bản đồ)
@@ -49,6 +49,11 @@ rectangle "Hệ thống FoodStreet" {
   User --> (Nghe thuyết minh POI)
   User --> (Chọn ngôn ngữ thuyết minh)
   User --> (Tự động phát thuyết minh khi đến gần POI)
+
+  ' ================= ADMIN - TOUR =================
+  (Quản lý TOUR) --> (Tạo TOUR) : <<include>>
+  (Quản lý TOUR) --> (Cập nhật TOUR) : <<include>>
+  (Quản lý TOUR) --> (Ẩn / Hiện TOUR) : <<include>>
 
   ' ================= INCLUDE / EXTEND =================
   (Đăng ký tài khoản Vendor) --> (Duyệt tài khoản Vendor) : <<include>>
@@ -66,8 +71,8 @@ rectangle "Hệ thống FoodStreet" {
   (Cập nhật thông tin POI) --> (Upload bản dịch riêng) : <<include>>
   (Cập nhật thông tin POI) --> (Upload audio thuyết minh riêng) : <<include>>
 
-  (Xem chi tiết POI) --> (Xem hình ảnh POI) : <<include>>
-  (Xem chi tiết POI) --> (Nghe thuyết minh POI) : <<include>>
+  (Xem chi tiết POI hoặc TOUR) --> (Xem hình ảnh POI) : <<include>>
+  (Xem chi tiết POI hoặc TOUR) --> (Nghe thuyết minh POI) : <<include>>
 
   (Nghe thuyết minh POI) --> (Chọn ngôn ngữ thuyết minh) : <<include>>
   (Tự động phát thuyết minh khi đến gần POI) --> (Nghe thuyết minh POI) : <<extend>>

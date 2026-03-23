@@ -1,0 +1,41 @@
+@startuml
+title Activity Diagram - Vendor thêm ngôn ngữ & audio cho POI
+
+start
+
+:Vendor đăng nhập hệ thống;
+:Vendor xem danh sách POI của mình;
+
+if (POI đã được duyệt?) then (Có)
+
+    :Vendor chọn POI;
+    :Chọn chức năng thêm nội dung ngôn ngữ;
+
+    :Vendor chọn ngôn ngữ;
+    :Nhập nội dung thuyết minh (bản dịch riêng);
+    note right
+      Không sử dụng API dịch thuật
+    end note
+
+    if (Vendor có audio riêng?) then (Có)
+        :Upload audio thuyết minh;
+        note right
+          Không sử dụng API Text To Speech
+        end note
+    else (Không)
+        :Bỏ qua bước upload audio;
+    endif
+
+    :Vendor lưu nội dung;
+    :Hệ thống gắn ngôn ngữ & audio vào POI;
+    :Cập nhật dữ liệu POI;
+
+    :Nội dung sẵn sàng cho User sử dụng;
+
+else (Không)
+    :Từ chối thao tác;
+    :Thông báo POI chưa được duyệt;
+endif
+
+stop
+@enduml

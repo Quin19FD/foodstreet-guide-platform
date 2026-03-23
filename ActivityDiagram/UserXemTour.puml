@@ -1,0 +1,36 @@
+@startuml
+title Activity Diagram - User xem Tour
+
+start
+
+:User mở ứng dụng;
+:Chọn chức năng Xem Tour;
+
+:Hệ thống tải danh sách Tour\n(đang hoạt động);
+
+if (Có Tour?) then (Có)
+    :Hiển thị danh sách Tour;
+    :User chọn 1 Tour;
+
+    :Hệ thống hiển thị chi tiết Tour;
+    :Xem tên Tour;
+    :Xem mô tả Tour;
+    :Xem thời lượng & số POI;
+
+    :Xem danh sách POI\ntrong Tour;
+
+    if (User xem bản đồ?) then (Có)
+        :Hiển thị lộ trình Tour\ntrên bản đồ;
+    endif
+
+    if (User chọn POI?) then (Có)
+        :Hiển thị chi tiết POI;
+        :Xem hình ảnh & thuyết minh;
+    endif
+
+else (Không)
+    :Hiển thị thông báo\n"Chưa có Tour";
+endif
+
+stop
+@enduml

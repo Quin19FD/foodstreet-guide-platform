@@ -1,0 +1,28 @@
+@startuml
+title Activity Diagram - Admin duyệt / từ chối POI
+
+start
+
+:Admin đăng nhập hệ thống;
+:Admin truy cập danh sách POI chờ duyệt;
+:Admin chọn một POI;
+
+:Admin xem chi tiết POI;
+:Kiểm tra thông tin cơ bản;
+:Kiểm tra thuyết minh;
+:Kiểm tra hình ảnh & menu;
+
+if (POI hợp lệ?) then (Có)
+    :Admin duyệt POI;
+    :Cập nhật trạng thái POI = "Đã duyệt";
+    :Cho phép POI hiển thị với User;
+    :Gửi email thông báo duyệt POI cho Vendor;
+else (Không)
+    :Admin từ chối POI;
+    :Nhập lý do từ chối;
+    :Cập nhật trạng thái POI = "Từ chối";
+    :Gửi email nêu rõ lý do cho Vendor;
+endif
+
+stop
+@enduml

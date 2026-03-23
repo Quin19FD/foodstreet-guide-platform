@@ -1,0 +1,28 @@
+@startuml
+title Activity Diagram - Đăng ký tài khoản Vendor & chờ duyệt
+
+start
+
+:Vendor truy cập hệ thống;
+:Vendor nhập thông tin đăng ký;
+:Vendor gửi yêu cầu đăng ký;
+
+: Hệ thống lưu tài khoản;
+: Đặt trạng thái = "Chờ duyệt";
+
+:Thông báo Admin có yêu cầu duyệt Vendor;
+
+if (Admin duyệt tài khoản?) then (Có)
+    :Admin duyệt Vendor;
+    :Cập nhật trạng thái = "Đã duyệt";
+    :Gửi email thông báo duyệt thành công cho Vendor;
+    :Vendor có quyền đăng nhập và tạo POI;
+else (Không)
+    :Admin từ chối Vendor;
+    :Nhập lý do từ chối;
+    :Cập nhật trạng thái = "Từ chối";
+    :Gửi email nêu rõ lý do cho Vendor;
+endif
+
+stop
+@enduml

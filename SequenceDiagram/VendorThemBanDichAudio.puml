@@ -1,0 +1,37 @@
+@startuml
+title Sequence Diagram - Vendor thêm bản dịch & audio riêng
+
+actor Vendor
+participant "FoodStreet System" as System
+participant "Storage Service" as Storage
+
+== Điều kiện ==
+note over Vendor,System
+POI đã được Admin duyệt
+Vendor là chủ sở hữu POI
+end note
+
+== Vendor thêm bản dịch ==
+Vendor -> System : Chọn POI
+System --> Vendor : Danh sách ngôn ngữ hiện có
+
+Vendor -> System : Thêm bản dịch mới\n(Nội dung tự viết)
+System -> System : Lưu bản dịch theo ngôn ngữ
+
+== Vendor upload audio riêng ==
+Vendor -> System : Upload audio theo ngôn ngữ
+System -> Storage : Lưu file audio
+Storage --> System : Trả về đường dẫn audio
+
+System -> System : Gắn audio với POI\nvà ngôn ngữ tương ứng
+
+== Hoàn tất ==
+System --> Vendor : Thêm bản dịch & audio thành công
+
+note over System
+Không gọi API dịch thuật
+Không gọi Text To Speech
+Chỉ phát audio upload sẵn
+end note
+
+@enduml

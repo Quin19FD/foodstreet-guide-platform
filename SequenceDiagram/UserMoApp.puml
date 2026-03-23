@@ -1,0 +1,31 @@
+@startuml
+title Sequence Diagram - User mở app → xem POI gần nhất
+
+actor User
+participant "Web" as Web
+participant "GPS Service" as GPS
+participant "FoodStreet System" as System
+participant "POI Service" as POI
+participant "Map Service" as Map
+
+== User mở ứng dụng ==
+User -> Web : Mở ứng dụng FoodStreet
+
+== Lấy vị trí người dùng ==
+Web -> GPS : Yêu cầu vị trí hiện tại
+GPS --> Web : Trả về tọa độ (lat, long)
+
+== Lấy POI gần nhất ==
+Web -> System : Gửi vị trí người dùng
+System -> POI : Tìm POI gần nhất\n(đã duyệt, đang hoạt động)
+POI --> System : Danh sách POI hợp lệ
+System --> Web : Trả về danh sách POI
+
+== Hiển thị bản đồ ==
+Web -> Map : Hiển thị bản đồ
+Map --> Web : Bản đồ đã load
+
+App -> Map : Đánh dấu POI trên bản đồ
+Map --> User : Hiển thị POI gần nhất
+
+@enduml

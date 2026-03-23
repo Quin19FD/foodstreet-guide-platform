@@ -1,0 +1,30 @@
+@startuml
+title Sequence Diagram - Vendor tạo POI & Admin duyệt POI
+
+actor Vendor
+actor Admin
+participant "FoodStreet System" as System
+participant "Mail Service" as Mail
+
+== Vendor tạo POI ==
+Vendor -> System : Tạo POI\n(thông tin cơ bản,\nthuyết minh tiếng Việt,\nmenu, hình ảnh)
+System -> System : Kiểm tra quyền Vendor
+System -> System : Lưu POI\n(Trạng thái: Chờ duyệt)
+
+== Admin duyệt POI ==
+Admin -> System : Xem danh sách POI chờ duyệt
+System --> Admin : Trả về thông tin POI
+
+alt POI được duyệt
+    Admin -> System : Duyệt POI
+    System -> System : Cập nhật trạng thái = Đã duyệt
+    System -> Mail : Gửi email thông báo duyệt POI
+    Mail --> Vendor : Email: POI đã được duyệt
+else POI bị từ chối
+    Admin -> System : Từ chối POI\n(Nhập lý do)
+    System -> System : Lưu lý do từ chối
+    System -> Mail : Gửi email từ chối + lý do
+    Mail --> Vendor : Email: POI bị từ chối
+end
+
+@enduml

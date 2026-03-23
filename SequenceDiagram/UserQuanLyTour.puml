@@ -1,0 +1,27 @@
+@startuml
+title Sequence - Admin quản lý Tour
+
+actor Admin
+participant "Giao diện Admin"
+participant "Hệ thống"
+database "Cơ sở dữ liệu"
+
+Admin -> "Giao diện Admin": Mở màn hình quản lý Tour
+"Giao diện Admin" -> "Hệ thống": Yêu cầu danh sách Tour
+"Hệ thống" -> "Cơ sở dữ liệu": Lấy thông tin các Tour
+"Cơ sở dữ liệu" --> "Hệ thống": Danh sách Tour
+"Hệ thống" --> "Giao diện Admin": Hiển thị danh sách Tour
+
+Admin -> "Giao diện Admin": Tạo / chỉnh sửa / khóa Tour
+"Giao diện Admin" -> "Hệ thống": Gửi thông tin Tour
+"Hệ thống" -> "Cơ sở dữ liệu": Lưu hoặc cập nhật Tour
+"Cơ sở dữ liệu" --> "Hệ thống": Lưu thành công
+"Hệ thống" --> "Giao diện Admin": Thông báo kết quả
+
+Admin -> "Giao diện Admin": Duyệt Tour
+"Giao diện Admin" -> "Hệ thống": Yêu cầu duyệt Tour
+"Hệ thống" -> "Cơ sở dữ liệu": Cập nhật trạng thái Tour
+"Cơ sở dữ liệu" --> "Hệ thống": Cập nhật thành công
+"Hệ thống" --> "Giao diện Admin": Tour đã được duyệt
+
+@enduml

@@ -1,25 +1,40 @@
 @startuml
 left to right direction
-actor Admin
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+actor ADMIN as Admin
 
 rectangle "FoodStreet - Admin" {
 
+  ' ================= XÁC THỰC =================
   Admin --> (Đăng nhập hệ thống)
 
+  ' ================= QUẢN LÝ USER =================
   Admin --> (Quản lý tài khoản User)
   (Quản lý tài khoản User) --> (Xem danh sách User) : <<include>>
   (Quản lý tài khoản User) --> (Khóa / Mở khóa User) : <<include>>
 
+  ' ================= QUẢN LÝ VENDOR =================
   Admin --> (Quản lý tài khoản Vendor)
   (Quản lý tài khoản Vendor) --> (Duyệt đăng ký Vendor) : <<include>>
   (Quản lý tài khoản Vendor) --> (Khóa / Mở khóa Vendor) : <<include>>
 
+  ' ================= QUẢN LÝ TOUR =================
+  Admin --> (Quản lý TOUR)
+  (Quản lý TOUR) --> (Tạo TOUR) : <<include>>
+  (Quản lý TOUR) --> (Cập nhật TOUR) : <<include>>
+  (Quản lý TOUR) --> (Ẩn / Hiện TOUR) : <<include>>
+
+  ' ================= KIỂM DUYỆT POI =================
   Admin --> (Kiểm duyệt POI)
   (Kiểm duyệt POI) --> (Xem nội dung POI) : <<include>>
   (Kiểm duyệt POI) --> (Phê duyệt POI) : <<include>>
   (Kiểm duyệt POI) --> (Từ chối POI) : <<extend>>
 
+  ' ================= HỆ THỐNG =================
   Admin --> (Phân quyền & kiểm soát truy cập)
   Admin --> (Xem thống kê hệ thống)
 }
+
 @enduml

@@ -1,25 +1,38 @@
 @startuml
 left to right direction
-actor User
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+actor USER as User
 
 rectangle "FoodStreet - User" {
 
+  ' ================= XÁC THỰC =================
   User --> (Đăng ký tài khoản)
   User --> (Đăng nhập hệ thống)
 
-  User --> (Xem POI đã được duyệt)
-  (Xem POI đã được duyệt) --> (Xem POI gần nhất) : <<include>>
-  (Xem POI đã được duyệt) --> (Tìm kiếm POI) : <<include>>
+  ' ================= KHÁM PHÁ =================
+  User --> (Xem POI & TOUR đã được duyệt)
+  (Xem POI & TOUR đã được duyệt) --> (Xem POI gần nhất) : <<include>>
+  (Xem POI & TOUR đã được duyệt) --> (Tìm kiếm POI) : <<include>>
+  (Xem POI & TOUR đã được duyệt) --> (Tìm kiếm TOUR) : <<include>>
 
+  ' ================= CHI TIẾT =================
   User --> (Xem chi tiết POI)
   (Xem chi tiết POI) --> (Xem hình ảnh POI) : <<include>>
-  (Xem chi tiết POI) --> (Chọn ngôn ngữ thuyết minh) : <<include>>
   (Xem chi tiết POI) --> (Nghe thuyết minh POI) : <<include>>
+  (Nghe thuyết minh POI) --> (Chọn ngôn ngữ thuyết minh) : <<include>>
 
+  User --> (Xem chi tiết TOUR)
+  (Xem chi tiết TOUR) --> (Xem hình ảnh TOUR) : <<include>>
+
+  ' ================= BẢN ĐỒ & ĐIỀU HƯỚNG =================
   User --> (Xem POI trên bản đồ)
   (Xem POI trên bản đồ) --> (Tìm đường đến POI) : <<include>>
 
+  ' ================= TỰ ĐỘNG =================
   User --> (Tự động phát thuyết minh khi đến gần POI)
   (Tự động phát thuyết minh khi đến gần POI) --> (Nghe thuyết minh POI) : <<extend>>
 }
+
 @enduml

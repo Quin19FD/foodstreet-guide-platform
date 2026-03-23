@@ -1,0 +1,38 @@
+@startuml
+title Activity Diagram - User sử dụng hệ thống chính
+
+start
+
+:User mở ứng dụng FoodStreet;
+
+if (User đã đăng nhập?) then (Có)
+else (Chưa)
+    :User đăng ký / đăng nhập;
+endif
+
+:Ứng dụng yêu cầu quyền định vị;
+:User cấp quyền định vị;
+
+:Hiển thị bản đồ;
+:Lấy vị trí hiện tại của User;
+
+:Hiển thị danh sách POI gần nhất trên bản đồ;
+:User chọn một POI;
+
+:Hiển thị thông tin chi tiết POI;
+:Hiển thị hình ảnh & menu;
+:User chọn ngôn ngữ thuyết minh;
+
+if (User nhấn phát thuyết minh?) then (Có)
+    :Phát audio thuyết minh;
+endif
+
+if (User chọn chỉ đường?) then (Có)
+    :Hiển thị lộ trình đến POI;
+endif
+
+:User có thể vừa nghe thuyết minh;
+:User có thể vừa xem hình ảnh & menu;
+
+stop
+@enduml

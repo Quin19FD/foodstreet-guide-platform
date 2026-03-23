@@ -1,0 +1,37 @@
+@startuml
+title Activity Diagram - Admin quản lý Tour
+
+start
+
+:Admin đăng nhập hệ thống;
+:Truy cập chức năng Quản lý Tour;
+:Hiển thị danh sách Tour;
+
+if (Admin chọn thao tác?) then (Tạo Tour)
+    :Nhập thông tin Tour\n(Tên, mô tả);
+    :Chọn danh sách POI\n(POI đã được duyệt);
+    :Sắp xếp thứ tự POI;
+    :Lưu Tour;
+    :Tour ở trạng thái Hoạt động;
+elseif (Chỉnh sửa Tour)
+    :Chọn Tour;
+    :Cập nhật thông tin Tour;
+    :Thêm / Xóa / Sắp xếp lại POI;
+    :Lưu thay đổi;
+elseif (Bật / Tắt Tour)
+    :Chọn Tour;
+    if (Bật Tour?) then (Có)
+        :Cập nhật trạng thái = Hoạt động;
+    else (Không)
+        :Cập nhật trạng thái = Tạm ẩn;
+    endif
+elseif (Xóa Tour)
+    :Chọn Tour;
+    :Xác nhận xóa Tour;
+    :Xóa Tour khỏi hệ thống;
+endif
+
+:Hiển thị danh sách Tour đã cập nhật;
+
+stop
+@enduml

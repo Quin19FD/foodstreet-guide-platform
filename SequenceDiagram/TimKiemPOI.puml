@@ -1,0 +1,31 @@
+@startuml
+title Sequence Diagram - User tìm kiếm POI
+
+actor User
+participant "Mobile App" as App
+participant "FoodStreet System" as System
+participant "Search Service" as Search
+participant "POI Service" as POI
+participant "Map Service" as Map
+
+== User nhập từ khóa ==
+User -> App : Nhập từ khóa tìm kiếm
+App -> System : Gửi từ khóa + vị trí hiện tại
+
+== Xử lý tìm kiếm ==
+System -> Search : Tìm POI theo từ khóa
+Search --> System : Danh sách POI phù hợp
+
+System -> POI : Lọc POI hợp lệ\n(đã duyệt, đang hoạt động)
+POI --> System : POI hợp lệ
+
+System -> System : Sắp xếp POI theo khoảng cách
+
+== Trả kết quả ==
+System --> App : Danh sách POI tìm được
+
+== Hiển thị trên bản đồ ==
+App -> Map : Cập nhật POI trên bản đồ
+Map --> User : Hiển thị POI theo tìm kiếm
+
+@enduml

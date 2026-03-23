@@ -1,0 +1,28 @@
+@startuml
+title Activity Diagram - User tìm kiếm Tour
+
+start
+
+:User mở ứng dụng;
+:Chọn chức năng Tìm kiếm Tour;
+
+:Nhập từ khóa tìm kiếm\n(hoặc chọn bộ lọc);
+
+:Click nút Tìm kiếm;
+
+:Hệ thống xử lý điều kiện tìm kiếm;
+:Hệ thống truy vấn danh sách Tour\n(chỉ Tour đang hoạt động);
+
+if (Có kết quả?) then (Có)
+    :Hiển thị danh sách Tour;
+    :User chọn Tour;
+
+    :Hiển thị chi tiết Tour;
+    :Xem lộ trình POI;
+    :Xem mô tả, thời lượng,\n số điểm tham quan;
+else (Không)
+    :Hiển thị thông báo\n"Không tìm thấy Tour phù hợp";
+endif
+
+stop
+@enduml

@@ -1,0 +1,22 @@
+@startuml
+title Sequence - User xem Tour
+
+actor User
+participant "Ứng dụng di động"
+participant "Hệ thống"
+database "Cơ sở dữ liệu"
+
+User -> "Ứng dụng di động": Chọn một Tour
+"Ứng dụng di động" -> "Hệ thống": Yêu cầu xem chi tiết Tour
+"Hệ thống" -> "Cơ sở dữ liệu": Lấy thông tin Tour
+"Cơ sở dữ liệu" --> "Hệ thống": Thông tin Tour
+
+"Hệ thống" -> "Cơ sở dữ liệu": Lấy danh sách POI thuộc Tour
+"Cơ sở dữ liệu" --> "Hệ thống": Danh sách POI
+
+"Hệ thống" --> "Ứng dụng di động": Hiển thị thông tin Tour và POI
+
+User -> "Ứng dụng di động": Xem Tour trên bản đồ
+"Ứng dụng di động" -> "Ứng dụng di động": Hiển thị lộ trình và các POI
+
+@enduml

@@ -1,0 +1,42 @@
+@startuml
+title Sequence Diagram - User đến gần POI → phát thuyết minh
+
+actor User
+participant " Web" as Web
+participant "GPS Service" as GPS
+participant "FoodStreet System" as System
+participant "POI Service" as POI
+participant "Notification Service" as Notify
+participant "Audio Player" as Audio
+
+== Theo dõi vị trí ==
+GPS -> Web : Cập nhật vị trí người dùng
+Web -> System : Gửi vị trí hiện tại
+
+== Phát hiện POI gần ==
+System -> POI : Kiểm tra POI trong bán kính
+POI --> System : Danh sách POI gần hợp lệ
+System -> System : Chọn POI ưu tiên\n(đã duyệt, gần nhất)
+
+== Thông báo cho User ==
+System -> Notify : Tạo thông báo\n"Sắp đến POI X, nghe thuyết minh?"
+Notify --> App : Hiển thị thông báo
+Web --> User : Thông báo + âm báo
+
+alt User đồng ý nghe
+    Web -> System : Xác nhận phát thuyết minh
+    System -> System : Lấy ngôn ngữ user chọn
+    System -> Audio : Phát audio theo ngôn ngữ
+    Audio --> User : Âm thanh thuyết minh
+    Web--> User : Hiển thị thông tin,\nmenu & hình ảnh POI
+else User từ chối
+    Web -> System : Bỏ qua thuyết minh
+end
+
+note over System
+Nếu có nhiều POI gần nhau:
+- Chỉ phát 1 POI hợp lệ
+- Không phát đồng thời
+end note
+
+@enduml

@@ -1,0 +1,28 @@
+@startuml
+title Activity Diagram - Admin quản lý User
+
+start
+
+:Admin đăng nhập hệ thống;
+:Admin truy cập chức năng quản lý User;
+:Admin xem danh sách User;
+
+:Admin chọn một User;
+:Admin xem thông tin chi tiết User;
+
+if (Admin thực hiện khóa tài khoản?) then (Có)
+    :Admin khóa tài khoản User;
+    :Cập nhật trạng thái User = "Bị khóa";
+    :User không thể đăng nhập;
+else (Không)
+    if (Admin mở khóa tài khoản?) then (Có)
+        :Admin mở khóa tài khoản User;
+        :Cập nhật trạng thái User = "Hoạt động";
+        :User có thể đăng nhập;
+    else (Không)
+        :Admin chỉ xem thông tin User;
+    endif
+endif
+
+stop
+@enduml

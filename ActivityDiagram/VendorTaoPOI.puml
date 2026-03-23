@@ -1,0 +1,40 @@
+@startuml
+title Activity Diagram - Vendor tạo POI (lần đầu)
+
+start
+
+:Vendor đăng nhập hệ thống;
+if (Tài khoản Vendor đã được duyệt?) then (Có)
+
+    :Vendor chọn chức năng "Tạo POI";
+    :Nhập thông tin cơ bản POI;
+    :Nhập thuyết minh tiếng Việt;
+    :Nhập Menu;
+    :Upload hình ảnh POI;
+
+    :Vendor gửi yêu cầu tạo POI;
+
+    :Hệ thống lưu POI;
+    :Đặt trạng thái POI = "Chờ duyệt";
+
+    :Thông báo Admin có POI mới cần duyệt;
+
+    if (Admin duyệt POI?) then (Có)
+        :Admin duyệt POI;
+        :Cập nhật trạng thái POI = "Đã duyệt";
+        :Gửi email thông báo duyệt POI cho Vendor;
+        :POI được hiển thị cho User;
+    else (Không)
+        :Admin từ chối POI;
+        :Nhập lý do từ chối;
+        :Cập nhật trạng thái POI = "Từ chối";
+        :Gửi email nêu rõ lý do cho Vendor;
+    endif
+
+else (Không)
+    :Từ chối thao tác tạo POI;
+    :Thông báo Vendor chưa được duyệt tài khoản;
+endif
+
+stop
+@enduml

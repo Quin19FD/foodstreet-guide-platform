@@ -1,0 +1,37 @@
+@startuml
+title Activity Diagram - Vendor sửa POI & gửi duyệt lại
+
+start
+
+:Vendor đăng nhập hệ thống;
+:Vendor xem danh sách POI của mình;
+
+:Vendor chọn POI bị từ chối;
+:Vendor xem lý do từ chối từ Admin;
+
+:Vendor chỉnh sửa thông tin POI;
+:Chỉnh sửa thuyết minh;
+:Chỉnh sửa menu;
+:Thay đổi / bổ sung hình ảnh;
+:Chỉnh sửa nội dung chưa đạt yêu cầu;
+
+:Vendor gửi yêu cầu duyệt lại POI;
+
+:Hệ thống cập nhật POI;
+:Đặt trạng thái POI = "Chờ duyệt lại";
+:Thông báo Admin có POI cần duyệt lại;
+
+if (Admin duyệt lại POI?) then (Có)
+    :Admin duyệt POI;
+    :Cập nhật trạng thái POI = "Đã duyệt";
+    :POI được hiển thị cho User;
+    :Gửi email thông báo duyệt thành công cho Vendor;
+else (Không)
+    :Admin từ chối POI;
+    :Nhập lý do từ chối;
+    :Cập nhật trạng thái POI = "Từ chối";
+    :Gửi email nêu rõ lý do cho Vendor;
+endif
+
+stop
+@enduml

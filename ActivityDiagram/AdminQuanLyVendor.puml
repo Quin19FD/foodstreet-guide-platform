@@ -1,0 +1,36 @@
+@startuml
+title Activity Diagram - Admin quản lý Vendor
+
+start
+
+:Admin đăng nhập hệ thống;
+:Admin truy cập chức năng quản lý Vendor;
+:Admin xem danh sách Vendor;
+
+:Admin chọn một Vendor;
+:Admin xem thông tin chi tiết Vendor;
+
+if (Vendor đang chờ duyệt?) then (Có)
+    if (Admin duyệt Vendor?) then (Duyệt)
+        :Admin duyệt Vendor;
+        :Cập nhật trạng thái Vendor = "Đã duyệt";
+        :Gửi email thông báo duyệt thành công;
+    else (Từ chối)
+        :Admin từ chối Vendor;
+        :Nhập lý do từ chối;
+        :Cập nhật trạng thái Vendor = "Từ chối";
+        :Gửi email nêu rõ lý do;
+    endif
+else (Không)
+    if (Admin khóa Vendor?) then (Có)
+        :Admin khóa Vendor;
+        :Cập nhật trạng thái Vendor = "Đã khóa";
+        :Ẩn toàn bộ POI của Vendor;
+        :Gửi email thông báo cho Vendor;
+    else (Không)
+        :Admin chỉ xem thông tin Vendor;
+    endif
+endif
+
+stop
+@enduml

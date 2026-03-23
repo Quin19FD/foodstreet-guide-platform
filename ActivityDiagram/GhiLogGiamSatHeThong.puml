@@ -1,0 +1,33 @@
+@startuml
+title Activity Diagram - Ghi log & giám sát hệ thống
+
+start
+
+:Người dùng / Vendor / Admin thực hiện hành động;
+:Hệ thống tiếp nhận yêu cầu;
+
+:Phân loại đối tượng thực hiện;
+if (Đối tượng là Admin?) then (Có)
+    :Ghi log Admin;
+    :Lưu log Admin vào file log riêng;
+    :Lưu log Admin vào Database;
+else (Không)
+    if (Đối tượng là Vendor?) then (Có)
+        :Ghi log Vendor;
+        :Lưu log Vendor vào file log riêng;
+        :Lưu log Vendor vào Database;
+    else (User)
+        :Ghi log User;
+        :Lưu log User vào Database;
+    endif
+endif
+
+:Thu thập dữ liệu truy cập;
+:Thống kê số User đang hoạt động;
+:Thống kê số Vendor đang hoạt động;
+
+:Admin truy cập chức năng giám sát;
+:Admin xem thống kê & log hệ thống;
+
+stop
+@enduml

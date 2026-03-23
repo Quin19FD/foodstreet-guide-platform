@@ -1,0 +1,25 @@
+@startuml
+title Sequence Diagram - Admin khóa Vendor → Ẩn POI
+
+actor Admin
+participant "FoodStreet System" as System
+participant "POI Service" as POI
+participant "Mail Service" as Mail
+
+== Admin khóa Vendor ==
+Admin -> System : Chọn Vendor\n(Không hợp tác)
+System -> System : Cập nhật trạng thái Vendor = Bị khóa
+
+== Ẩn toàn bộ POI ==
+System -> POI : Lấy danh sách POI của Vendor
+POI --> System : Danh sách POI
+
+loop Với mỗi POI
+    System -> POI : Cập nhật trạng thái POI = Bị ẩn
+end
+
+== Thông báo Vendor ==
+System -> Mail : Gửi email thông báo khóa Vendor
+Mail --> System : Xác nhận gửi mail
+
+@enduml

@@ -1,0 +1,35 @@
+@startuml
+title Sequence Diagram - Vendor sửa POI & gửi duyệt lại
+
+actor Vendor
+actor Admin
+participant "FoodStreet System" as System
+participant "Mail Service" as Mail
+
+== Vendor nhận POI bị từ chối ==
+Mail --> Vendor : Email từ chối POI\n(Kèm lý do chỉnh sửa)
+
+== Vendor chỉnh sửa POI ==
+Vendor -> System : Mở POI bị từ chối
+System --> Vendor : Hiển thị thông tin POI + lý do
+
+Vendor -> System : Cập nhật POI\n(sửa nội dung, hình ảnh,\nthuyết minh, menu...)
+System -> System : Lưu POI\n(Trạng thái: Chờ duyệt lại)
+
+== Admin duyệt lại POI ==
+Admin -> System : Xem danh sách POI chờ duyệt lại
+System --> Admin : Trả về thông tin POI đã chỉnh sửa
+
+alt POI được duyệt
+    Admin -> System : Duyệt lại POI
+    System -> System : Cập nhật trạng thái = Đã duyệt
+    System -> Mail : Gửi email duyệt POI
+    Mail --> Vendor : Email: POI đã được duyệt
+else POI tiếp tục bị từ chối
+    Admin -> System : Từ chối duyệt lại\n(Nhập lý do mới)
+    System -> System : Lưu lý do từ chối
+    System -> Mail : Gửi email từ chối + lý do
+    Mail --> Vendor : Email: POI chưa đạt yêu cầu
+end
+
+@enduml

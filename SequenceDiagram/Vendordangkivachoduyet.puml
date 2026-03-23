@@ -1,0 +1,29 @@
+@startuml
+title Sequence Diagram - Vendor đăng ký & Admin duyệt
+
+actor Vendor
+actor Admin
+participant "FoodStreet System" as System
+participant "Mail Service" as Mail
+
+== Vendor đăng ký tài khoản ==
+Vendor -> System : Gửi thông tin đăng ký
+System -> System : Lưu Vendor (Trạng thái: Chờ duyệt)
+
+== Admin duyệt Vendor ==
+Admin -> System : Xem danh sách Vendor chờ duyệt
+System --> Admin : Trả về thông tin Vendor
+
+alt Vendor được duyệt
+    Admin -> System : Duyệt tài khoản Vendor
+    System -> System : Cập nhật trạng thái = Hoạt động
+    System -> Mail : Gửi email thông báo duyệt
+    Mail --> Vendor : Email: Tài khoản đã được duyệt
+else Vendor bị từ chối
+    Admin -> System : Từ chối duyệt (Nhập lý do)
+    System -> System : Lưu lý do từ chối
+    System -> Mail : Gửi email từ chối + lý do
+    Mail --> Vendor : Email: Tài khoản bị từ chối
+end
+
+@enduml
