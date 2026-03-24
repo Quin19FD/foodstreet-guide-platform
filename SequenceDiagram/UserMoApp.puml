@@ -1,5 +1,5 @@
 @startuml
-title Sequence Diagram - User mở app → xem POI gần nhất
+title Sequence Diagram - User mở hệ thống → xem POI gần nhất
 
 actor User
 participant "Web" as Web

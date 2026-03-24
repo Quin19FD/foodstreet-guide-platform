@@ -16,7 +16,7 @@ if (Admin chọn thao tác?) then (Tạo Tour)
 elseif (Chỉnh sửa Tour)
     :Chọn Tour;
     :Cập nhật thông tin Tour;
-    :Thêm / Xóa / Sắp xếp lại POI;
+    :Thêm / Xóa POI;
     :Lưu thay đổi;
 elseif (Bật / Tắt Tour)
     :Chọn Tour;
