@@ -119,6 +119,7 @@ model POI {
   favoritePois FavoritePOI[]
 
   poiViews POIView[]
+  tourPois TourPOI[]
 
   @@index([status])
   @@index([status, isActive])
@@ -328,6 +329,46 @@ model UserActivity {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_activity")
+}
+
+//////////////////////////////////////////////////
+// TOUR
+//////////////////////////////////////////////////
+model Tour {
+  id String @id @db.Uuid
+
+  name        String  @db.VarChar(255)
+  description String?
+
+  imageUrl String? @map("image_url")
+
+  durationMinutes Int? @map("duration_minutes")
+  isActive        Boolean @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  tourPois TourPOI[]
+
+  @@index([isActive])
+  @@map("tours")
+}
+
+model TourPOI {
+  id String @id @db.Uuid
+
+  tourId String @map("tour_id") @db.Uuid
+  poiId  String @map("poi_id") @db.Uuid
+
+  stopOrder Int @map("stop_order")
+
+  tour Tour @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  poi  POI  @relation(fields: [poiId], references: [id], onDelete: Cascade)
+
+  @@unique([tourId, poiId])
+  @@index([tourId])
+  @@index([poiId])
+  @@map("tour_pois")
 }
 
 
