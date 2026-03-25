@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 import { vendorDecisionSchema, vendorUpdateSchema } from "@/application/validators/admin-vendors";
@@ -9,6 +9,22 @@ import { sendVendorApprovedEmail, sendVendorRejectedEmail } from "@/infrastructu
 import { ADMIN_AUTH_COOKIES, jsonError, verifyAdminAccessToken } from "../../session/_shared";
 
 export const runtime = "nodejs";
+
+const vendorSelect = {
+  id: true,
+  email: true,
+  name: true,
+  phoneNumber: true,
+  avatarUrl: true,
+  status: true,
+  rejectionReason: true,
+  approvedBy: true,
+  approvedAt: true,
+  isActive: true,
+  createdAt: true,
+  updatedAt: true,
+  lastLogin: true,
+} as const;
 
 async function requireAdmin(request: NextRequest): Promise<{ adminId: string } | NextResponse> {
   const cookieToken = request.cookies.get(ADMIN_AUTH_COOKIES.access)?.value ?? null;
@@ -42,20 +58,8 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
   const vendor = await prisma.user.findUnique({
     where: { id },
     select: {
-      id: true,
-      email: true,
-      name: true,
-      phoneNumber: true,
-      avatarUrl: true,
+      ...vendorSelect,
       role: true,
-      status: true,
-      rejectionReason: true,
-      approvedBy: true,
-      approvedAt: true,
-      isActive: true,
-      createdAt: true,
-      updatedAt: true,
-      lastLogin: true,
     },
   });
 
@@ -113,21 +117,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
               approvedBy: adminResult.adminId,
               approvedAt: now,
             },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        phoneNumber: true,
-        avatarUrl: true,
-        status: true,
-        rejectionReason: true,
-        approvedBy: true,
-        approvedAt: true,
-        isActive: true,
-        createdAt: true,
-        updatedAt: true,
-        lastLogin: true,
-      },
+      select: vendorSelect,
     });
 
     await logUserActivity({
@@ -171,34 +161,51 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
   }
 
   try {
+    const shouldSyncPoiActive =
+      typeof updateParsed.data.isActive === "boolean" && updateParsed.data.isActive !== vendor.isActive;
+
+    if (shouldSyncPoiActive) {
+      const [updated, poiUpdated] = await prisma.$transaction([
+        prisma.user.update({
+          where: { id: vendor.id },
+          data: {
+            ...(typeof updateParsed.data.email === "string" ? { email: updateParsed.data.email } : {}),
+            ...(typeof updateParsed.data.name === "string" ? { name: updateParsed.data.name } : {}),
+            ...("phoneNumber" in updateParsed.data
+              ? { phoneNumber: updateParsed.data.phoneNumber }
+              : {}),
+            ...("avatarUrl" in updateParsed.data ? { avatarUrl: updateParsed.data.avatarUrl } : {}),
+            isActive: updateParsed.data.isActive,
+          },
+          select: vendorSelect,
+        }),
+        prisma.pOI.updateMany({
+          where: { ownerId: vendor.id },
+          data: { isActive: updateParsed.data.isActive },
+        }),
+      ]);
+
+      await logUserActivity({
+        userId: adminResult.adminId,
+        action: updateParsed.data.isActive ? "ADMIN_VENDOR_ENABLED_WITH_POIS" : "ADMIN_VENDOR_DISABLED_WITH_POIS",
+        targetType: "USER",
+        targetId: updated.id,
+        meta: { vendorEmail: updated.email, poiAffected: poiUpdated.count },
+        request,
+      });
+
+      return NextResponse.json({ ok: true, vendor: updated, poiAffected: poiUpdated.count });
+    }
+
     const updated = await prisma.user.update({
       where: { id: vendor.id },
       data: {
         ...(typeof updateParsed.data.email === "string" ? { email: updateParsed.data.email } : {}),
         ...(typeof updateParsed.data.name === "string" ? { name: updateParsed.data.name } : {}),
-        ...("phoneNumber" in updateParsed.data
-          ? { phoneNumber: updateParsed.data.phoneNumber }
-          : {}),
+        ...("phoneNumber" in updateParsed.data ? { phoneNumber: updateParsed.data.phoneNumber } : {}),
         ...("avatarUrl" in updateParsed.data ? { avatarUrl: updateParsed.data.avatarUrl } : {}),
-        ...(typeof updateParsed.data.isActive === "boolean"
-          ? { isActive: updateParsed.data.isActive }
-          : {}),
       },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        phoneNumber: true,
-        avatarUrl: true,
-        status: true,
-        rejectionReason: true,
-        approvedBy: true,
-        approvedAt: true,
-        isActive: true,
-        createdAt: true,
-        updatedAt: true,
-        lastLogin: true,
-      },
+      select: vendorSelect,
     });
 
     await logUserActivity({
@@ -241,38 +248,30 @@ export async function DELETE(request: NextRequest, context: { params: Promise<{ 
 
   if (!vendor || vendor.role !== "VENDOR") return jsonError(404, "Không tìm thấy vendor");
 
-  const updated = await prisma.user.update({
-    where: { id: vendor.id },
-    data: {
-      isActive: false,
-      refreshTokenHash: null,
-      refreshTokenExpiry: null,
-    },
-    select: {
-      id: true,
-      email: true,
-      name: true,
-      phoneNumber: true,
-      avatarUrl: true,
-      status: true,
-      rejectionReason: true,
-      approvedBy: true,
-      approvedAt: true,
-      isActive: true,
-      createdAt: true,
-      updatedAt: true,
-      lastLogin: true,
-    },
-  });
+  const [updated, poiUpdated] = await prisma.$transaction([
+    prisma.user.update({
+      where: { id: vendor.id },
+      data: {
+        isActive: false,
+        refreshTokenHash: null,
+        refreshTokenExpiry: null,
+      },
+      select: vendorSelect,
+    }),
+    prisma.pOI.updateMany({
+      where: { ownerId: vendor.id },
+      data: { isActive: false },
+    }),
+  ]);
 
   await logUserActivity({
     userId: adminResult.adminId,
-    action: "ADMIN_VENDOR_DISABLED",
+    action: "ADMIN_VENDOR_DISABLED_WITH_POIS",
     targetType: "USER",
     targetId: updated.id,
-    meta: { vendorEmail: updated.email },
+    meta: { vendorEmail: updated.email, poiAffected: poiUpdated.count },
     request,
   });
 
-  return NextResponse.json({ ok: true, vendor: updated });
+  return NextResponse.json({ ok: true, vendor: updated, poiAffected: poiUpdated.count });
 }

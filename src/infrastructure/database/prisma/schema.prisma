@@ -98,6 +98,7 @@ model POI {
 
   status POIStatus @default(PENDING)
 
+  isActive Boolean @default(true) @map("is_active")
   rejectionReason String? @map("rejection_reason")
 
   approvedBy String?   @map("approved_by") @db.Uuid
@@ -121,6 +122,7 @@ model POI {
   tourPois TourPOI[]
 
   @@index([status])
+  @@index([status, isActive])
   @@map("pois")
 }
 
@@ -366,3 +368,6 @@ model TourPOI {
   @@index([poiId])
   @@map("tour_pois")
 }
+
+
+

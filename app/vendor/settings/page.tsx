@@ -3,8 +3,7 @@
 import { Save, Upload, UserCircle2, X } from "lucide-react";
 import { type ChangeEvent, useEffect, useMemo, useState } from "react";
 
-import { AdminLayout } from "@/components/layouts/admin-layout";
-import { config } from "@/shared/config";
+import { VendorLayout } from "@/components/layouts/vendor-layout";
 
 type MeResponse = {
   user: {
@@ -29,7 +28,7 @@ function pickError(input: unknown, fallback: string): string {
   return maybe.issues?.[0]?.message ?? maybe.error ?? fallback;
 }
 
-export default function AdminSettingsPage() {
+export default function VendorSettingsPage() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -62,7 +61,7 @@ export default function AdminSettingsPage() {
       setIsLoading(true);
       setErrorMessage(null);
       try {
-        const res = await fetch("/api/admin/session/me", { method: "GET" });
+        const res = await fetch("/api/vendor/auth/me", { method: "GET" });
         if (!res.ok) {
           const data = (await res.json().catch(() => null)) as unknown;
           throw new Error(pickError(data, "Không thể tải hồ sơ"));
@@ -120,7 +119,7 @@ export default function AdminSettingsPage() {
         const form = new FormData();
         form.append("file", avatarFile);
 
-        const uploadRes = await fetch("/api/admin/session/avatar-upload", {
+        const uploadRes = await fetch("/api/vendor/auth/avatar-upload", {
           method: "POST",
           body: form,
         });
@@ -144,7 +143,7 @@ export default function AdminSettingsPage() {
         payload.avatarUrl = nextAvatarUrl;
       }
 
-      const res = await fetch("/api/admin/session/profile", {
+      const res = await fetch("/api/vendor/auth/profile", {
         method: "PATCH",
         headers: { "content-type": "application/json" },
         body: JSON.stringify(payload),
@@ -173,10 +172,10 @@ export default function AdminSettingsPage() {
   };
 
   return (
-    <AdminLayout>
+    <VendorLayout>
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Thông tin cá nhân Admin</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Thông tin cá nhân Vendor</h1>
           <p className="mt-1 text-sm text-slate-500">
             Chọn ảnh từ máy rồi bấm Lưu để upload lên Cloudinary và cập nhật DB.
           </p>
@@ -258,14 +257,7 @@ export default function AdminSettingsPage() {
           {avatarFile ? <Upload className="h-4 w-4" /> : <Save className="h-4 w-4" />}
           {isSaving ? "Đang lưu..." : "Lưu thay đổi"}
         </button>
-
-        <div className="rounded-xl border border-slate-200 p-4">
-          <h2 className="font-semibold">Application</h2>
-          <p className="mt-2 text-sm text-slate-600">Name: {config.app.name}</p>
-          <p className="mt-1 text-sm text-slate-600">Environment: {config.app.environment}</p>
-          <p className="mt-1 text-sm text-slate-600">URL: {config.app.url}</p>
-        </div>
       </div>
-    </AdminLayout>
+    </VendorLayout>
   );
 }

@@ -1,4 +1,4 @@
-generator client {
+﻿generator client {
   provider = "prisma-client-js"
 }
 
@@ -98,6 +98,7 @@ model POI {
 
   status POIStatus @default(PENDING)
 
+  isActive Boolean @default(true) @map("is_active")
   rejectionReason String? @map("rejection_reason")
 
   approvedBy String? @map("approved_by") @db.Uuid
@@ -120,6 +121,7 @@ model POI {
   poiViews POIView[]
 
   @@index([status])
+  @@index([status, isActive])
   @@map("pois")
 }
 
@@ -327,3 +329,5 @@ model UserActivity {
 
   @@map("user_activity")
 }
+
+

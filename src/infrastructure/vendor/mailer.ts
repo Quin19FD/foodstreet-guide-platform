@@ -1,4 +1,4 @@
-import * as nodemailer from "nodemailer";
+﻿import * as nodemailer from "nodemailer";
 
 import { config } from "@/shared/config";
 
@@ -10,6 +10,19 @@ type SendVendorApprovedEmailInput = {
 type SendVendorRejectedEmailInput = {
   to: string;
   vendorName?: string | null;
+  reason: string;
+};
+
+type SendPoiApprovedEmailInput = {
+  to: string;
+  vendorName?: string | null;
+  poiName: string;
+};
+
+type SendPoiRejectedEmailInput = {
+  to: string;
+  vendorName?: string | null;
+  poiName: string;
   reason: string;
 };
 
@@ -48,7 +61,7 @@ async function sendMailOrDevLog(input: {
   if (!host || !portRaw || !user || !pass) {
     console.log(`[DEV][VENDOR_MAIL] to=${input.to} subject=${input.subject}`);
     console.log(input.text);
-    console.warn("[DEV][VENDOR_MAIL] SMTP chưa cấu hình đầy đủ → không gửi mail thật");
+    console.warn("[DEV][VENDOR_MAIL] SMTP chưa cấu hình đầy đủ -> không gửi mail thật");
     return;
   }
 
@@ -96,5 +109,36 @@ Lý do: ${input.reason}
 
 Bạn có thể đăng ký lại sau khi chỉnh sửa thông tin (hoặc liên hệ admin).
 Trang đăng nhập: ${loginUrl}`,
+  });
+}
+
+export async function sendPoiApprovedEmail(input: SendPoiApprovedEmailInput): Promise<void> {
+  const vendorName = input.vendorName?.trim() || "Vendor";
+
+  await sendMailOrDevLog({
+    to: input.to,
+    subject: `POI "${input.poiName}" đã được phê duyệt`,
+    text: `Xin chào ${vendorName},
+
+POI "${input.poiName}" của bạn đã được admin phê duyệt.
+POI có thể hiển thị với người dùng nếu đang mở khóa.
+
+Trân trọng.`,
+  });
+}
+
+export async function sendPoiRejectedEmail(input: SendPoiRejectedEmailInput): Promise<void> {
+  const vendorName = input.vendorName?.trim() || "Vendor";
+
+  await sendMailOrDevLog({
+    to: input.to,
+    subject: `POI "${input.poiName}" chưa được phê duyệt`,
+    text: `Xin chào ${vendorName},
+
+POI "${input.poiName}" chưa được phê duyệt.
+Lý do: ${input.reason}
+
+Bạn vui lòng chỉnh sửa POI và gửi duyệt lại.
+Trân trọng.`,
   });
 }

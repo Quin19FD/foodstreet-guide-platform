@@ -51,13 +51,13 @@ export default function LoginPage() {
       setErrorMessage(null);
 
       try {
-        const me = await fetch("/api/auth/me", { method: "GET" });
+        const me = await fetch("/api/admin/session/me", { method: "GET" });
         if (me.ok) {
           router.replace(nextPath);
           return;
         }
 
-        const refreshed = await fetch("/api/auth/refresh", { method: "POST" });
+        const refreshed = await fetch("/api/admin/session/refresh", { method: "POST" });
         if (refreshed.ok) {
           router.replace(nextPath);
         }
@@ -85,7 +85,7 @@ export default function LoginPage() {
 
     setIsLoading(true);
     try {
-      const res = await fetch("/api/auth/login", {
+      const res = await fetch("/api/admin/session/login", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ email: emailTrimmed, password, rememberMe }),
@@ -238,7 +238,7 @@ export default function LoginPage() {
               <span className={styles.checkmark} />
               <span className={styles.rememberText}>Ghi nhớ đăng nhập</span>
             </label>
-            <a href="/login" className={styles.forgotLink}>
+            <a href="/admin/forgot-password" className={styles.forgotLink}>
               Quên mật khẩu?
             </a>
           </div>
@@ -259,7 +259,7 @@ export default function LoginPage() {
         </form>
 
         <div style={{ marginTop: 14, textAlign: "center" }}>
-          <a href="/register" className={styles.forgotLink}>
+          <a href="/admin/register" className={styles.forgotLink}>
             Chưa có tài khoản? Đăng ký
           </a>
         </div>
@@ -278,3 +278,4 @@ export default function LoginPage() {
     </div>
   );
 }
+
