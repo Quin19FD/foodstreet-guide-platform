@@ -8,10 +8,11 @@
 import type { Location } from "../value-objects/location";
 
 export type POICategory = "FOOD" | "DRINK" | "SNACK" | "DESSERT" | string;
+export type POIStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 export interface POIProps {
   id: string;
-  districtId: string;
+  ownerId: string;
   name: string;
   slug?: string;
   category?: POICategory;
@@ -19,14 +20,18 @@ export interface POIProps {
   priceMin?: number;
   priceMax?: number;
   rating: number;
-  isOpen: boolean;
+  status: POIStatus;
+  rejectionReason?: string;
+  approvedBy?: string;
+  approvedAt?: Date;
+  submitCount: number;
   createdAt: Date;
   updatedAt: Date;
 }
 
 export class POI {
   readonly id: string;
-  readonly districtId: string;
+  readonly ownerId: string;
   readonly name: string;
   readonly slug?: string;
   readonly category?: POICategory;
@@ -34,13 +39,17 @@ export class POI {
   readonly priceMin?: number;
   readonly priceMax?: number;
   readonly rating: number;
-  readonly isOpen: boolean;
+  readonly status: POIStatus;
+  readonly rejectionReason?: string;
+  readonly approvedBy?: string;
+  readonly approvedAt?: Date;
+  readonly submitCount: number;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 
   constructor(props: POIProps) {
     this.id = props.id;
-    this.districtId = props.districtId;
+    this.ownerId = props.ownerId;
     this.name = props.name;
     this.slug = props.slug;
     this.category = props.category;
@@ -48,7 +57,11 @@ export class POI {
     this.priceMin = props.priceMin;
     this.priceMax = props.priceMax;
     this.rating = props.rating;
-    this.isOpen = props.isOpen;
+    this.status = props.status;
+    this.rejectionReason = props.rejectionReason;
+    this.approvedBy = props.approvedBy;
+    this.approvedAt = props.approvedAt;
+    this.submitCount = props.submitCount;
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;
   }
@@ -66,5 +79,17 @@ export class POI {
 
   getCategory(): string {
     return this.category || "FOOD";
+  }
+
+  isApproved(): boolean {
+    return this.status === "APPROVED";
+  }
+
+  isPending(): boolean {
+    return this.status === "PENDING";
+  }
+
+  isRejected(): boolean {
+    return this.status === "REJECTED";
   }
 }

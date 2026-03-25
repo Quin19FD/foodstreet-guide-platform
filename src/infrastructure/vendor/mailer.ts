@@ -7,9 +7,16 @@ type SendVendorApprovedEmailInput = {
   vendorName?: string | null;
 };
 
-type SendVendorRejectedEmailInput = {
+type SendPoiApprovedEmailInput = {
   to: string;
   vendorName?: string | null;
+  poiName: string;
+};
+
+type SendPoiRejectedEmailInput = {
+  to: string;
+  vendorName?: string | null;
+  poiName: string;
   reason: string;
 };
 
@@ -82,19 +89,39 @@ Nếu bạn không thực hiện đăng ký, hãy bỏ qua email này.`,
   });
 }
 
-export async function sendVendorRejectedEmail(input: SendVendorRejectedEmailInput): Promise<void> {
+export async function sendPoiApprovedEmail(input: SendPoiApprovedEmailInput): Promise<void> {
   const vendorName = input.vendorName?.trim() || "Vendor";
-  const loginUrl = `${config.app.url}/vendor/login`;
+  const vendorUrl = `${config.app.url}/vendor/pois`;
 
   await sendMailOrDevLog({
     to: input.to,
-    subject: "Tài khoản vendor bị từ chối",
+    subject: `POI "${input.poiName}" đã được phê duyệt`,
     text: `Xin chào ${vendorName},
 
-Yêu cầu đăng ký tài khoản vendor của bạn đã bị từ chối.
+POI "${input.poiName}" của bạn đã được admin phê duyệt. POI này giờ đã xuất hiện trên ứng dụng.
+
+Bạn có thể quản lý POI tại:
+${vendorUrl}
+
+Nếu bạn không thực hiện tạo POI, hãy bỏ qua email này.`,
+  });
+}
+
+export async function sendPoiRejectedEmail(input: SendPoiRejectedEmailInput): Promise<void> {
+  const vendorName = input.vendorName?.trim() || "Vendor";
+  const vendorUrl = `${config.app.url}/vendor/pois`;
+
+  await sendMailOrDevLog({
+    to: input.to,
+    subject: `POI "${input.poiName}" bị từ chối`,
+    text: `Xin chào ${vendorName},
+
+POI "${input.poiName}" của bạn đã bị từ chối phê duyệt.
 Lý do: ${input.reason}
 
-Bạn có thể đăng ký lại sau khi chỉnh sửa thông tin (hoặc liên hệ admin).
-Trang đăng nhập: ${loginUrl}`,
+Bạn có thể chỉnh sửa và gửi lại POI tại:
+${vendorUrl}
+
+Nếu cần hỗ trợ, hãy liên hệ admin.`,
   });
 }
