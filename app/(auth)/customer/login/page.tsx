@@ -15,7 +15,7 @@ export default function CustomerLoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const nextPath = useMemo(() => searchParams.get("next") ?? "/customer", [searchParams]);
+  const nextPath = useMemo(() => searchParams.get("next") ?? "/customer/map", [searchParams]);
   const dotKeys = useMemo(() => Array.from({ length: 12 }, (_, idx) => `dot-${idx}`), []);
 
   const [email, setEmail] = useState("");
@@ -224,9 +224,14 @@ export default function CustomerLoginPage() {
               <span className={styles.checkmark} />
               <span className={styles.rememberText}>Ghi nhớ đăng nhập</span>
             </label>
-            <a href="/customer/register" className={styles.forgotLink}>
-              Đăng ký
-            </a>
+            <div className="flex items-center gap-3">
+              <a href="/customer/forgot-password" className={styles.forgotLink}>
+                Quên mật khẩu
+              </a>
+              <a href="/customer/register" className={styles.forgotLink}>
+                Đăng ký
+              </a>
+            </div>
           </div>
 
           <button type="submit" className={styles.btnLogin} disabled={isBusy}>
@@ -254,3 +259,5 @@ export default function CustomerLoginPage() {
     </div>
   );
 }
+
+

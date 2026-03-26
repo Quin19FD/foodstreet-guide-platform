@@ -224,8 +224,8 @@ export default function VendorLoginPage() {
               <span className={styles.checkmark} />
               <span className={styles.rememberText}>Ghi nhớ đăng nhập</span>
             </label>
-            <a href="/vendor/register" className={styles.forgotLink}>
-              Đăng ký gian hàng
+            <a href="/vendor/forgot-password" className={styles.forgotLink}>
+              Quên mật khẩu?
             </a>
           </div>
 
@@ -243,6 +243,12 @@ export default function VendorLoginPage() {
           </button>
         </form>
 
+        <div style={{ marginTop: 14, textAlign: "center" }}>
+          <a href="/vendor/register" className={styles.forgotLink}>
+            Chưa có tài khoản? Đăng ký gian hàng
+          </a>
+        </div>
+
         <div className={styles.formFooter}>
           <p>
             Tài khoản vendor cần được <strong>admin phê duyệt</strong> trước khi sử dụng.
@@ -254,3 +260,4 @@ export default function VendorLoginPage() {
     </div>
   );
 }
+

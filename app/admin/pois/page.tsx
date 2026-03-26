@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 "use client";
 
 import { useState } from "react";
@@ -101,6 +102,16 @@ export default function AdminPOIsPage() {
           </div>
         )}
       </div>
+=======
+﻿import { AdminLayout } from "@/components/layouts/admin-layout";
+
+import { AdminPoiManagement } from "./poi-management";
+
+export default function AdminPOIsPage() {
+  return (
+    <AdminLayout>
+      <AdminPoiManagement />
+>>>>>>> 89e97ffa7fc3bc74ced766cd9fe6d398954730db
     </AdminLayout>
   );
 }

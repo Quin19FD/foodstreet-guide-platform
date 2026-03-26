@@ -14,7 +14,7 @@ export default function CustomerRegisterPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const nextPath = useMemo(() => searchParams.get("next") ?? "/customer", [searchParams]);
+  const nextPath = useMemo(() => searchParams.get("next") ?? "/customer/map", [searchParams]);
   const dotKeys = useMemo(() => Array.from({ length: 12 }, (_, idx) => `dot-${idx}`), []);
 
   const [name, setName] = useState("");
@@ -237,3 +237,4 @@ export default function CustomerRegisterPage() {
     </div>
   );
 }
+
