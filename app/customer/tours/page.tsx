@@ -24,6 +24,7 @@ export default function CustomerToursPage() {
       setIsLoading(true);
       try {
         const params = new URLSearchParams();
+        params.set("take", "30");
         if (searchQuery.trim()) params.set("q", searchQuery.trim());
         const res = await fetch(`/api/customer/tours?${params.toString()}`, {
           signal: controller.signal,

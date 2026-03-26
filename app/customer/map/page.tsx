@@ -400,7 +400,8 @@ export default function CustomerMapPage() {
     const params = new URLSearchParams({
       lat: String(lat),
       lng: String(lng),
-      take: "120",
+      mode: "map",
+      take: "80",
     });
 
     if (keyword.trim()) params.set("q", keyword.trim());
