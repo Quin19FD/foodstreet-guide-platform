@@ -56,5 +56,3 @@ export async function GET(request: NextRequest) {
 export async function POST() {
   return jsonError(405, "Không hỗ trợ tạo POI từ API admin. Vui lòng dùng luồng vendor.");
 }
-
-
