@@ -253,7 +253,7 @@ export default function CustomerMapPage() {
   const [networkHint, setNetworkHint] = useState<string | null>(null);
   const [locationHint, setLocationHint] = useState<string | null>(null);
   const [isLoadingPois, setIsLoadingPois] = useState(false);
-  const [isOnline, setIsOnline] = useState<boolean>(typeof navigator !== "undefined" ? navigator.onLine : true);
+  const [isOnline, setIsOnline] = useState<boolean>(true);
 
   const focusPoiId = searchParams.get("focusPoi");
 
@@ -400,7 +400,8 @@ export default function CustomerMapPage() {
     const params = new URLSearchParams({
       lat: String(lat),
       lng: String(lng),
-      take: "120",
+      mode: "map",
+      take: "80",
     });
 
     if (keyword.trim()) params.set("q", keyword.trim());
@@ -493,6 +494,8 @@ export default function CustomerMapPage() {
   };
 
   useEffect(() => {
+    setIsOnline(navigator.onLine);
+
     const onOnline = () => {
       setIsOnline(true);
       setNetworkHint(null);
@@ -526,7 +529,9 @@ export default function CustomerMapPage() {
     mapRef.current = map;
 
     return () => {
-      poiMarkersRef.current.forEach((marker) => marker.remove());
+      for (const marker of poiMarkersRef.current) {
+        marker.remove();
+      }
       poiMarkersRef.current = [];
       userMarkerRef.current?.remove();
       userMarkerRef.current = null;
@@ -630,7 +635,9 @@ export default function CustomerMapPage() {
     const map = mapRef.current;
     if (!map) return;
 
-    poiMarkersRef.current.forEach((marker) => marker.remove());
+    for (const marker of poiMarkersRef.current) {
+      marker.remove();
+    }
     poiMarkersRef.current = [];
 
     for (const poi of pois) {

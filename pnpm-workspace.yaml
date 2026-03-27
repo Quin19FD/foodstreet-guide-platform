@@ -1,0 +1,6 @@
+ignoredBuiltDependencies:
+  - '@biomejs/biome'
+  - '@prisma/client'
+  - '@prisma/engines'
+  - prisma
+  - sharp

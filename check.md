@@ -1,160 +1,152 @@
-# Phân tích Tính năng Giao diện Khách hàng
+# CHECK - Audit chuc nang hien tai
 
-## So sánh: Project.md vs Database Schema
+## Pham vi kiem tra
+- Da doc code thuc te trong `app/`, `app/api/`, `src/`, `prisma/`.
+- Bao cao nay dua tren code dang co, khong chi dua vao README.
 
-### Database Schema có nhưng Project.md chưa đề cập đầy đủ:
+## 1) Chuc nang da hoan thanh
 
-| Entity | Database | Project.md | Ghi chú |
-|--------|----------|------------|---------|
-| **MenuItem** | ✅ Có (menu_items) | ❌ Không có | Cần hiển thị menu từng quán |
-| **FavoritePOI** | ✅ Có (favorite_pois) | ❌ Không có | Tính năng yêu thích quán |
-| **Review** | ✅ Có (reviews) | ❌ Không có | Đánh giá quán |
-| **SearchHistory** | ✅ Có (search_history) | ❌ Không có | Lịch sử tìm kiếm |
-| **UserActivity** | ✅ Có (user_activity) | ❌ Không có | Tracking hoạt động |
-| **POIImage** | ✅ Có (poi_images) | ✅ Có (Upload ảnh) | Đã có |
-| **POITranslation** | ✅ Có (poi_translations) | ✅ Có (Đa ngôn ngữ) | Đã có |
-| **POIAudio** | ✅ Có (poi_audios) | ✅ Có (Audio Guide) | Đã có |
+### A. Auth va session
+- Admin: login, refresh, me, logout, bootstrap admin dau tien, cap nhat profile, upload avatar.
+  - File: `app/api/admin/session/login/route.ts`, `app/api/admin/session/refresh/route.ts`, `app/api/admin/session/me/route.ts`, `app/api/admin/session/logout/route.ts`, `app/api/admin/session/register/route.ts`, `app/api/admin/session/profile/route.ts`, `app/api/admin/session/avatar-upload/route.ts`.
+- Vendor: register (PENDING), login, refresh, me, logout, profile, avatar.
+  - File: `app/api/vendor/auth/register/route.ts`, `app/api/vendor/auth/login/route.ts`, `app/api/vendor/auth/refresh/route.ts`, `app/api/vendor/auth/me/route.ts`, `app/api/vendor/auth/logout/route.ts`, `app/api/vendor/auth/profile/route.ts`, `app/api/vendor/auth/avatar-upload/route.ts`.
+- Customer: register, login, refresh, me, logout.
+  - File: `app/api/customer/auth/register/route.ts`, `app/api/customer/auth/login/route.ts`, `app/api/customer/auth/refresh/route.ts`, `app/api/customer/auth/me/route.ts`, `app/api/customer/auth/logout/route.ts`.
+- Quen mat khau OTP cho ca 3 role.
+  - File: `app/api/admin/password/*`, `app/api/vendor/password/*`, `app/api/customer/password/*`.
+- Middleware bao ve route admin/vendor bang cookie.
+  - File: `middleware.ts`.
 
----
+### B. Admin
+- Quan ly POI theo DB: list/filter, detail, approve/reject, lock/unlock.
+  - UI: `app/admin/pois/page.tsx`, `app/admin/pois/poi-management.tsx`, `app/admin/pois/[id]/admin-poi-detail.tsx`.
+  - API: `app/api/admin/pois/route.ts`, `app/api/admin/pois/[id]/route.ts`, `app/api/admin/pois/[id]/decision/route.ts`, `app/api/admin/pois/[id]/lock/route.ts`, `app/api/admin/pois/[id]/unlock/route.ts`.
+- Quan ly Vendor theo DB: tao/sua/duyet/tu choi/xoa mem/khoi phuc.
+  - UI: `app/admin/vendors/vendor-management.tsx`.
+  - API: `app/api/admin/vendors/route.ts`, `app/api/admin/vendors/[id]/route.ts`.
+- Quan ly Tour theo DB: tao/sua, sap xep stop, an/hien tour, xem chi tiet.
+  - UI: `app/admin/tours/tour-management.tsx`.
+  - API: `app/api/admin/tours/route.ts`, `app/api/admin/tours/[id]/route.ts`.
+- Nhat ky he thong (userActivity) da co.
+  - File: `app/admin/activity-logs/page.tsx`.
+- Settings admin (profile + avatar) da co.
+  - File: `app/admin/settings/page.tsx`.
 
-## Danh sách Tính năng Giao diện Khách hàng (Customer Interface)
+### C. Vendor
+- Quan ly POI vendor theo DB: tao POI (translation, image, menu), sua, lock/unlock, resubmit.
+  - UI: `app/vendor/vendor-poi-management.tsx`, `app/vendor/pois/[id]/page.tsx`.
+  - API: `app/api/vendor/pois/route.ts`, `app/api/vendor/pois/[id]/route.ts`, `app/api/vendor/pois/[id]/lock/route.ts`, `app/api/vendor/pois/[id]/unlock/route.ts`, `app/api/vendor/pois/[id]/resubmit/route.ts`.
+- Upload media vendor da co.
+  - File: `app/api/vendor/media/upload/route.ts`.
+- Settings vendor (profile + avatar) da co.
+  - File: `app/vendor/settings/page.tsx`, `app/api/vendor/auth/profile/route.ts`, `app/api/vendor/auth/avatar-upload/route.ts`.
 
-### 1. Landing / Welcome Screen
-- [ ] Màn hình chào mừng khi quét QR Code
-- [ ] Chọn ngôn ngữ (VN, EN, CN, KR)
-- [ ] Yêu cầu quyền truy cập GPS
-- [ ] Hiển thị logo và thông tin khu phố
+### D. Customer
+- Kham pha POI/Tour theo DB da co.
+  - UI: `app/customer/page.tsx`.
+  - API: `app/api/customer/pois/route.ts`, `app/api/customer/tours/route.ts`.
+- Ban do GPS + cluster + hang doi thuyet minh da co.
+  - UI: `app/customer/map/page.tsx`.
+- Chi tiet POI da co (anh, menu, TTS, dich).
+  - UI: `app/customer/pois/[id]/page.tsx`.
+  - API: `app/api/customer/pois/[id]/route.ts`, `app/api/tools/translate/route.ts`.
+- Danh sach/chi tiet tour da co.
+  - UI: `app/customer/tours/page.tsx`, `app/customer/tours/[id]/page.tsx`.
+  - API: `app/api/customer/tours/route.ts`, `app/api/customer/tours/[id]/route.ts`.
+- Search tong hop customer da co.
+  - File: `app/api/customer/search/route.ts`.
 
-### 2. Bản đồ tương tác (Map Interface)
-- [ ] Hiển thị bản đồ khu phố ẩm thực
-- [ ] Hiển thị marker cho tất cả POI
-- [ ] Hiển thị vị trí người dùng (GPS)
-- [ ] Highlight POI gần nhất
-- [ ] Hiển thị khoảng cách đến từng POI
-- [ ] Click marker để xem chi tiết POI
-- [ ] Filter POI theo loại (Food Stall / Supporting Facility)
-- [ ] Filter POI theo trạng thái (isOpen)
+## 2) Chuc nang chua hoan thanh / dang partial
 
-### 3. Chi tiết POI (POI Detail)
-- [ ] Tên gian hàng (có đa ngôn ngữ)
-- [ ] Mô tả (có đa ngôn ngữ)
-- [ ] Hình ảnh slider / gallery
-- [ ] Menu món ăn (MenuItem) - **MỚI từ DB**
-- [ ] Giá từng món (priceMin, priceMax) - **MỚI từ DB**
-- [ ] Đánh giá trung bình (rating) - **MỚI từ DB**
-- [ ] Khoảng cách từ vị trí hiện tại
-- [ ] Nút nghe Audio Guide
-- [ ] Nút thích / Yêu thích (Favorite) - **MỚI từ DB**
-- [ ] Nút dẫn đường (Directions)
+### A. Con dung mock data
+Nhung man hinh sau dang dung `mockPlatformService` (`src/application/services/mock-platform.ts`), chua noi day du voi DB:
+- `app/admin/dashboard/page.tsx`
+- `app/admin/districts/page.tsx`
+- `app/admin/media/page.tsx`
+- `app/admin/audio-guides/page.tsx`
+- `app/admin/translations/page.tsx`
+- `app/admin/analytics/page.tsx`
+- `app/customer/favorites/page.tsx`
 
-### 4. Audio Guide
-- [ ] Text-to-Speech phát script thuyết minh
-- [ ] Chọn ngôn ngữ audio
-- [ ] Phát / Tạm dừng / Stop
-- [ ] Tự động phát khi đến gần POI (geofencing)
-- [ ] Thanh tiến độ audio
+### B. Customer profile co link den route chua ton tai
+Trong `app/customer/profile/page.tsx` co cac link:
+- `/customer/history`
+- `/customer/reviews`
+- `/customer/language`
+- `/customer/notifications`
+- `/customer/settings`
 
-### 5. Tìm kiếm & Khám phá
-- [ ] Thanh tìm kiếm theo tên quán
-- [ ] Lọc theo loại (Food Stall vs Supporting Facility)
-- [ ] Lọc theo khoảng cách
-- [ ] Lọc theo đánh giá (rating)
-- [ ] Lịch sử tìm kiếm - **MỚI từ DB**
+Nhung hien tai khong co file route tuong ung trong `app/customer/*` -> se 404.
 
-### 6. Yêu thích (Favorites) - **MỚI từ DB**
-- [ ] Thêm/xóa POI khỏi danh sách yêu thích
-- [ ] Xem danh sách POI yêu thích
-- [ ] Truy cập nhanh từ favorites
+### C. API Gateway dang o muc mock
+- Gateway route co san: `app/api/gateway/[service]/[...path]/route.ts`.
+- Router van dispatch vao mock service: `src/infrastructure/api-gateway/router.ts`.
 
-### 7. Đánh giá (Reviews) - **MỚI từ DB**
-- [ ] Xem các đánh giá của POI
-- [ ] Viết đánh giá mới (1-5 sao + comment)
-- [ ] Xem đánh giá cá nhân của mình
+### D. Entry root chua phuc vu user chung
+- `app/page.tsx` dang redirect thang ve `/admin/login`.
 
-### 8. Food Tour
-- [ ] Xem danh sách Food Tour có sẵn
-- [ ] Chi tiết tour: tên, mô tả, thời lượng
-- [ ] Danh sách POI trong tour
-- [ ] Bắt đầu tour (navigate theo thứ tự POI)
-- [ ] Check-in tại từng POI
+### E. Script docker chua dung duoc
+- `package.json` co `docker:up`/`docker:down` tro toi `infrastructure/docker/docker-compose.yml`.
+- Trong repo hien tai khong co file/folder do.
 
-### 9. Tài khoản (Profile)
-- [ ] Thông tin cá nhân (nếu đăng nhập)
-- [ ] Lịch sử hoạt động - **MỚI từ DB**
-- [ ] Đăng xuất
-- [ ] Có thể dùng Guest Mode (không đăng nhập)
+### F. Chua co seed script ro rang
+- Khong thay `prisma seed` hoac file seed.
 
-### 10. Responsive & Mobile-first
-- [ ] Tối ưu cho mobile (người dùng đi bộ)
-- [ ] Nút lớn, dễ tap
-- [ ] Offline support (PWA)
-- [ ] Loading states
-- [ ] Error handling
+## 3) Cach chay du an (Admin, Vendor, User)
 
----
+### 3.1 Dieu kien
+- Node.js >= 22
+- pnpm >= 9
+- PostgreSQL dang chay
 
-## Cấu trúc Route đề xuất cho Customer Interface
-
-```
-app/
-├── page.tsx                    # Landing / Welcome (QR scan entry)
-├── (customer)/                 # Customer route group
-│   ├── layout.tsx              # Customer layout (khác admin)
-│   ├── page.tsx                # / - Homepage (bản đồ chính)
-│   ├── scan/page.tsx           # /scan - Quét QR (nếu cần)
-│   ├── map/page.tsx            # /map - Bản đồ đầy đủ
-│   ├── pois/
-│   │   ├── page.tsx            # /pois - Danh sách tất cả POI
-│   │   └── [id]/page.tsx       # /pois/123 - Chi tiết POI
-│   ├── tours/
-│   │   ├── page.tsx            # /tours - Danh sách Food Tour
-│   │   └── [id]/page.tsx       # /tours/123 - Chi tiết tour
-│   ├── favorites/page.tsx      # /favorites - POI yêu thích
-│   └── profile/page.tsx        # /profile - Tài khoản
-├── (auth)/                     # Auth (đã có)
-├── (map)/                      # Map pages (đã có, có thể merge)
-└── admin/                      # Admin (đã có)
+### 3.2 Setup va run
+1. Cai dependencies:
+```bash
+pnpm install
 ```
 
----
+2. Tao `.env` tu `.env.example`, it nhat can:
+- `DATABASE_URL`
+- `JWT_SECRET`
+- `NEXT_PUBLIC_APP_URL`
 
-## API Endpoints cần thiết cho Customer
-
-```
-GET  /api/districts           # Lấy danh sách khu phố
-GET  /api/districts/:id       # Chi tiết khu phố
-GET  /api/pois                # Lấy danh sách POI (có filter)
-GET  /api/pois/:id            # Chi tiết POI
-GET  /api/pois/:id/menu       # Menu của POI - **MỚI**
-GET  /api/pois/:id/reviews    # Đánh giá của POI - **MỚI**
-POST /api/pois/:id/reviews    # Gửi đánh giá - **MỚI**
-GET  /api/pois/nearby         # POI gần vị trí hiện tại
-GET  /api/tours               # Danh sách Food Tour
-GET  /api/tours/:id           # Chi tiết tour
-GET  /api/audio/:translationId # Audio URL
-GET  /api/user/favorites      # Danh sách yêu thích - **MỚI**
-POST /api/user/favorites      # Thêm yêu thích - **MỚI**
-DELETE /api/user/favorites/:id # Xóa yêu thích - **MỚI**
-GET  /api/user/history        # Lịch sử tìm kiếm - **MỚI**
+3. Dong bo schema DB:
+```bash
+pnpm db:push
 ```
 
----
+4. Chay dev:
+```bash
+pnpm dev
+```
 
-## Ưu tiên triển khai (MVP)
+### 3.3 Truy cap theo role
 
-### Phase 1: Core Features
-1. Landing với QR + GPS
-2. Bản đồ với marker POI
-3. Chi tiết POI cơ bản
-4. Audio Guide (TTS)
+#### Admin
+- Login: `http://localhost:3000/admin/login`
+- Neu lan dau chua co admin: vao `http://localhost:3000/admin/register` de bootstrap admin dau tien.
+- Sau login: `http://localhost:3000/admin/dashboard`
 
-### Phase 2: Engagement
-5. Menu món ăn
-6. Yêu thích (Favorites)
-7. Đánh giá (Reviews)
-8. Tìm kiếm
+#### Vendor
+- Register: `http://localhost:3000/vendor/register`
+- Login: `http://localhost:3000/vendor/login`
+- Luu y: tai khoan vendor tu dang ky la `PENDING`, can admin duyet moi login duoc.
+- Sau login: `http://localhost:3000/vendor`
 
-### Phase 3: Advanced
-9. Food Tour navigation
-10. Offline PWA
-11. Profile/User account
+#### Customer (User)
+- Register: `http://localhost:3000/customer/register`
+- Login: `http://localhost:3000/customer/login`
+- Cac trang chinh:
+  - `http://localhost:3000/customer`
+  - `http://localhost:3000/customer/map`
+  - `http://localhost:3000/customer/tours`
+
+## 4) Tong ket nhanh
+- Auth/session 3 role: **Da co**
+- Admin quan ly Vendor/POI/Tour: **Da co**
+- Vendor quan ly POI: **Da co**
+- Customer discovery/map/poi/tour: **Da co**
+- Dashboard/analytics/media/audio/translation/district: **Partial (mock)**
+- Favorites/profile customer: **Partial/Chua xong**
+- Gateway microservice: **Partial (van mock)**

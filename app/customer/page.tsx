@@ -39,35 +39,53 @@ export default function CustomerHomePage() {
   }, []);
 
   useEffect(() => {
+    const controller = new AbortController();
     const timer = setTimeout(async () => {
       setIsLoading(true);
       try {
         if (searchType === "poi") {
           const params = new URLSearchParams();
+          params.set("mode", "summary");
+          params.set("take", "36");
           if (searchQuery.trim()) params.set("q", searchQuery.trim());
           if (userLocation) {
             params.set("lat", String(userLocation.lat));
             params.set("lng", String(userLocation.lng));
           }
-          const res = await fetch(`/api/customer/pois?${params.toString()}`);
+          const res = await fetch(`/api/customer/pois?${params.toString()}`, {
+            signal: controller.signal,
+          });
           const data = (await res.json().catch(() => null)) as { pois?: PoiItem[] } | null;
+          if (controller.signal.aborted) return;
           setPois(data?.pois ?? []);
           setTours([]);
         } else {
           const params = new URLSearchParams();
+          params.set("take", "24");
           if (searchQuery.trim()) params.set("q", searchQuery.trim());
-          const res = await fetch(`/api/customer/tours?${params.toString()}`);
+          const res = await fetch(`/api/customer/tours?${params.toString()}`, {
+            signal: controller.signal,
+          });
           const data = (await res.json().catch(() => null)) as { tours?: TourItem[] } | null;
+          if (controller.signal.aborted) return;
           setTours(data?.tours ?? []);
           setPois([]);
         }
+      } catch {
+        if (!controller.signal.aborted) {
+          setPois([]);
+          setTours([]);
+        }
       } finally {
-        setIsLoading(false);
+        if (!controller.signal.aborted) setIsLoading(false);
       }
     }, 250);
 
-    return () => clearTimeout(timer);
-  }, [searchType, searchQuery, userLocation]);
+    return () => {
+      controller.abort();
+      clearTimeout(timer);
+    };
+  }, [searchType, searchQuery, searchType === "poi" ? userLocation?.lat : null, searchType === "poi" ? userLocation?.lng : null]);
 
   const emptyMessage = useMemo(() => {
     if (isLoading) return "Đang tìm kiếm...";
