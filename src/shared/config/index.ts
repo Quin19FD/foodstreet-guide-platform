@@ -5,6 +5,10 @@
  */
 
 export const config = {
+  google: {
+    apiKey: process.env.GOOGLE_API_KEY ?? "",
+    cloudCredentials: process.env.GOOGLE_CLOUD_CREDENTIALS ?? "",
+  },
   app: {
     name: "FoodStreet Guide",
     url: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",

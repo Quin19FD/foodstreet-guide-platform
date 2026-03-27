@@ -90,14 +90,14 @@ const OSM_STYLE: maplibregl.StyleSpecification = {
 };
 
 const LANGUAGE_FALLBACK_OPTIONS = [
-  { code: "vi", label: "Vietnam" },
-  { code: "en", label: "United States" },
-  { code: "fr", label: "France" },
-  { code: "de", label: "Germany" },
-  { code: "ja", label: "Japan" },
-  { code: "ko", label: "Korea" },
-  { code: "zh", label: "China" },
-  { code: "th", label: "Thailand" },
+  { code: "vi", label: "Vietnamese (VI)" },
+  { code: "en", label: "English (EN)" },
+  { code: "fr", label: "French (FR)" },
+  { code: "de", label: "German (DE)" },
+  { code: "ja", label: "Japanese (JA)" },
+  { code: "ko", label: "Korean (KO)" },
+  { code: "zh", label: "Chinese (ZH)" },
+  { code: "th", label: "Thai (TH)" },
 ] as const;
 
 function normalizeLanguageCode(input: string): string {
@@ -155,15 +155,36 @@ function splitSentences(value: string): string[] {
 
 function toSpeechLang(language: string): string {
   const normalized = language.toLowerCase();
-  if (normalized === "vi") return "vi-VN";
-  if (normalized === "en") return "en-US";
-  if (normalized === "fr") return "fr-FR";
-  if (normalized === "de") return "de-DE";
-  if (normalized === "ja") return "ja-JP";
-  if (normalized === "ko") return "ko-KR";
-  if (normalized === "zh") return "zh-CN";
-  if (normalized === "th") return "th-TH";
-  return normalized;
+  
+  // Ánh xạ các mã ngôn ngữ 2 ký tự sang mã ngôn ngữ đầy đủ (BCP-47)
+  // để Web Speech API có thể tìm đúng giọng đọc (voice).
+  const speechMap: Record<string, string> = {
+    vi: "vi-VN", en: "en-US", fr: "fr-FR", de: "de-DE",
+    ja: "ja-JP", ko: "ko-KR", zh: "zh-CN", th: "th-TH",
+    es: "es-ES", pt: "pt-BR", it: "it-IT", ru: "ru-RU",
+    ar: "ar-SA", hi: "hi-IN", id: "id-ID", ms: "ms-MY",
+    nl: "nl-NL", pl: "pl-PL", tr: "tr-TR", uk: "uk-UA",
+    cs: "cs-CZ", sv: "sv-SE", da: "da-DK", no: "nb-NO",
+    fi: "fi-FI", hu: "hu-HU", el: "el-GR", he: "he-IL",
+    ro: "ro-RO", bg: "bg-BG", hr: "hr-HR", sk: "sk-SK",
+    ta: "ta-IN", te: "te-IN", mr: "mr-IN", bn: "bn-IN",
+    gu: "gu-IN", kn: "kn-IN", ml: "ml-IN", pa: "pa-IN",
+    "zh-tw": "zh-TW", "zh-hk": "zh-HK",
+  };
+
+  return speechMap[normalized] || normalized;
+}
+
+function getBestVoice(langCode: string) {
+  if (typeof window === "undefined") return null;
+  const voices = window.speechSynthesis.getVoices();
+  const targetPrefix = langCode.split("-")[0].toLowerCase();
+
+  let voice = voices.find((v) => v.lang.replace("_", "-").toLowerCase() === langCode.toLowerCase());
+  if (!voice) {
+    voice = voices.find((v) => v.lang.toLowerCase().startsWith(targetPrefix));
+  }
+  return voice || null;
 }
 
 function PoiReadonlyMap({ latitude, longitude }: { latitude?: number | null; longitude?: number | null }) {
@@ -276,11 +297,14 @@ export function PoiDetailView(props: PoiDetailViewProps) {
           const normalized = normalizeLanguageCode(firstLanguageCode);
           if (!normalized) continue;
           if (!map.has(normalized)) {
-            map.set(normalized, `${countryName} (${normalized.toUpperCase()})`);
+            const languageName = item.languages![firstLanguageCode];
+            map.set(normalized, `${languageName || countryName} (${normalized.toUpperCase()})`);
           }
         }
 
-        map.set("vi", "Vietnam (VI)");
+        map.set("vi", "Vietnamese (VI)");
+        map.set("en", "English (EN)");
+        map.set("zh", "Chinese (ZH)");
 
         const options = Array.from(map.entries())
           .map(([code, label]) => ({ code, label }))
@@ -340,6 +364,8 @@ export function PoiDetailView(props: PoiDetailViewProps) {
 
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = toSpeechLang(targetLanguage);
+      const voice = getBestVoice(utterance.lang);
+      if (voice) utterance.voice = voice;
       utterance.rate = speechRate;
       utterance.onstart = () => {
         if (playbackTokenRef.current !== token) return;
@@ -399,6 +425,8 @@ export function PoiDetailView(props: PoiDetailViewProps) {
 
     const utterance = new SpeechSynthesisUtterance(description);
     utterance.lang = toSpeechLang(language);
+    const voice = getBestVoice(utterance.lang);
+    if (voice) utterance.voice = voice;
     utterance.rate = speechRate;
     utterance.onstart = () => {
       setIsSpeaking(true);
