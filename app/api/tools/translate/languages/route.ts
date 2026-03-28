@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-type Language = { code: string; name: string; nativeName: string; };
+type Language = { code: string; name: string; nativeName: string };
 
 /**
  * GET /api/tools/translate/languages

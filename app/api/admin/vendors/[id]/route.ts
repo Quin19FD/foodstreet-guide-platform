@@ -162,14 +162,17 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
 
   try {
     const shouldSyncPoiActive =
-      typeof updateParsed.data.isActive === "boolean" && updateParsed.data.isActive !== vendor.isActive;
+      typeof updateParsed.data.isActive === "boolean" &&
+      updateParsed.data.isActive !== vendor.isActive;
 
     if (shouldSyncPoiActive) {
       const [updated, poiUpdated] = await prisma.$transaction([
         prisma.user.update({
           where: { id: vendor.id },
           data: {
-            ...(typeof updateParsed.data.email === "string" ? { email: updateParsed.data.email } : {}),
+            ...(typeof updateParsed.data.email === "string"
+              ? { email: updateParsed.data.email }
+              : {}),
             ...(typeof updateParsed.data.name === "string" ? { name: updateParsed.data.name } : {}),
             ...("phoneNumber" in updateParsed.data
               ? { phoneNumber: updateParsed.data.phoneNumber }
@@ -187,7 +190,9 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
 
       await logUserActivity({
         userId: adminResult.adminId,
-        action: updateParsed.data.isActive ? "ADMIN_VENDOR_ENABLED_WITH_POIS" : "ADMIN_VENDOR_DISABLED_WITH_POIS",
+        action: updateParsed.data.isActive
+          ? "ADMIN_VENDOR_ENABLED_WITH_POIS"
+          : "ADMIN_VENDOR_DISABLED_WITH_POIS",
         targetType: "USER",
         targetId: updated.id,
         meta: { vendorEmail: updated.email, poiAffected: poiUpdated.count },
@@ -202,7 +207,9 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
       data: {
         ...(typeof updateParsed.data.email === "string" ? { email: updateParsed.data.email } : {}),
         ...(typeof updateParsed.data.name === "string" ? { name: updateParsed.data.name } : {}),
-        ...("phoneNumber" in updateParsed.data ? { phoneNumber: updateParsed.data.phoneNumber } : {}),
+        ...("phoneNumber" in updateParsed.data
+          ? { phoneNumber: updateParsed.data.phoneNumber }
+          : {}),
         ...("avatarUrl" in updateParsed.data ? { avatarUrl: updateParsed.data.avatarUrl } : {}),
       },
       select: vendorSelect,

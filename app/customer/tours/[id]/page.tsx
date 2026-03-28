@@ -86,7 +86,9 @@ export default function TourDetailPage() {
           <div className="rounded-xl bg-white p-4 text-center shadow-sm">
             <Clock className="mx-auto h-5 w-5 text-orange-500" />
             <p className="mt-1 text-xs text-slate-500">Thời lượng</p>
-            <p className="text-sm font-semibold text-slate-800">{tour.durationMinutes ?? "-"} phút</p>
+            <p className="text-sm font-semibold text-slate-800">
+              {tour.durationMinutes ?? "-"} phút
+            </p>
           </div>
           <div className="rounded-xl bg-white p-4 text-center shadow-sm">
             <MapPin className="mx-auto h-5 w-5 text-orange-500" />

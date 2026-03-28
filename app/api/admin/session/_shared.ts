@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 
-import { parseDurationToSeconds, signJwtHs256, verifyJwtHs256 } from "@/infrastructure/security/jwt";
+import {
+  parseDurationToSeconds,
+  signJwtHs256,
+  verifyJwtHs256,
+} from "@/infrastructure/security/jwt";
 import { config } from "@/shared/config";
 
 export const ADMIN_AUTH_COOKIES = {
@@ -95,4 +99,3 @@ export function jsonError(status: number, message: string, extra?: Record<string
     { status }
   );
 }
-

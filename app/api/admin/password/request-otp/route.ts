@@ -9,8 +9,6 @@ import { generateNumericOtp, hashOtp } from "@/infrastructure/password-reset/otp
 import { checkAndRecordOtpSend } from "@/infrastructure/password-reset/rate-limit";
 import { sendPasswordResetOtpEmail } from "@/infrastructure/password-reset/mailer";
 
-
-
 export const runtime = "nodejs";
 
 const OTP_TTL_MS = 2 * 60_000;
@@ -72,4 +70,3 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({ ok: true });
 }
-

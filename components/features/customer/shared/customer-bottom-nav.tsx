@@ -2,13 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  MapPin,
-  Compass,
-  Heart,
-  User,
-  Home,
-} from "lucide-react";
+import { MapPin, Compass, Heart, User, Home } from "lucide-react";
 import { cn } from "@/shared/utils";
 
 const navItems = [
@@ -23,7 +17,7 @@ export function CustomerBottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white/95 px-2 pt-2 backdrop-blur md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200/80 bg-white/95 px-2 pt-2 backdrop-blur-md md:hidden safe-area-bottom">
       <div className="flex justify-around pb-[calc(0.35rem+env(safe-area-inset-bottom))]">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
@@ -34,18 +28,58 @@ export function CustomerBottomNav() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex min-h-14 min-w-14 flex-col items-center justify-center gap-1 rounded-xl px-3 py-2 transition-colors active:scale-[0.98]",
+                "group relative flex min-h-14 min-w-14 flex-col items-center justify-center gap-1 rounded-xl px-3 py-2 transition-all duration-200 active:scale-[0.95]",
                 isActive
-                  ? "bg-orange-50 text-orange-500"
-                  : "text-slate-500 hover:text-slate-700"
+                  ? "text-orange-500"
+                  : "text-slate-400 hover:text-slate-600 active:bg-slate-50"
               )}
             >
-              <Icon className="h-5 w-5" strokeWidth={isActive ? 2.5 : 2} />
-              <span className="text-[11px] font-medium leading-none">{item.label}</span>
+              {/* Active indicator background */}
+              {isActive && (
+                <span className="absolute inset-0 rounded-xl bg-orange-50/80 animate-fade-in" />
+              )}
+
+              {/* Icon container with bounce animation on active */}
+              <span
+                className={cn(
+                  "relative flex items-center justify-center transition-transform duration-200",
+                  isActive && "animate-bounce-subtle"
+                )}
+              >
+                <Icon
+                  className="h-5 w-5 transition-all duration-200"
+                  strokeWidth={isActive ? 2.5 : 2}
+                />
+
+                {/* Active dot indicator */}
+                {isActive && (
+                  <span className="absolute -bottom-1 h-1 w-1 rounded-full bg-orange-500 animate-pulse-soft" />
+                )}
+              </span>
+
+              {/* Label */}
+              <span
+                className={cn(
+                  "relative text-[11px] font-medium leading-none transition-all duration-200",
+                  isActive ? "text-orange-600 font-semibold" : "text-slate-500"
+                )}
+              >
+                {item.label}
+              </span>
+
+              {/* Ripple effect container */}
+              <span className="absolute inset-0 rounded-xl ripple-effect" />
             </Link>
           );
         })}
       </div>
+
+      {/* Safe area spacer for iOS */}
+      <style>{`
+        .safe-area-bottom {
+          padding-bottom: env(safe-area-inset-bottom, 0.35rem);
+        }
+      `}</style>
     </nav>
   );
 }

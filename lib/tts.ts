@@ -36,9 +36,18 @@ function ensureVoicesLoaded(): SpeechSynthesisVoice[] {
 // Language helpers
 // ---------------------------------------------------------------------------
 const SPEECH_LANG_MAP: Record<string, string> = {
-  vi: "vi-VN", en: "en-US", fr: "fr-FR", de: "de-DE",
-  ja: "ja-JP", ko: "ko-KR", zh: "zh-CN", th: "th-TH",
-  es: "es-ES", pt: "pt-BR", it: "it-IT", ru: "ru-RU",
+  vi: "vi-VN",
+  en: "en-US",
+  fr: "fr-FR",
+  de: "de-DE",
+  ja: "ja-JP",
+  ko: "ko-KR",
+  zh: "zh-CN",
+  th: "th-TH",
+  es: "es-ES",
+  pt: "pt-BR",
+  it: "it-IT",
+  ru: "ru-RU",
 };
 
 export function toSpeechLang(lang: string): string {
@@ -144,7 +153,7 @@ async function playGoogleTranslateTts(
   text: string,
   lang: string,
   rate: number,
-  callbacks: TtsCallbacks,
+  callbacks: TtsCallbacks
 ): Promise<void> {
   // Abort bất kỳ phiên TTS nào đang chạy
   currentAbort?.abort();

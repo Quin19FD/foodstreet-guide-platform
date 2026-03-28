@@ -9,7 +9,7 @@ type PageProps = {
 
 function toSingle(value: string | string[] | undefined): string | null {
   if (!value) return null;
-  return Array.isArray(value) ? value[0] ?? null : value;
+  return Array.isArray(value) ? (value[0] ?? null) : value;
 }
 
 export default async function AdminActivityLogsPage({ searchParams }: PageProps) {
@@ -108,4 +108,3 @@ export default async function AdminActivityLogsPage({ searchParams }: PageProps)
     </AdminLayout>
   );
 }
-

@@ -156,21 +156,52 @@ function splitSentences(value: string): string[] {
 
 function toSpeechLang(language: string): string {
   const normalized = language.toLowerCase();
-  
+
   // Ánh xạ các mã ngôn ngữ 2 ký tự sang mã ngôn ngữ đầy đủ (BCP-47)
   // để Web Speech API có thể tìm đúng giọng đọc (voice).
   const speechMap: Record<string, string> = {
-    vi: "vi-VN", en: "en-US", fr: "fr-FR", de: "de-DE",
-    ja: "ja-JP", ko: "ko-KR", zh: "zh-CN", th: "th-TH",
-    es: "es-ES", pt: "pt-BR", it: "it-IT", ru: "ru-RU",
-    ar: "ar-SA", hi: "hi-IN", id: "id-ID", ms: "ms-MY",
-    nl: "nl-NL", pl: "pl-PL", tr: "tr-TR", uk: "uk-UA",
-    cs: "cs-CZ", sv: "sv-SE", da: "da-DK", no: "nb-NO",
-    fi: "fi-FI", hu: "hu-HU", el: "el-GR", he: "he-IL",
-    ro: "ro-RO", bg: "bg-BG", hr: "hr-HR", sk: "sk-SK",
-    ta: "ta-IN", te: "te-IN", mr: "mr-IN", bn: "bn-IN",
-    gu: "gu-IN", kn: "kn-IN", ml: "ml-IN", pa: "pa-IN",
-    "zh-tw": "zh-TW", "zh-hk": "zh-HK",
+    vi: "vi-VN",
+    en: "en-US",
+    fr: "fr-FR",
+    de: "de-DE",
+    ja: "ja-JP",
+    ko: "ko-KR",
+    zh: "zh-CN",
+    th: "th-TH",
+    es: "es-ES",
+    pt: "pt-BR",
+    it: "it-IT",
+    ru: "ru-RU",
+    ar: "ar-SA",
+    hi: "hi-IN",
+    id: "id-ID",
+    ms: "ms-MY",
+    nl: "nl-NL",
+    pl: "pl-PL",
+    tr: "tr-TR",
+    uk: "uk-UA",
+    cs: "cs-CZ",
+    sv: "sv-SE",
+    da: "da-DK",
+    no: "nb-NO",
+    fi: "fi-FI",
+    hu: "hu-HU",
+    el: "el-GR",
+    he: "he-IL",
+    ro: "ro-RO",
+    bg: "bg-BG",
+    hr: "hr-HR",
+    sk: "sk-SK",
+    ta: "ta-IN",
+    te: "te-IN",
+    mr: "mr-IN",
+    bn: "bn-IN",
+    gu: "gu-IN",
+    kn: "kn-IN",
+    ml: "ml-IN",
+    pa: "pa-IN",
+    "zh-tw": "zh-TW",
+    "zh-hk": "zh-HK",
   };
 
   return speechMap[normalized] || normalized;
@@ -201,7 +232,10 @@ function getBestVoice(langCode: string) {
   return voice || null;
 }
 
-function PoiReadonlyMap({ latitude, longitude }: { latitude?: number | null; longitude?: number | null }) {
+function PoiReadonlyMap({
+  latitude,
+  longitude,
+}: { latitude?: number | null; longitude?: number | null }) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markerRef = useRef<maplibregl.Marker | null>(null);
@@ -256,7 +290,8 @@ export function PoiDetailView(props: PoiDetailViewProps) {
   const { poi, headerActions, showOwner } = props;
 
   const viTranslation = useMemo(
-    () => poi.translations.find((translation) => translation.language.toLowerCase() === "vi") ?? null,
+    () =>
+      poi.translations.find((translation) => translation.language.toLowerCase() === "vi") ?? null,
     [poi.translations]
   );
 
@@ -267,9 +302,9 @@ export function PoiDetailView(props: PoiDetailViewProps) {
 
   const [targetLanguage, setTargetLanguage] = useState("vi");
   const [previewLanguage, setPreviewLanguage] = useState("vi");
-  const [countryLanguageOptions, setCountryLanguageOptions] = useState<Array<{ code: string; label: string }>>(
-    [...LANGUAGE_FALLBACK_OPTIONS]
-  );
+  const [countryLanguageOptions, setCountryLanguageOptions] = useState<
+    Array<{ code: string; label: string }>
+  >([...LANGUAGE_FALLBACK_OPTIONS]);
   const [translatedPreview, setTranslatedPreview] = useState(viTranslation?.description ?? "");
   const [translateNotice, setTranslateNotice] = useState<string | null>(null);
   const [isTranslating, setIsTranslating] = useState(false);
@@ -298,9 +333,10 @@ export function PoiDetailView(props: PoiDetailViewProps) {
         const response = await fetch("https://restcountries.com/v3.1/all?fields=name,languages");
         if (!response.ok) return;
 
-        const data = (await response.json().catch(() => null)) as
-          | Array<{ name?: { common?: string }; languages?: Record<string, string> }>
-          | null;
+        const data = (await response.json().catch(() => null)) as Array<{
+          name?: { common?: string };
+          languages?: Record<string, string>;
+        }> | null;
 
         if (!data?.length || !isMounted) return;
 
@@ -509,9 +545,10 @@ export function PoiDetailView(props: PoiDetailViewProps) {
         return;
       }
 
-      const data = (await response.json().catch(() => null)) as
-        | { translatedText?: string; provider?: string }
-        | null;
+      const data = (await response.json().catch(() => null)) as {
+        translatedText?: string;
+        provider?: string;
+      } | null;
 
       const translatedText = data?.translatedText?.trim();
       if (!translatedText) {
@@ -542,7 +579,9 @@ export function PoiDetailView(props: PoiDetailViewProps) {
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-2">
             <div className="flex flex-wrap items-center gap-2">
-              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusBadge(poi.status)}`}>
+              <span
+                className={`rounded-full px-3 py-1 text-xs font-semibold ${statusBadge(poi.status)}`}
+              >
                 {poi.status}
               </span>
               <span
@@ -563,7 +602,8 @@ export function PoiDetailView(props: PoiDetailViewProps) {
             <p className="text-xs text-slate-500">Cập nhật: {formatDate(poi.updatedAt)}</p>
             {showOwner && poi.owner ? (
               <p className="text-xs text-slate-500">
-                Vendor: <span className="font-medium text-slate-700">{poi.owner.name}</span> ({poi.owner.email})
+                Vendor: <span className="font-medium text-slate-700">{poi.owner.name}</span> (
+                {poi.owner.email})
               </p>
             ) : null}
             {poi.rejectionReason ? (
@@ -573,7 +613,9 @@ export function PoiDetailView(props: PoiDetailViewProps) {
             ) : null}
           </div>
 
-          {headerActions ? <div className="flex flex-wrap items-center gap-2">{headerActions}</div> : null}
+          {headerActions ? (
+            <div className="flex flex-wrap items-center gap-2">{headerActions}</div>
+          ) : null}
         </div>
       </section>
 
@@ -602,9 +644,18 @@ export function PoiDetailView(props: PoiDetailViewProps) {
           ) : (
             <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
               {poi.images.map((image) => (
-                <div key={image.id} className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
-                  <img src={image.imageUrl} alt={image.description ?? poi.name} className="h-32 w-full object-cover" />
-                  <p className="line-clamp-2 px-2 py-1.5 text-xs text-slate-600">{image.description || "Không mô tả"}</p>
+                <div
+                  key={image.id}
+                  className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50"
+                >
+                  <img
+                    src={image.imageUrl}
+                    alt={image.description ?? poi.name}
+                    className="h-32 w-full object-cover"
+                  />
+                  <p className="line-clamp-2 px-2 py-1.5 text-xs text-slate-600">
+                    {image.description || "Không mô tả"}
+                  </p>
                 </div>
               ))}
             </div>
@@ -625,9 +676,16 @@ export function PoiDetailView(props: PoiDetailViewProps) {
         ) : (
           <div className="grid gap-3 md:grid-cols-2">
             {poi.menuItems.map((item) => (
-              <div key={item.id} className="flex gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <div
+                key={item.id}
+                className="flex gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3"
+              >
                 {item.imageUrl ? (
-                  <img src={item.imageUrl} alt={item.name ?? "menu"} className="h-20 w-24 rounded-lg object-cover" />
+                  <img
+                    src={item.imageUrl}
+                    alt={item.name ?? "menu"}
+                    className="h-20 w-24 rounded-lg object-cover"
+                  />
                 ) : (
                   <div className="flex h-20 w-24 items-center justify-center rounded-lg border border-dashed border-slate-300 text-xs text-slate-400">
                     Không ảnh
@@ -637,7 +695,9 @@ export function PoiDetailView(props: PoiDetailViewProps) {
                   <p className="font-semibold text-slate-800">{item.name ?? "(không tên)"}</p>
                   <p className="mt-1 text-xs text-slate-600">{item.description || "Không mô tả"}</p>
                   <div className="mt-2 flex items-center justify-between">
-                    <span className="text-sm font-semibold text-orange-600">{formatCurrency(item.price)}</span>
+                    <span className="text-sm font-semibold text-orange-600">
+                      {formatCurrency(item.price)}
+                    </span>
                     <span
                       className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
                         item.isAvailable === false
@@ -704,7 +764,9 @@ export function PoiDetailView(props: PoiDetailViewProps) {
 
         <div className="mt-3 rounded-xl border border-slate-200 bg-white p-3">
           <p className="text-xs font-semibold text-slate-500">Bản dùng để đọc</p>
-          <p className="mt-1 whitespace-pre-wrap text-sm text-slate-700">{translatedPreview || "-"}</p>
+          <p className="mt-1 whitespace-pre-wrap text-sm text-slate-700">
+            {translatedPreview || "-"}
+          </p>
 
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <button
@@ -728,7 +790,9 @@ export function PoiDetailView(props: PoiDetailViewProps) {
             <button
               type="button"
               className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-              onClick={() => speakSentenceAt(Math.min(sentenceIndex + 1, Math.max(viSentences.length - 1, 0)))}
+              onClick={() =>
+                speakSentenceAt(Math.min(sentenceIndex + 1, Math.max(viSentences.length - 1, 0)))
+              }
               disabled={viSentences.length === 0}
             >
               <SkipForward className="h-3.5 w-3.5" />
@@ -752,7 +816,8 @@ export function PoiDetailView(props: PoiDetailViewProps) {
               Dừng
             </button>
             <span className="text-xs text-slate-500">
-              Câu {Math.min(sentenceIndex + 1, Math.max(viSentences.length, 1))}/{Math.max(viSentences.length, 1)}
+              Câu {Math.min(sentenceIndex + 1, Math.max(viSentences.length, 1))}/
+              {Math.max(viSentences.length, 1)}
             </span>
           </div>
         </div>
@@ -816,7 +881,10 @@ export function PoiDetailView(props: PoiDetailViewProps) {
                   </p>
                   <div className="space-y-2">
                     {translation.audios?.map((audio) => (
-                      <div key={audio.id} className="rounded-lg border border-slate-200 bg-slate-50 p-2">
+                      <div
+                        key={audio.id}
+                        className="rounded-lg border border-slate-200 bg-slate-50 p-2"
+                      >
                         <audio controls className="w-full">
                           <source src={audio.audioUrl} />
                         </audio>
@@ -831,13 +899,3 @@ export function PoiDetailView(props: PoiDetailViewProps) {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-

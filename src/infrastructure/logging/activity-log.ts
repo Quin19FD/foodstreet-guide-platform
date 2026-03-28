@@ -65,4 +65,3 @@ export async function logUserActivity(input: ActivityLogInput): Promise<void> {
     }),
   ]);
 }
-

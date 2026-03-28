@@ -1,7 +1,7 @@
 "use client";
 
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
 
 import styles from "./login.module.css";
 
@@ -11,7 +11,7 @@ type AuthErrorResponse = {
   issues?: Array<{ message?: string }>;
 };
 
-export default function VendorLoginPage() {
+function VendorLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -258,6 +258,14 @@ export default function VendorLoginPage() {
         <span className={styles.verBadge}>v2.4.1 © 2026</span>
       </div>
     </div>
+  );
+}
+
+export default function VendorLoginPage() {
+  return (
+    <Suspense fallback={<div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", fontSize: 16 }}>Loading...</div>}>
+      <VendorLoginForm />
+    </Suspense>
   );
 }
 

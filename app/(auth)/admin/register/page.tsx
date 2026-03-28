@@ -1,7 +1,7 @@
 "use client";
 
+import { Suspense, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
 
 import styles from "../login/login.module.css";
 
@@ -10,7 +10,7 @@ type AuthErrorResponse = {
   issues?: Array<{ message?: string }>;
 };
 
-export default function RegisterPage() {
+function RegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -237,5 +237,27 @@ export default function RegisterPage() {
         <span className={styles.verBadge}>v2.4.1 © 2026</span>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense
+      fallback={
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "100vh",
+            fontSize: 16,
+          }}
+        >
+          Loading...
+        </div>
+      }
+    >
+      <RegisterForm />
+    </Suspense>
   );
 }

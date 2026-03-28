@@ -5,7 +5,9 @@ import { prisma } from "@/infrastructure/database/prisma/client";
 
 import { ADMIN_AUTH_COOKIES, jsonError, verifyAdminAccessToken } from "../session/_shared";
 
-export async function requireAdmin(request: NextRequest): Promise<{ adminId: string } | NextResponse> {
+export async function requireAdmin(
+  request: NextRequest
+): Promise<{ adminId: string } | NextResponse> {
   const cookieToken = request.cookies.get(ADMIN_AUTH_COOKIES.access)?.value ?? null;
   if (!cookieToken) return jsonError(401, "Chưa đăng nhập");
 
@@ -46,32 +48,30 @@ export function buildTourInclude() {
   };
 }
 
-export function toTourResponse(
-  tour: {
+export function toTourResponse(tour: {
+  id: string;
+  name: string;
+  description: string | null;
+  imageUrl: string | null;
+  durationMinutes: number | null;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  tourPois: Array<{
     id: string;
-    name: string;
-    description: string | null;
-    imageUrl: string | null;
-    durationMinutes: number | null;
-    isActive: boolean;
-    createdAt: Date;
-    updatedAt: Date;
-    tourPois: Array<{
+    poiId: string;
+    stopOrder: number;
+    poi: {
       id: string;
-      poiId: string;
-      stopOrder: number;
-      poi: {
-        id: string;
-        name: string;
-        category: string | null;
-        latitude: number | null;
-        longitude: number | null;
-        status: string;
-        isActive: boolean;
-      };
-    }>;
-  }
-) {
+      name: string;
+      category: string | null;
+      latitude: number | null;
+      longitude: number | null;
+      status: string;
+      isActive: boolean;
+    };
+  }>;
+}) {
   return {
     id: tour.id,
     name: tour.name,

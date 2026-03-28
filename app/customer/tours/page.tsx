@@ -81,7 +81,11 @@ export default function CustomerToursPage() {
               >
                 <div className="relative mb-3 aspect-video overflow-hidden rounded-xl bg-slate-100">
                   {tour.imageUrl ? (
-                    <img src={tour.imageUrl} alt={tour.name} className="h-full w-full object-cover" />
+                    <img
+                      src={tour.imageUrl}
+                      alt={tour.name}
+                      className="h-full w-full object-cover"
+                    />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center">
                       <MapPin className="h-12 w-12 text-slate-300" />
@@ -89,10 +93,18 @@ export default function CustomerToursPage() {
                   )}
                 </div>
                 <h3 className="text-[15px] font-semibold text-slate-900">{tour.name}</h3>
-                <p className="mt-1 line-clamp-2 text-sm text-slate-500">{tour.description ?? "-"}</p>
+                <p className="mt-1 line-clamp-2 text-sm text-slate-500">
+                  {tour.description ?? "-"}
+                </p>
                 <div className="mt-3 flex items-center gap-3 text-sm text-slate-500">
-                  <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" />{tour.durationMinutes ?? "-"} phút</span>
-                  <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{tour.poiCount} điểm dừng</span>
+                  <span className="inline-flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    {tour.durationMinutes ?? "-"} phút
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
+                    {tour.poiCount} điểm dừng
+                  </span>
                 </div>
               </Link>
             ))}

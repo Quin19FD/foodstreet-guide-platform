@@ -95,9 +95,7 @@ export function AudioPlayer({
 
       {/* Controls */}
       <div className="flex items-center justify-between">
-        <p className="text-xs text-slate-500 line-clamp-2">
-          {script}
-        </p>
+        <p className="text-xs text-slate-500 line-clamp-2">{script}</p>
         <button
           onClick={handlePlay}
           className={cn(
@@ -107,11 +105,7 @@ export function AudioPlayer({
               : "bg-orange-500 text-white shadow-lg shadow-orange-200"
           )}
         >
-          {isPlaying ? (
-            <Pause className="h-5 w-5" />
-          ) : (
-            <Play className="h-5 w-5 fill-current" />
-          )}
+          {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 fill-current" />}
         </button>
       </div>
     </div>

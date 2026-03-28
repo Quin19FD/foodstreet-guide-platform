@@ -50,7 +50,8 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
     return NextResponse.json({ error: "Không tìm thấy POI" }, { status: 404 });
   }
 
-  const viTranslation = poi.translations.find((item) => item.language.toLowerCase() === "vi") ?? null;
+  const viTranslation =
+    poi.translations.find((item) => item.language.toLowerCase() === "vi") ?? null;
 
   return NextResponse.json({
     poi: {

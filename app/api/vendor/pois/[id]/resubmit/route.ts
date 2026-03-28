@@ -19,6 +19,12 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
 
   const { id } = await context.params;
 
+  // Validate UUID format
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!uuidRegex.test(id)) {
+    return jsonError(404, "Không tìm thấy POI");
+  }
+
   const poi = await prisma.pOI.findFirst({
     where: {
       id,

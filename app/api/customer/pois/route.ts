@@ -208,7 +208,10 @@ export async function GET(request: NextRequest) {
     for (const item of languageMeta) {
       const key = item.poiId;
       const lang = item.language.toLowerCase();
-      const bucket = languageMap.get(key) ?? { available: new Set<string>(), audio: new Set<string>() };
+      const bucket = languageMap.get(key) ?? {
+        available: new Set<string>(),
+        audio: new Set<string>(),
+      };
       bucket.available.add(lang);
       if ((item.audios?.length ?? 0) > 0) bucket.audio.add(lang);
       languageMap.set(key, bucket);
@@ -220,7 +223,10 @@ export async function GET(request: NextRequest) {
       const viTranslation = poi.translations[0] ?? null;
 
       const distanceMeters =
-        lat != null && lng != null && typeof poi.latitude === "number" && typeof poi.longitude === "number"
+        lat != null &&
+        lng != null &&
+        typeof poi.latitude === "number" &&
+        typeof poi.longitude === "number"
           ? haversineMeters(lat, lng, poi.latitude, poi.longitude)
           : null;
 
@@ -262,10 +268,16 @@ export async function GET(request: NextRequest) {
       } satisfies PoiMapResponseItem;
     })
     .sort((a, b) => {
-      if ("priorityScore" in a && "priorityScore" in b && a.priorityScore != null && b.priorityScore != null) {
+      if (
+        "priorityScore" in a &&
+        "priorityScore" in b &&
+        a.priorityScore != null &&
+        b.priorityScore != null
+      ) {
         return a.priorityScore - b.priorityScore;
       }
-      if (a.distanceMeters != null && b.distanceMeters != null) return a.distanceMeters - b.distanceMeters;
+      if (a.distanceMeters != null && b.distanceMeters != null)
+        return a.distanceMeters - b.distanceMeters;
       if ("rating" in a && "rating" in b) {
         const ratingA = a.rating ?? 0;
         const ratingB = b.rating ?? 0;

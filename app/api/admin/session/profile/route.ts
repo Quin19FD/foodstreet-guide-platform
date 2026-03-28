@@ -28,7 +28,12 @@ export async function PATCH(request: NextRequest) {
   const input = parsed.data;
 
   const existing = await prisma.user.findUnique({ where: { id: payload.sub } });
-  if (!existing || existing.role !== "ADMIN" || !existing.isActive || existing.status !== "APPROVED") {
+  if (
+    !existing ||
+    existing.role !== "ADMIN" ||
+    !existing.isActive ||
+    existing.status !== "APPROVED"
+  ) {
     return jsonError(401, "Phiên đăng nhập không hợp lệ");
   }
 

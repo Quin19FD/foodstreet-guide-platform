@@ -15,7 +15,8 @@ function jsonError(status: number, message: string, extra?: Record<string, unkno
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null);
   const parsed = verifyOtpSchema.safeParse(body);
-  if (!parsed.success) return jsonError(400, "Dữ liệu không hợp lệ", { issues: parsed.error.issues });
+  if (!parsed.success)
+    return jsonError(400, "Dữ liệu không hợp lệ", { issues: parsed.error.issues });
 
   const { email, otp } = parsed.data;
   const user = await prisma.user.findUnique({ where: { email } });

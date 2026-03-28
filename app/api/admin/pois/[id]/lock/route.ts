@@ -37,6 +37,3 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
 
   return NextResponse.json({ ok: true, poi: updatedPoi });
 }
-
-
-

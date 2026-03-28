@@ -119,7 +119,9 @@ export default function CustomerForgotPasswordPage() {
       <div className={styles.right}>
         <div className={styles.formHeader}>
           <p className={styles.formEyebrow}>Customer</p>
-          <h2 className={styles.formTitle}>Quên mật khẩu<span>.</span></h2>
+          <h2 className={styles.formTitle}>
+            Quên mật khẩu<span>.</span>
+          </h2>
           <p className={styles.formSub}>Luồng OTP: Email → OTP → Mật khẩu mới</p>
         </div>
 
@@ -128,7 +130,13 @@ export default function CustomerForgotPasswordPage() {
             <label htmlFor="email">Email đã đăng ký</label>
             <div className={styles.inputWrap}>
               <span className={styles.icon}>✉</span>
-              <input id="email" className={styles.input} value={email} onChange={(e) => setEmail(e.target.value)} disabled={isLoading || step === "done"} />
+              <input
+                id="email"
+                className={styles.input}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={isLoading || step === "done"}
+              />
             </div>
           </div>
 
@@ -137,7 +145,13 @@ export default function CustomerForgotPasswordPage() {
               <label htmlFor="otp">OTP</label>
               <div className={styles.inputWrap}>
                 <span className={styles.icon}>#</span>
-                <input id="otp" className={styles.input} value={otp} onChange={(e) => setOtp(e.target.value)} disabled={isLoading || step === "done"} />
+                <input
+                  id="otp"
+                  className={styles.input}
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  disabled={isLoading || step === "done"}
+                />
               </div>
             </div>
           ) : null}
@@ -148,14 +162,28 @@ export default function CustomerForgotPasswordPage() {
                 <label htmlFor="new-password">Mật khẩu mới</label>
                 <div className={styles.inputWrap}>
                   <span className={styles.icon}>🔒</span>
-                  <input id="new-password" type="password" className={styles.input} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} disabled={isLoading} />
+                  <input
+                    id="new-password"
+                    type="password"
+                    className={styles.input}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    disabled={isLoading}
+                  />
                 </div>
               </div>
               <div className={styles.field}>
                 <label htmlFor="confirm-password">Xác nhận mật khẩu mới</label>
                 <div className={styles.inputWrap}>
                   <span className={styles.icon}>🔁</span>
-                  <input id="confirm-password" type="password" className={styles.input} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} disabled={isLoading} />
+                  <input
+                    id="confirm-password"
+                    type="password"
+                    className={styles.input}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    disabled={isLoading}
+                  />
                 </div>
               </div>
             </>
@@ -165,26 +193,57 @@ export default function CustomerForgotPasswordPage() {
           {message ? <p style={{ color: "#93c5fd", fontSize: 13 }}>{message}</p> : null}
 
           {step === "request" ? (
-            <button type="button" className={styles.btnLogin} onClick={() => void submitRequestOtp()} disabled={isLoading}>
-              <span className={styles.btnInner}><span>{isLoading ? "Đang gửi OTP..." : "Gửi OTP"}</span><span>→</span></span>
+            <button
+              type="button"
+              className={styles.btnLogin}
+              onClick={() => void submitRequestOtp()}
+              disabled={isLoading}
+            >
+              <span className={styles.btnInner}>
+                <span>{isLoading ? "Đang gửi OTP..." : "Gửi OTP"}</span>
+                <span>→</span>
+              </span>
             </button>
           ) : null}
 
           {step === "verify" ? (
-            <button type="button" className={styles.btnLogin} onClick={() => void submitVerifyOtp()} disabled={isLoading}>
-              <span className={styles.btnInner}><span>{isLoading ? "Đang kiểm tra OTP..." : "Xác thực OTP"}</span><span>→</span></span>
+            <button
+              type="button"
+              className={styles.btnLogin}
+              onClick={() => void submitVerifyOtp()}
+              disabled={isLoading}
+            >
+              <span className={styles.btnInner}>
+                <span>{isLoading ? "Đang kiểm tra OTP..." : "Xác thực OTP"}</span>
+                <span>→</span>
+              </span>
             </button>
           ) : null}
 
           {step === "reset" ? (
-            <button type="button" className={styles.btnLogin} onClick={() => void submitReset()} disabled={isLoading}>
-              <span className={styles.btnInner}><span>{isLoading ? "Đang đổi mật khẩu..." : "Đổi mật khẩu"}</span><span>→</span></span>
+            <button
+              type="button"
+              className={styles.btnLogin}
+              onClick={() => void submitReset()}
+              disabled={isLoading}
+            >
+              <span className={styles.btnInner}>
+                <span>{isLoading ? "Đang đổi mật khẩu..." : "Đổi mật khẩu"}</span>
+                <span>→</span>
+              </span>
             </button>
           ) : null}
 
           {step === "done" ? (
-            <button type="button" className={styles.btnLogin} onClick={() => router.replace("/customer/login")}>
-              <span className={styles.btnInner}><span>Quay lại đăng nhập</span><span>→</span></span>
+            <button
+              type="button"
+              className={styles.btnLogin}
+              onClick={() => router.replace("/customer/login")}
+            >
+              <span className={styles.btnInner}>
+                <span>Quay lại đăng nhập</span>
+                <span>→</span>
+              </span>
             </button>
           ) : null}
         </div>

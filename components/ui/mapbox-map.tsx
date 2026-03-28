@@ -53,10 +53,7 @@ export function MapboxMap({
     });
 
     // Add navigation controls
-    map.current.addControl(
-      new mapboxgl.NavigationControl(),
-      "top-right"
-    );
+    map.current.addControl(new mapboxgl.NavigationControl(), "top-right");
 
     // Add geolocate control
     map.current.addControl(
@@ -133,16 +130,10 @@ export function MapboxMap({
 
   return (
     <div className="relative h-full w-full">
-      <div
-        ref={mapContainer}
-        className="w-full h-full"
-        style={{ minHeight: "400px" }}
-      />
+      <div ref={mapContainer} className="w-full h-full" style={{ minHeight: "400px" }} />
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/10">
-          <div className="rounded-lg bg-white px-4 py-2 text-sm font-medium">
-            Loading map...
-          </div>
+          <div className="rounded-lg bg-white px-4 py-2 text-sm font-medium">Loading map...</div>
         </div>
       )}
     </div>

@@ -11,18 +11,14 @@ function getEnv(name: string): string | null {
   return value && value.trim() ? value.trim() : null;
 }
 
-export async function sendPasswordResetOtpEmail(
-  input: SendOtpEmailInput
-): Promise<void> {
+export async function sendPasswordResetOtpEmail(input: SendOtpEmailInput): Promise<void> {
   const host = getEnv("SMTP_HOST");
   const portRaw = getEnv("SMTP_PORT");
   const fromEnv = getEnv("SMTP_FROM");
   const user = getEnv("SMTP_USER") ?? (fromEnv && fromEnv.includes("@") ? fromEnv : null);
   const passRaw = getEnv("SMTP_PASS");
   const pass =
-    host === "smtp.gmail.com" && passRaw?.includes(" ")
-      ? passRaw.replaceAll(" ", "")
-      : passRaw;
+    host === "smtp.gmail.com" && passRaw?.includes(" ") ? passRaw.replaceAll(" ", "") : passRaw;
   const from = fromEnv ?? user ?? "no-reply@foodstreet.local";
 
   const subject = "Mã OTP đặt lại mật khẩu (hiệu lực 2 phút)";

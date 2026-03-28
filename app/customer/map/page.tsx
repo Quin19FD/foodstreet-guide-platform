@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import maplibregl from "maplibre-gl";
 import { MapPin, Navigation, Pause, Play, Search, Square, Wifi, WifiOff } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { speak as ttsSpeak, stopSpeaking as ttsStop } from "@/lib/tts";
 
 type PoiMapItem = {
@@ -81,10 +81,6 @@ function speechLang(code: string): string {
 }
 
 function splitSentences(text: string): string[] {
-  return voice || null;
-}
-
-function splitSentences(text: string): string[] {
   return text
     .split(/(?<=[.!?…])\s+|\n+/g)
     .map((item) => item.trim())
@@ -132,7 +128,8 @@ function toDistancePriority(poi: PoiMapItem, lat: number, lng: number): PoiMapIt
 
 function sortPoiByPriority(a: PoiMapItem, b: PoiMapItem): number {
   if (a.priorityScore != null && b.priorityScore != null) return a.priorityScore - b.priorityScore;
-  if (a.distanceMeters != null && b.distanceMeters != null) return a.distanceMeters - b.distanceMeters;
+  if (a.distanceMeters != null && b.distanceMeters != null)
+    return a.distanceMeters - b.distanceMeters;
   return 0;
 }
 
@@ -163,8 +160,12 @@ function buildClusterCandidates(
       if (distanceToCenter <= CLUSTER_RADIUS_METERS) {
         cluster.members.push(poi);
         const size = cluster.members.length;
-        cluster.centerLat = cluster.members.reduce((sum, item) => sum + (item.latitude ?? cluster.centerLat), 0) / size;
-        cluster.centerLng = cluster.members.reduce((sum, item) => sum + (item.longitude ?? cluster.centerLng), 0) / size;
+        cluster.centerLat =
+          cluster.members.reduce((sum, item) => sum + (item.latitude ?? cluster.centerLat), 0) /
+          size;
+        cluster.centerLng =
+          cluster.members.reduce((sum, item) => sum + (item.longitude ?? cluster.centerLng), 0) /
+          size;
         assigned = true;
         break;
       }
@@ -187,8 +188,14 @@ function buildClusterCandidates(
           const priority = poi.priorityScore ?? distance;
           const hasNarrationBoost = poi.viNarration?.trim() ? -30 : 0;
           const hasAudioBoost = (poi.languagesWithAudio?.length ?? 0) > 0 ? -20 : 0;
-          const recentlyPromptedPenalty = Date.now() - (alertedPoiAt[poi.id] ?? 0) < POI_COOLDOWN_MS ? 180 : 0;
-          const score = distance * 0.65 + priority * 0.25 + recentlyPromptedPenalty + hasNarrationBoost + hasAudioBoost;
+          const recentlyPromptedPenalty =
+            Date.now() - (alertedPoiAt[poi.id] ?? 0) < POI_COOLDOWN_MS ? 180 : 0;
+          const score =
+            distance * 0.65 +
+            priority * 0.25 +
+            recentlyPromptedPenalty +
+            hasNarrationBoost +
+            hasAudioBoost;
           return { poi, score };
         })
         .sort((a, b) => a.score - b.score);
@@ -213,7 +220,7 @@ function buildClusterCandidates(
     .sort((a, b) => a.score - b.score);
 }
 
-export default function CustomerMapPage() {
+function CustomerMapContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -225,7 +232,9 @@ export default function CustomerMapPage() {
 
   const poiPromptedAtRef = useRef<Record<string, number>>({});
   const clusterPromptedAtRef = useRef<Record<string, number>>({});
-  const activeClusterRef = useRef<{ id: string; centerLat: number; centerLng: number } | null>(null);
+  const activeClusterRef = useRef<{ id: string; centerLat: number; centerLng: number } | null>(
+    null
+  );
 
   const queueRef = useRef<SpeechChunk[]>([]);
   const queueProcessingRef = useRef(false);
@@ -248,7 +257,10 @@ export default function CustomerMapPage() {
   const [appliedQuery, setAppliedQuery] = useState("");
   const [selectedPoiId, setSelectedPoiId] = useState<string | null>(null);
   const [nearPromptPoi, setNearPromptPoi] = useState<PoiMapItem | null>(null);
-  const [promptClusterInfo, setPromptClusterInfo] = useState<{ clusterId: string; memberCount: number } | null>(null);
+  const [promptClusterInfo, setPromptClusterInfo] = useState<{
+    clusterId: string;
+    memberCount: number;
+  } | null>(null);
   const [language, setLanguage] = useState("vi");
 
   const [queueCount, setQueueCount] = useState(0);
@@ -348,7 +360,13 @@ export default function CustomerMapPage() {
     processSpeechQueue();
   };
 
-  const enqueueSpeechBySentence = (text: string, lang: string, keyPrefix: string, label: string, poiId?: string) => {
+  const enqueueSpeechBySentence = (
+    text: string,
+    lang: string,
+    keyPrefix: string,
+    label: string,
+    poiId?: string
+  ) => {
     const sentences = splitSentences(text);
     if (sentences.length === 0) return;
 
@@ -413,17 +431,25 @@ export default function CustomerMapPage() {
 
     setIsLoadingPois(true);
     try {
-      const res = await fetchWithTimeout(`/api/customer/pois?${params.toString()}`, { method: "GET" }, NETWORK_TIMEOUT_MS);
+      const res = await fetchWithTimeout(
+        `/api/customer/pois?${params.toString()}`,
+        { method: "GET" },
+        NETWORK_TIMEOUT_MS
+      );
       if (!res.ok) throw new Error("network");
 
       const data = (await res.json().catch(() => null)) as { pois?: PoiMapItem[] } | null;
       if (data?.pois) {
-        const merged = data.pois.map((poi) => toDistancePriority(poi, lat, lng)).sort(sortPoiByPriority);
+        const merged = data.pois
+          .map((poi) => toDistancePriority(poi, lat, lng))
+          .sort(sortPoiByPriority);
         setPois(merged);
       }
       setNetworkHint(null);
     } catch {
-      setNetworkHint("Mạng yếu, hệ thống đang giữ dữ liệu gần nhất để không gián đoạn trải nghiệm.");
+      setNetworkHint(
+        "Mạng yếu, hệ thống đang giữ dữ liệu gần nhất để không gián đoạn trải nghiệm."
+      );
     } finally {
       setIsLoadingPois(false);
     }
@@ -434,7 +460,11 @@ export default function CustomerMapPage() {
     const cacheKey = `${poi.id}:${lang}`;
     if (narrationCacheRef.current[cacheKey]) return narrationCacheRef.current[cacheKey];
 
-    const viFallback = (poi.viNarration?.trim() || poi.description?.trim() || `Bạn đang đến gần ${poi.name}`).trim();
+    const viFallback = (
+      poi.viNarration?.trim() ||
+      poi.description?.trim() ||
+      `Bạn đang đến gần ${poi.name}`
+    ).trim();
     if (lang === "vi") {
       narrationCacheRef.current[cacheKey] = viFallback;
       return viFallback;
@@ -447,7 +477,11 @@ export default function CustomerMapPage() {
     let detail: PoiDetailNarration | undefined = poiDetailCacheRef.current[poi.id];
     if (!detail) {
       try {
-        const res = await fetchWithTimeout(`/api/customer/pois/${poi.id}`, { method: "GET" }, NETWORK_TIMEOUT_MS);
+        const res = await fetchWithTimeout(
+          `/api/customer/pois/${poi.id}`,
+          { method: "GET" },
+          NETWORK_TIMEOUT_MS
+        );
         if (res.ok) {
           const data = (await res.json().catch(() => null)) as { poi?: PoiDetailNarration } | null;
           detail = data?.poi;
@@ -459,8 +493,12 @@ export default function CustomerMapPage() {
     }
 
     const translatedFromSource =
-      detail?.translations?.find((item) => item.language.toLowerCase() === lang)?.audioScript?.trim() ||
-      detail?.translations?.find((item) => item.language.toLowerCase() === lang)?.description?.trim() ||
+      detail?.translations
+        ?.find((item) => item.language.toLowerCase() === lang)
+        ?.audioScript?.trim() ||
+      detail?.translations
+        ?.find((item) => item.language.toLowerCase() === lang)
+        ?.description?.trim() ||
       "";
 
     if (translatedFromSource) {
@@ -469,8 +507,12 @@ export default function CustomerMapPage() {
     }
 
     const viSource =
-      detail?.translations?.find((item) => item.language.toLowerCase() === "vi")?.audioScript?.trim() ||
-      detail?.translations?.find((item) => item.language.toLowerCase() === "vi")?.description?.trim() ||
+      detail?.translations
+        ?.find((item) => item.language.toLowerCase() === "vi")
+        ?.audioScript?.trim() ||
+      detail?.translations
+        ?.find((item) => item.language.toLowerCase() === "vi")
+        ?.description?.trim() ||
       detail?.description?.trim() ||
       viFallback;
 
@@ -486,7 +528,9 @@ export default function CustomerMapPage() {
       );
 
       if (translate.ok) {
-        const translated = (await translate.json().catch(() => null)) as { translatedText?: string } | null;
+        const translated = (await translate.json().catch(() => null)) as {
+          translatedText?: string;
+        } | null;
         const text = translated?.translatedText?.trim() || viSource;
         narrationCacheRef.current[cacheKey] = text;
         return text;
@@ -595,7 +639,11 @@ export default function CustomerMapPage() {
   useEffect(() => {
     if (!userLocation) return;
 
-    setPois((prev) => prev.map((poi) => toDistancePriority(poi, userLocation.lat, userLocation.lng)).sort(sortPoiByPriority));
+    setPois((prev) =>
+      prev
+        .map((poi) => toDistancePriority(poi, userLocation.lat, userLocation.lng))
+        .sort(sortPoiByPriority)
+    );
   }, [userLocation]);
 
   useEffect(() => {
@@ -603,8 +651,11 @@ export default function CustomerMapPage() {
 
     const last = lastFetchRef.current;
     const now = Date.now();
-    const movedMeters = last ? haversineMeters(last.lat, last.lng, userLocation.lat, userLocation.lng) : Number.POSITIVE_INFINITY;
-    const shouldFetch = !last || last.q !== appliedQuery || movedMeters > 45 || now - last.at > 15_000;
+    const movedMeters = last
+      ? haversineMeters(last.lat, last.lng, userLocation.lat, userLocation.lng)
+      : Number.POSITIVE_INFINITY;
+    const shouldFetch =
+      !last || last.q !== appliedQuery || movedMeters > 45 || now - last.at > 15_000;
 
     if (!shouldFetch) return;
 
@@ -648,7 +699,11 @@ export default function CustomerMapPage() {
     for (const poi of pois) {
       if (typeof poi.latitude !== "number" || typeof poi.longitude !== "number") continue;
 
-      const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 18 }).setText(poi.name);
+      const popup = new maplibregl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        offset: 18,
+      }).setText(poi.name);
       const isSelected = poi.id === selectedPoiId;
 
       const marker = new maplibregl.Marker({
@@ -675,7 +730,8 @@ export default function CustomerMapPage() {
 
   useEffect(() => {
     if (!selectedPoi || !mapRef.current) return;
-    if (typeof selectedPoi.latitude !== "number" || typeof selectedPoi.longitude !== "number") return;
+    if (typeof selectedPoi.latitude !== "number" || typeof selectedPoi.longitude !== "number")
+      return;
 
     mapRef.current.flyTo({
       center: [selectedPoi.longitude, selectedPoi.latitude],
@@ -699,20 +755,22 @@ export default function CustomerMapPage() {
 
     void (async () => {
       try {
-        const res = await fetchWithTimeout(`/api/customer/pois/${focusPoiId}`, { method: "GET" }, NETWORK_TIMEOUT_MS);
+        const res = await fetchWithTimeout(
+          `/api/customer/pois/${focusPoiId}`,
+          { method: "GET" },
+          NETWORK_TIMEOUT_MS
+        );
         if (!res.ok) return;
 
-        const data = (await res.json().catch(() => null)) as
-          | {
-              poi?: {
-                id: string;
-                name: string;
-                description?: string | null;
-                latitude?: number | null;
-                longitude?: number | null;
-              };
-            }
-          | null;
+        const data = (await res.json().catch(() => null)) as {
+          poi?: {
+            id: string;
+            name: string;
+            description?: string | null;
+            latitude?: number | null;
+            longitude?: number | null;
+          };
+        } | null;
 
         if (cancelled || !data?.poi) return;
 
@@ -729,13 +787,19 @@ export default function CustomerMapPage() {
         setPois((prev) => {
           const merged = [...prev.filter((item) => item.id !== focusPoi.id), focusPoi];
           if (!userLocation) return merged;
-          return merged.map((item) => toDistancePriority(item, userLocation.lat, userLocation.lng)).sort(sortPoiByPriority);
+          return merged
+            .map((item) => toDistancePriority(item, userLocation.lat, userLocation.lng))
+            .sort(sortPoiByPriority);
         });
 
         setSelectedPoiId(focusPoi.id);
         handledFocusPoiRef.current = focusPoiId;
 
-        if (mapRef.current && typeof focusPoi.latitude === "number" && typeof focusPoi.longitude === "number") {
+        if (
+          mapRef.current &&
+          typeof focusPoi.latitude === "number" &&
+          typeof focusPoi.longitude === "number"
+        ) {
           mapRef.current.flyTo({
             center: [focusPoi.longitude, focusPoi.latitude],
             zoom: 16,
@@ -754,9 +818,15 @@ export default function CustomerMapPage() {
 
   useEffect(() => {
     if (!nearPromptPoi || !userLocation) return;
-    if (typeof nearPromptPoi.latitude !== "number" || typeof nearPromptPoi.longitude !== "number") return;
+    if (typeof nearPromptPoi.latitude !== "number" || typeof nearPromptPoi.longitude !== "number")
+      return;
 
-    const distance = haversineMeters(userLocation.lat, userLocation.lng, nearPromptPoi.latitude, nearPromptPoi.longitude);
+    const distance = haversineMeters(
+      userLocation.lat,
+      userLocation.lng,
+      nearPromptPoi.latitude,
+      nearPromptPoi.longitude
+    );
     if (distance > CLUSTER_EXIT_RADIUS_METERS) {
       setNearPromptPoi(null);
       setPromptClusterInfo(null);
@@ -783,7 +853,9 @@ export default function CustomerMapPage() {
 
     const nearby = pois.filter((poi) => {
       if (typeof poi.latitude !== "number" || typeof poi.longitude !== "number") return false;
-      const distance = poi.distanceMeters ?? haversineMeters(userLocation.lat, userLocation.lng, poi.latitude, poi.longitude);
+      const distance =
+        poi.distanceMeters ??
+        haversineMeters(userLocation.lat, userLocation.lng, poi.latitude, poi.longitude);
       return distance <= ALERT_TRIGGER_RADIUS_METERS;
     });
 
@@ -884,20 +956,25 @@ export default function CustomerMapPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 pb-[calc(5.5rem+env(safe-area-inset-bottom))]">
-      <header className="sticky top-0 z-40 bg-white/95 px-4 py-3 shadow-sm backdrop-blur">
+      {/* Glassmorphism Header */}
+      <header className="glass-header sticky top-0 z-40 px-4 py-3">
         <div className="flex items-center justify-between gap-2">
-          <div>
+          <div className="animate-fade-in">
             <h1 className="text-lg font-bold text-slate-900">Bản đồ POI</h1>
-            <p className="text-xs text-slate-500">Vị trí người dùng: xanh, POI: đỏ</p>
+            <p className="text-xs text-slate-500">Vị trí: xanh / POI: cam</p>
           </div>
-          <Link href="/customer" className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700">
+          <Link
+            href="/customer"
+            className="rounded-xl bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:shadow-md transition-shadow border border-slate-100"
+          >
             Về trang tìm
           </Link>
         </div>
 
+        {/* Search Bar */}
         <div className="mt-3 flex gap-2">
           <div className="relative flex-1">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-orange-400" />
             <input
               type="text"
               value={queryInput}
@@ -906,54 +983,84 @@ export default function CustomerMapPage() {
                 if (e.key === "Enter") handleApplySearch();
               }}
               placeholder="Nhập từ khóa POI..."
-              className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-3 text-[15px] outline-none focus:border-orange-500"
+              className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3 text-[15px] outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20 transition-all"
             />
           </div>
           <button
             type="button"
             onClick={handleApplySearch}
-            className="min-h-11 rounded-xl bg-orange-500 px-4 text-sm font-semibold text-white shadow-sm active:scale-[0.99]"
+            className="min-h-11 rounded-xl bg-orange-500 px-4 text-sm font-semibold text-white shadow-md hover:bg-orange-600 active:scale-[0.97] transition-all"
           >
             Tìm
           </button>
         </div>
 
+        {/* Status Indicators */}
         <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-slate-600">
+          <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 ${
+            isOnline ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
+          }`}>
             {isOnline ? <Wifi className="h-3.5 w-3.5" /> : <WifiOff className="h-3.5 w-3.5" />}
             {isOnline ? "Online" : "Offline"}
           </span>
-          <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-600">
-            {isLoadingPois ? "Đang cập nhật POI..." : `${pois.length} POI`}
+          <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1.5 text-blue-700">
+            <MapPin className="h-3.5 w-3.5" />
+            {isLoadingPois ? "Đang cập nhật..." : `${pois.length} POI`}
           </span>
-          {isLocating ? <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-600">Đang định vị...</span> : null}
+          {isLocating ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-purple-100 px-3 py-1.5 text-purple-700 animate-pulse-soft">
+              <Navigation className="h-3.5 w-3.5" />
+              Đang định vị...
+            </span>
+          ) : null}
         </div>
-        {locationHint ? <p className="mt-1 text-xs text-amber-600">{locationHint}</p> : null}
-        {networkHint ? <p className="mt-1 text-xs text-amber-600">{networkHint}</p> : null}
+        {locationHint ? (
+          <p className="mt-2 flex items-center gap-1 text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2">
+            <Navigation className="h-3.5 w-3.5" />
+            {locationHint}
+          </p>
+        ) : null}
+        {networkHint ? (
+          <p className="mt-2 flex items-center gap-1 text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2">
+            <WifiOff className="h-3.5 w-3.5" />
+            {networkHint}
+          </p>
+        ) : null}
       </header>
 
-      <main className="space-y-3 p-4">
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <main className="space-y-4 p-4">
+        {/* Map Container with enhanced styling */}
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-elevated">
           <div ref={mapContainerRef} className="h-[48vh] w-full sm:h-[52vh]" />
         </div>
 
+        {/* Nearby POI Alert - Enhanced */}
         {nearPromptPoi ? (
-          <div className="rounded-2xl border border-orange-200 bg-orange-50 p-4">
-            <p className="text-base font-semibold text-orange-900">Bạn đang đến gần {nearPromptPoi.name}</p>
-            <p className="mt-1 text-sm text-orange-800">
-              {promptClusterInfo && promptClusterInfo.memberCount > 1
-                ? `Có ${promptClusterInfo.memberCount} POI trong cụm gần nhau, hệ thống ưu tiên ${nearPromptPoi.name}.`
-                : "Hệ thống phát hiện bạn đang đến gần POI này."}
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
+          <div className="animate-fade-in-up rounded-2xl border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-amber-50 p-4 shadow-medium">
+            <div className="flex items-start gap-3">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-orange-500 text-white animate-pulse-soft">
+                <MapPin className="h-5 w-5" />
+              </div>
+              <div className="flex-1">
+                <p className="text-base font-semibold text-orange-900">
+                  Bạn đang đến gần {nearPromptPoi.name}
+                </p>
+                <p className="mt-1 text-sm text-orange-700">
+                  {promptClusterInfo && promptClusterInfo.memberCount > 1
+                    ? `Có ${promptClusterInfo.memberCount} POI trong cụm gần nhau.`
+                    : "Hệ thống phát hiện bạn đang đến gần POI này."}
+                </p>
+              </div>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => {
                   void handleListenNearbyPoi();
                 }}
-                className="inline-flex min-h-11 items-center gap-1 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white"
+                className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-md hover:bg-orange-600 active:scale-[0.97] transition-all"
               >
-                <Play className="h-3.5 w-3.5" /> Nghe thuyết minh
+                <Play className="h-4 w-4" /> Nghe thuyết minh
               </button>
               <button
                 type="button"
@@ -961,31 +1068,32 @@ export default function CustomerMapPage() {
                   setNearPromptPoi(null);
                   setPromptClusterInfo(null);
                 }}
-                className="min-h-11 rounded-xl border border-orange-300 px-4 py-2 text-sm font-semibold text-orange-800"
+                className="min-h-11 rounded-xl border-2 border-orange-200 px-4 py-2 text-sm font-semibold text-orange-700 hover:bg-orange-100 active:scale-[0.97] transition-all"
               >
                 Bỏ qua
               </button>
               <button
                 type="button"
                 onClick={() => router.push(`/customer/pois/${nearPromptPoi.id}`)}
-                className="min-h-11 rounded-xl border border-orange-300 px-4 py-2 text-sm font-semibold text-orange-800"
+                className="min-h-11 rounded-xl border-2 border-orange-200 px-4 py-2 text-sm font-semibold text-orange-700 hover:bg-orange-100 active:scale-[0.97] transition-all"
               >
-                Xem chi tiết POI
+                Xem chi tiết
               </button>
             </div>
           </div>
         ) : null}
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+        {/* Audio Controls - Enhanced */}
+        <div className="card-elevated">
           <div className="flex flex-wrap items-center gap-2">
-            <label className="text-sm font-semibold text-slate-600" htmlFor="speech-language">
-              Ngôn ngữ thuyết minh
+            <label className="text-sm font-semibold text-slate-700" htmlFor="speech-language">
+              Ngôn ngữ:
             </label>
             <select
               id="speech-language"
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
-              className="h-10 rounded-lg border border-slate-200 px-2 text-sm"
+              className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium focus:border-orange-400 focus:ring-2 focus:ring-orange-400/20"
             >
               {languageOptions.map((lang) => (
                 <option key={lang} value={lang}>
@@ -994,72 +1102,127 @@ export default function CustomerMapPage() {
               ))}
             </select>
 
-            <button
-              type="button"
-              onClick={pauseAudioQueue}
-              className="inline-flex min-h-10 items-center gap-1 rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700"
-            >
-              <Pause className="h-3.5 w-3.5" /> Pause
-            </button>
-            <button
-              type="button"
-              onClick={resumeAudioQueue}
-              className="inline-flex min-h-10 items-center gap-1 rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700"
-            >
-              <Play className="h-3.5 w-3.5" /> Resume
-            </button>
-            <button
-              type="button"
-              onClick={stopAudioQueue}
-              className="inline-flex min-h-10 items-center gap-1 rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700"
-            >
-              <Square className="h-3.5 w-3.5" /> Stop
-            </button>
+            <div className="flex-1" />
+
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={pauseAudioQueue}
+                className={`inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold transition-all ${
+                  isPaused
+                    ? "bg-amber-100 text-amber-700"
+                    : "border border-slate-200 text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                <Pause className="h-4 w-4" /> Tạm dừng
+              </button>
+              <button
+                type="button"
+                onClick={resumeAudioQueue}
+                className={`inline-flex min-h-10 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold transition-all ${
+                  !isPaused && isSpeaking
+                    ? "bg-emerald-100 text-emerald-700"
+                    : "border border-slate-200 text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                <Play className="h-4 w-4" /> Tiếp tục
+              </button>
+              <button
+                type="button"
+                onClick={stopAudioQueue}
+                className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-red-200 px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 transition-all"
+              >
+                <Square className="h-4 w-4" /> Dừng
+              </button>
+            </div>
           </div>
 
-          <p className="mt-2 text-sm text-slate-500">
-            {isSpeaking
-              ? `Đang phát: ${currentAudioLabel ?? "thuyết minh"}`
-              : isPaused
-                ? "Đang tạm dừng sau câu hiện tại."
-                : "Sẵn sàng phát thuyết minh."}
-          </p>
-          <p className="mt-1 text-sm text-slate-500">Hàng đợi audio: {queueCount} câu</p>
+          {/* Audio Status with visual indicator */}
+          <div className="mt-3 flex items-center gap-3">
+            <div className={`flex-1 rounded-full p-1 ${
+              isSpeaking ? "bg-gradient-to-r from-orange-400 to-amber-400" : "bg-slate-100"
+            }`}>
+              <div className="flex h-2 items-center gap-0.5 rounded-full bg-white/30 px-2">
+                {isSpeaking ? (
+                  <>
+                    <span className="h-3 w-1 rounded-full bg-white animate-pulse" style={{ animationDelay: "0ms" }} />
+                    <span className="h-4 w-1 rounded-full bg-white animate-pulse" style={{ animationDelay: "100ms" }} />
+                    <span className="h-2 w-1 rounded-full bg-white animate-pulse" style={{ animationDelay: "200ms" }} />
+                    <span className="h-4 w-1 rounded-full bg-white animate-pulse" style={{ animationDelay: "300ms" }} />
+                    <span className="h-3 w-1 rounded-full bg-white animate-pulse" style={{ animationDelay: "400ms" }} />
+                  </>
+                ) : (
+                  <span className="h-2 w-full rounded-full bg-slate-200" />
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="mt-2 flex items-center justify-between text-sm">
+            <p className="text-slate-600">
+              {isSpeaking
+                ? `Đang phát: ${currentAudioLabel ?? "thuyết minh"}`
+                : isPaused
+                  ? "Đang tạm dừng..."
+                  : "Sẵn sàng phát thuyết minh"}
+            </p>
+            <span className="text-xs font-medium text-slate-500">
+              Hàng đợi: {queueCount} câu
+            </span>
+          </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4">
-          <div className="mb-2 flex items-center justify-between">
+        {/* Nearby POIs List - Enhanced */}
+        <div className="card-elevated">
+          <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-slate-900">POI gần bạn</h2>
-            {selectedPoi ? <span className="text-xs text-slate-500">Đang chọn: {selectedPoi.name}</span> : null}
+            {selectedPoi ? (
+              <span className="text-xs font-medium text-orange-600 bg-orange-50 rounded-full px-2 py-1">
+                {selectedPoi.name}
+              </span>
+            ) : null}
           </div>
 
           {nearbyList.length === 0 ? (
-            <p className="py-4 text-sm text-slate-500">Không có POI phù hợp trong phạm vi hiện tại.</p>
+            <div className="py-8 text-center">
+              <MapPin className="mx-auto h-12 w-12 text-slate-300" />
+              <p className="mt-2 text-sm text-slate-500">
+                Không có POI phù hợp trong phạm vi hiện tại.
+              </p>
+            </div>
           ) : (
-            <div className="flex snap-x gap-3 overflow-x-auto pb-1">
-              {nearbyList.map((poi) => (
+            <div className="flex snap-x gap-3 overflow-x-auto pb-2 scrollbar-horizontal">
+              {nearbyList.map((poi, index) => (
                 <button
                   key={poi.id}
                   type="button"
                   onTouchStart={() => setSelectedPoiId(poi.id)}
                   onMouseEnter={() => setSelectedPoiId(poi.id)}
                   onClick={() => router.push(`/customer/pois/${poi.id}`)}
-                  className={`min-w-[250px] snap-start rounded-xl border p-4 text-left transition active:scale-[0.99] ${
-                    selectedPoiId === poi.id ? "border-orange-300 bg-orange-50" : "border-slate-200 bg-white"
+                  className={`min-w-[220px] snap-start rounded-xl border-2 p-3 text-left transition-all duration-200 animate-fade-in-up opacity-0 ${
+                    selectedPoiId === poi.id
+                      ? "border-orange-400 bg-orange-50 shadow-medium scale-105"
+                      : "border-slate-200 bg-white hover:border-orange-200 hover:shadow-soft"
                   }`}
+                  style={{ animationDelay: `${index * 50}ms` }}
                 >
-                  <p className="font-semibold text-slate-900">{poi.name}</p>
-                  <p className="mt-1 line-clamp-2 text-sm text-slate-500">{poi.description ?? "-"}</p>
-                  <div className="mt-2 flex items-center gap-3 text-sm text-slate-500">
-                    <span className="inline-flex items-center gap-1">
-                      <Navigation className="h-3.5 w-3.5" />
+                  <p className="font-semibold text-slate-900 line-clamp-1">{poi.name}</p>
+                  <p className="mt-1 line-clamp-2 text-sm text-slate-500">
+                    {poi.description ?? "-"}
+                  </p>
+                  <div className="mt-2 flex items-center justify-between">
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-orange-600">
+                      <Navigation className="h-3 w-3" />
                       {poi.distanceMeters != null
                         ? poi.distanceMeters < 1000
                           ? `${Math.round(poi.distanceMeters)}m`
                           : `${(poi.distanceMeters / 1000).toFixed(1)}km`
                         : "-"}
                     </span>
-                    {poi.rating != null ? <span>⭐ {poi.rating.toFixed(1)}</span> : null}
+                    {poi.rating != null ? (
+                      <span className="inline-flex items-center gap-0.5 text-xs font-medium text-amber-600">
+                        ⭐ {poi.rating.toFixed(1)}
+                      </span>
+                    ) : null}
                   </div>
                 </button>
               ))}
@@ -1067,37 +1230,80 @@ export default function CustomerMapPage() {
           )}
         </div>
 
+        {/* Selected POI Detail - Enhanced */}
         {selectedPoi ? (
-          <div className="rounded-2xl border border-slate-200 bg-white p-4">
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <h3 className="font-semibold text-slate-900">{selectedPoi.name}</h3>
-                <p className="text-xs text-slate-500">{selectedPoi.category ?? "POI"}</p>
+          <div className="card-featured animate-scale-in">
+            {selectedPoi.imageUrl && (
+              <div className="relative aspect-video w-full">
+                <img
+                  src={selectedPoi.imageUrl}
+                  alt={selectedPoi.name}
+                  className="h-full w-full object-cover"
+                />
+                <div className="gradient-overlay absolute inset-0" />
+                <div className="absolute top-3 right-3">
+                  <span className="badge-primary shadow-sm">
+                    {selectedPoi.category ?? "POI"}
+                  </span>
+                </div>
               </div>
-              <MapPin className="h-4 w-4 text-orange-500" />
-            </div>
-            <div className="mt-3 flex gap-2">
-              <button
-                type="button"
-                onClick={() => router.push(`/customer/pois/${selectedPoi.id}`)}
-                className="min-h-11 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white"
-              >
-                Xem chi tiết POI
-              </button>
-              {typeof selectedPoi.latitude === "number" && typeof selectedPoi.longitude === "number" ? (
-                <a
-                  href={`https://www.google.com/maps/dir/?api=1&destination=${selectedPoi.latitude},${selectedPoi.longitude}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex min-h-11 items-center gap-1 rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700"
+            )}
+            <div className="p-4">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <h3 className="font-semibold text-slate-900 text-lg">{selectedPoi.name}</h3>
+                  <p className="text-sm text-slate-500">{selectedPoi.category ?? "POI"}</p>
+                </div>
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-100">
+                  <MapPin className="h-5 w-5 text-orange-600" />
+                </div>
+              </div>
+              <div className="mt-4 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => router.push(`/customer/pois/${selectedPoi.id}`)}
+                  className="flex-1 min-h-11 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-md hover:bg-orange-600 active:scale-[0.97] transition-all"
                 >
-                  <Navigation className="h-3.5 w-3.5" /> Chỉ đường
-                </a>
-              ) : null}
+                  Xem chi tiết POI
+                </button>
+                {typeof selectedPoi.latitude === "number" &&
+                typeof selectedPoi.longitude === "number" ? (
+                  <a
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${selectedPoi.latitude},${selectedPoi.longitude}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex min-h-11 items-center gap-1 rounded-xl border-2 border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 active:scale-[0.97] transition-all"
+                  >
+                    <Navigation className="h-4 w-4" /> Chỉ đường
+                  </a>
+                ) : null}
+              </div>
             </div>
           </div>
         ) : null}
       </main>
     </div>
+  );
+}
+
+export default function CustomerMapPage() {
+  return (
+    <Suspense
+      fallback={
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "100vh",
+            fontSize: 16,
+          }}
+        >
+          Loading map...
+        </div>
+      }
+    >
+      <CustomerMapContent />
+    </Suspense>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
+import { Suspense, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
 
 import styles from "../login/login.module.css";
 
@@ -10,7 +10,7 @@ type AuthErrorResponse = {
   issues?: Array<{ message?: string }>;
 };
 
-export default function CustomerRegisterPage() {
+function CustomerRegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -238,3 +238,24 @@ export default function CustomerRegisterPage() {
   );
 }
 
+export default function CustomerRegisterPage() {
+  return (
+    <Suspense
+      fallback={
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "100vh",
+            fontSize: 16,
+          }}
+        >
+          Loading...
+        </div>
+      }
+    >
+      <CustomerRegisterForm />
+    </Suspense>
+  );
+}

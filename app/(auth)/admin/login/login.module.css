@@ -21,7 +21,7 @@
 .leftBg {
   position: absolute;
   inset: 0;
-  background-image: url('https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1200&q=80');
+  background-image: url("https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=1200&q=80");
   background-size: cover;
   background-position: center;
   transform: scale(1.04);
@@ -71,7 +71,7 @@
 
 .logoText {
   color: #f5f0eb;
-  font-family: 'Playfair Display', serif;
+  font-family: "Playfair Display", serif;
   font-size: 1.1rem;
   font-weight: 700;
   letter-spacing: 0.03em;
@@ -80,7 +80,7 @@
 
 .logoTextSub {
   display: block;
-  font-family: 'Be Vietnam Pro', sans-serif;
+  font-family: "Be Vietnam Pro", sans-serif;
   font-weight: 300;
   font-size: 0.68rem;
   letter-spacing: 0.22em;
@@ -121,7 +121,7 @@
 }
 
 .tagLine::before {
-  content: '';
+  content: "";
   width: 6px;
   height: 6px;
   background: #fff;
@@ -129,7 +129,7 @@
 }
 
 .slogan {
-  font-family: 'Playfair Display', serif;
+  font-family: "Playfair Display", serif;
   font-size: clamp(2.4rem, 3.5vw, 3.4rem);
   font-weight: 900;
   color: #f5f0eb;
@@ -242,7 +242,7 @@
 }
 
 .formTitle {
-  font-family: 'Playfair Display', serif;
+  font-family: "Playfair Display", serif;
   font-size: 2rem;
   font-weight: 700;
   color: #f5f0eb;
@@ -312,7 +312,7 @@
   border: 1px solid #2a2a2a;
   border-radius: 6px;
   color: #f5f0eb;
-  font-family: 'Be Vietnam Pro', sans-serif;
+  font-family: "Be Vietnam Pro", sans-serif;
   font-size: 0.9rem;
   font-weight: 400;
   padding: 13px 14px 13px 42px;
@@ -382,7 +382,7 @@
 }
 
 .remember input:checked ~ .checkmark::after {
-  content: '';
+  content: "";
   position: absolute;
   left: 4px;
   top: 1.5px;
@@ -416,7 +416,7 @@
   padding: 15px;
   background: #e8610a;
   color: #fff;
-  font-family: 'Be Vietnam Pro', sans-serif;
+  font-family: "Be Vietnam Pro", sans-serif;
   font-size: 0.92rem;
   font-weight: 600;
   letter-spacing: 0.08em;
@@ -429,7 +429,7 @@
 }
 
 .btnLogin::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   background: linear-gradient(

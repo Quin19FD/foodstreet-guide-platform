@@ -79,8 +79,9 @@ const pois: POISummary[] = [
     districtId: "d1",
     name: "Bánh Mì Huỳnh Hoa",
     type: "FOOD_STALL",
-    description: "Bánh mì thịt nguội, pate, bơ với vỏ bánh giòn tan, được mệnh danh là bánh mì ngon nhất Sài Gòn.",
-    latitude: 10.7760,
+    description:
+      "Bánh mì thịt nguội, pate, bơ với vỏ bánh giòn tan, được mệnh danh là bánh mì ngon nhất Sài Gòn.",
+    latitude: 10.776,
     longitude: 106.7018,
     displayRadius: 100,
     imageUrl: "https://images.unsplash.com/photo-1618449840665-9ed506d73a34?w=600&q=80",
@@ -91,7 +92,7 @@ const pois: POISummary[] = [
     name: "Phở Bò Đakao",
     type: "FOOD_STALL",
     description: "Phở bò tái nạm nóng hổi, nước dùng trong veo, thưởng thức cùng quẩy và chanh ớt.",
-    latitude: 10.7770,
+    latitude: 10.777,
     longitude: 106.7005,
     displayRadius: 100,
     imageUrl: "https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?w=600&q=80",
@@ -215,14 +216,16 @@ const audioGuides: AudioGuideSummary[] = [
     id: "a1",
     poiId: "p1",
     language: "vi",
-    scriptText: "Chào mừng bạn đến với Bún Bò Cô Lan! Đây là một trong những quán bún bò lâu đời nhất tại khu phố ẩm thực trung tâm. Nước dùng được ninh liên tục trong 12 tiếng với xương ống bò, tạo nên vị ngọt đậm đà và thơm đặc trưng.",
+    scriptText:
+      "Chào mừng bạn đến với Bún Bò Cô Lan! Đây là một trong những quán bún bò lâu đời nhất tại khu phố ẩm thực trung tâm. Nước dùng được ninh liên tục trong 12 tiếng với xương ống bò, tạo nên vị ngọt đậm đà và thơm đặc trưng.",
     audioUrl: "/audio/p1-vi.mp3",
   },
   {
     id: "a2",
     poiId: "p1",
     language: "en",
-    scriptText: "Welcome to Co Lan Bun Bo! This is one of the oldest bun bo stalls in the central food street district. The broth is simmered continuously for 12 hours with beef bones, creating a rich sweet flavor and unique aroma.",
+    scriptText:
+      "Welcome to Co Lan Bun Bo! This is one of the oldest bun bo stalls in the central food street district. The broth is simmered continuously for 12 hours with beef bones, creating a rich sweet flavor and unique aroma.",
     audioUrl: "/audio/p1-en.mp3",
   },
 ];

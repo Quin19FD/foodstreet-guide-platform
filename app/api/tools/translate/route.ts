@@ -37,13 +37,42 @@ function normalizeLanguageCode(code: string): string {
 
   // ISO 639-2/3 to ISO 639-1 mapping
   const iso639Map: Record<string, string> = {
-    vie: "vi", eng: "en", fra: "fr", fre: "fr", deu: "de", ger: "de",
-    jpn: "ja", kor: "ko", zho: "zh", chi: "zh", tha: "th",
-    spa: "es", por: "pt", ita: "it", rus: "ru", ara: "ar",
-    hin: "hi", ind: "id", msa: "ms", nld: "nl", dut: "nl",
-    pol: "pl", tur: "tr", ukr: "uk", ces: "cs", cze: "cs",
-    swe: "sv", dan: "da", nor: "no", fin: "fi", hun: "hu",
-    ell: "el", gre: "el", heb: "he", rum: "ro", ron: "ro",
+    vie: "vi",
+    eng: "en",
+    fra: "fr",
+    fre: "fr",
+    deu: "de",
+    ger: "de",
+    jpn: "ja",
+    kor: "ko",
+    zho: "zh",
+    chi: "zh",
+    tha: "th",
+    spa: "es",
+    por: "pt",
+    ita: "it",
+    rus: "ru",
+    ara: "ar",
+    hin: "hi",
+    ind: "id",
+    msa: "ms",
+    nld: "nl",
+    dut: "nl",
+    pol: "pl",
+    tur: "tr",
+    ukr: "uk",
+    ces: "cs",
+    cze: "cs",
+    swe: "sv",
+    dan: "da",
+    nor: "no",
+    fin: "fi",
+    hun: "hu",
+    ell: "el",
+    gre: "el",
+    heb: "he",
+    rum: "ro",
+    ron: "ro",
   };
 
   // If it's a 3-letter code, map it
@@ -64,7 +93,11 @@ function normalizeLanguageCode(code: string): string {
   return baseCode.length === 2 ? baseCode : normalized.slice(0, 2);
 }
 
-async function tryMyMemory(q: string, source: string, target: string): Promise<TranslateResult | null> {
+async function tryMyMemory(
+  q: string,
+  source: string,
+  target: string
+): Promise<TranslateResult | null> {
   try {
     // Normalize language codes
     const normalizedSource = normalizeLanguageCode(source);
@@ -77,13 +110,11 @@ async function tryMyMemory(q: string, source: string, target: string): Promise<T
     const res = await fetchWithTimeout(url, { method: "GET" }, 15000);
     if (!res.ok) return null;
 
-    const data = (await res.json().catch(() => null)) as
-      | {
-          responseData?: { translatedText?: string };
-          responseStatus?: number | string;
-          matches?: Array<{ translation: string }>;
-        }
-      | null;
+    const data = (await res.json().catch(() => null)) as {
+      responseData?: { translatedText?: string };
+      responseStatus?: number | string;
+      matches?: Array<{ translation: string }>;
+    } | null;
 
     // Check for quota exceeded or errors
     const status = data?.responseStatus;
@@ -116,7 +147,11 @@ async function tryMyMemory(q: string, source: string, target: string): Promise<T
   }
 }
 
-async function tryLibreTranslate(q: string, source: string, target: string): Promise<TranslateResult | null> {
+async function tryLibreTranslate(
+  q: string,
+  source: string,
+  target: string
+): Promise<TranslateResult | null> {
   const configured = process.env.LIBRETRANSLATE_BASE_URL?.trim() ?? "";
 
   // Updated endpoints - more reliable ones
@@ -172,7 +207,11 @@ async function tryLibreTranslate(q: string, source: string, target: string): Pro
   return null;
 }
 
-async function tryLingvaTranslate(q: string, source: string, target: string): Promise<TranslateResult | null> {
+async function tryLingvaTranslate(
+  q: string,
+  source: string,
+  target: string
+): Promise<TranslateResult | null> {
   try {
     let normalizedSource = normalizeLanguageCode(source);
     let normalizedTarget = normalizeLanguageCode(target);
@@ -189,7 +228,7 @@ async function tryLingvaTranslate(q: string, source: string, target: string): Pr
 
     const data = (await res.json().catch(() => null)) as { translation?: string } | null;
     const translatedText = data?.translation?.trim();
-    
+
     if (!translatedText) return null;
     return { translatedText, provider: "lingva" };
   } catch {
@@ -202,17 +241,21 @@ async function tryLingvaTranslate(q: string, source: string, target: string): Pr
  * Uses Google AI Studio (Gemini) for translation
  * Free tier available - check limits in AI Studio
  */
-async function tryGeminiTranslate(q: string, source: string, target: string): Promise<TranslateResult | null> {
+async function tryGeminiTranslate(
+  q: string,
+  source: string,
+  target: string
+): Promise<TranslateResult | null> {
   const apiKey = process.env.GOOGLE_API_KEY?.trim();
-  
+
   if (!apiKey) {
     return null; // Skip if no API key configured
   }
-  
+
   try {
     const normalizedSource = normalizeLanguageCode(source);
     const normalizedTarget = normalizeLanguageCode(target);
-    
+
     // Language name mapping for better prompts
     const languageNames: Record<string, string> = {
       vi: "Vietnamese",
@@ -231,10 +274,10 @@ async function tryGeminiTranslate(q: string, source: string, target: string): Pr
       id: "Indonesian",
       ms: "Malay",
     };
-    
+
     const sourceName = languageNames[normalizedSource] || normalizedSource;
     const targetName = languageNames[normalizedTarget] || normalizedTarget;
-    
+
     const prompt = `Translate the following text from ${sourceName} to ${targetName}. 
 Only provide the translation, no explanations or additional text.
 
@@ -256,25 +299,24 @@ ${q}`;
       },
       15000
     );
-    
+
     if (!response.ok) return null;
-    
-    const data = await response.json() as {
+
+    const data = (await response.json()) as {
       candidates?: Array<{
         content?: {
           parts?: Array<{ text?: string }>;
         };
       }>;
     };
-    
+
     const translatedText = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-    
+
     if (!translatedText || translatedText === q) {
       return null;
     }
-    
+
     return { translatedText, provider: "gemini" };
-    
   } catch {
     return null;
   }
@@ -319,5 +361,8 @@ export async function POST(request: NextRequest) {
     if (result?.translatedText) return NextResponse.json(result);
   }
 
-  return jsonError(502, "Không thể dịch tự động ở thời điểm hiện tại. Vui lòng thử lại sau vài phút.");
+  return jsonError(
+    502,
+    "Không thể dịch tự động ở thời điểm hiện tại. Vui lòng thử lại sau vài phút."
+  );
 }

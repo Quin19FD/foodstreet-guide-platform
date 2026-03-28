@@ -37,7 +37,11 @@ export async function POST(request: NextRequest) {
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user || user.role !== "ADMIN" || !user.isActive || user.status !== "APPROVED") {
     console.warn("[VERIFY_OTP] ineligible user", devExtra({ email }) ?? {});
-    return jsonError(400, "OTP không hợp lệ hoặc đã hết hạn", devExtra({ code: "USER_INELIGIBLE" }));
+    return jsonError(
+      400,
+      "OTP không hợp lệ hoặc đã hết hạn",
+      devExtra({ code: "USER_INELIGIBLE" })
+    );
   }
 
   if (!user.resetPasswordTokenHash || !user.resetPasswordTokenExpiry) {

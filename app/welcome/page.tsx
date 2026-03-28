@@ -73,11 +73,10 @@ export default function WelcomePage() {
       // Request GPS permission
       if ("geolocation" in navigator) {
         await new Promise((resolve, reject) => {
-          navigator.geolocation.getCurrentPosition(
-            resolve,
-            reject,
-            { enableHighAccuracy: true, timeout: 10000 }
-          );
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true,
+            timeout: 10000,
+          });
         });
       }
       // Save language preference
@@ -100,12 +99,8 @@ export default function WelcomePage() {
         <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-orange-500 shadow-lg">
           <MapPin className="h-10 w-10 text-white" strokeWidth={2.5} />
         </div>
-        <h1 className="text-center text-3xl font-bold text-slate-900">
-          {t.title}
-        </h1>
-        <p className="mt-2 max-w-xs text-center text-sm text-slate-600">
-          {t.subtitle}
-        </p>
+        <h1 className="text-center text-3xl font-bold text-slate-900">{t.title}</h1>
+        <p className="mt-2 max-w-xs text-center text-sm text-slate-600">{t.subtitle}</p>
       </div>
 
       {/* Language Selection */}

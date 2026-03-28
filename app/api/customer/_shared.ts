@@ -1,11 +1,6 @@
 import { prisma } from "@/infrastructure/database/prisma/client";
 
-export function haversineMeters(
-  lat1: number,
-  lng1: number,
-  lat2: number,
-  lng2: number
-): number {
+export function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const toRad = (value: number) => (value * Math.PI) / 180;
   const earthRadius = 6371e3;
   const dLat = toRad(lat2 - lat1);

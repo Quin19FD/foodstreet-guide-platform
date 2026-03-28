@@ -130,11 +130,15 @@ export function AdminPoiDetail() {
       ) : null}
 
       {isLoading && !poi ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-500">Đang tải chi tiết POI...</div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-500">
+          Đang tải chi tiết POI...
+        </div>
       ) : null}
 
       {!isLoading && !poi ? (
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-500">Không tìm thấy POI.</div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-500">
+          Không tìm thấy POI.
+        </div>
       ) : null}
 
       {poi ? (

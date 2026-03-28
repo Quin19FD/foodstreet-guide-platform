@@ -66,7 +66,9 @@ async function parseUpdatePayload(request: NextRequest): Promise<{
     const nameRaw = String(formData.get("name") ?? "");
     const descriptionRaw = String(formData.get("description") ?? "");
     const durationRaw = String(formData.get("durationMinutes") ?? "").trim();
-    const isActiveRaw = String(formData.get("isActive") ?? "").trim().toLowerCase();
+    const isActiveRaw = String(formData.get("isActive") ?? "")
+      .trim()
+      .toLowerCase();
     const poiIds = parsePoiIdsFromFormData(formData);
 
     return {
@@ -75,7 +77,9 @@ async function parseUpdatePayload(request: NextRequest): Promise<{
       ...(durationRaw ? { durationMinutes: Number(durationRaw) } : {}),
       ...(typeof imageUrl === "string" ? { imageUrl } : {}),
       ...(typeof poiIds !== "undefined" ? { poiIds } : {}),
-      ...(isActiveRaw === "true" || isActiveRaw === "false" ? { isActive: isActiveRaw === "true" } : {}),
+      ...(isActiveRaw === "true" || isActiveRaw === "false"
+        ? { isActive: isActiveRaw === "true" }
+        : {}),
     };
   }
 

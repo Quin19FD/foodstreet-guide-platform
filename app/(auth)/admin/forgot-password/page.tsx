@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation";
 
 import styles from "../login/login.module.css";
 
-type ApiError = { error?: string; retryAfterSeconds?: number; issues?: Array<{ message?: string }> };
+type ApiError = {
+  error?: string;
+  retryAfterSeconds?: number;
+  issues?: Array<{ message?: string }>;
+};
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
@@ -154,14 +158,15 @@ export default function ForgotPasswordPage() {
             <br />
             admin.
           </h1>
-          <p className={styles.motto}>OTP có hiệu lực 2 phút. Vui lòng kiểm tra email đã đăng ký.</p>
+          <p className={styles.motto}>
+            OTP có hiệu lực 2 phút. Vui lòng kiểm tra email đã đăng ký.
+          </p>
         </div>
       </div>
 
       <div className={styles.right}>
         <div className={styles.cornerDeco} />
         <div className={styles.cornerDecoBl} />
-
 
         <div className={styles.form}>
           <div className={styles.field}>
@@ -181,7 +186,12 @@ export default function ForgotPasswordPage() {
             </div>
           </div>
 
-          <button type="button" className={styles.btnLogin} disabled={isLoading} onClick={requestOtp}>
+          <button
+            type="button"
+            className={styles.btnLogin}
+            disabled={isLoading}
+            onClick={requestOtp}
+          >
             <span className={styles.btnInner}>
               <span>{isLoading ? "Đang gửi..." : "Gửi OTP"}</span>
               <span>{isLoading ? "⟳" : "→"}</span>
@@ -204,7 +214,12 @@ export default function ForgotPasswordPage() {
             </div>
           </div>
 
-          <button type="button" className={styles.btnLogin} disabled={isLoading} onClick={verifyOtp}>
+          <button
+            type="button"
+            className={styles.btnLogin}
+            disabled={isLoading}
+            onClick={verifyOtp}
+          >
             <span className={styles.btnInner}>
               <span>{isLoading ? "Đang xác thực..." : "Xác thực OTP"}</span>
               <span>{isLoading ? "⟳" : "→"}</span>
@@ -285,4 +300,3 @@ export default function ForgotPasswordPage() {
     </div>
   );
 }
-

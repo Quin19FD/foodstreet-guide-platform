@@ -2,7 +2,9 @@ import { z } from "zod";
 
 const optionalStringSchema = z.string().trim().min(1).optional();
 
-const poiIdsSchema = z.array(z.string().uuid("POI ID không hợp lệ")).min(1, "Tour phải có ít nhất 1 điểm dừng");
+const poiIdsSchema = z
+  .array(z.string().uuid("POI ID không hợp lệ"))
+  .min(1, "Tour phải có ít nhất 1 điểm dừng");
 
 export const adminCreateTourSchema = z.object({
   name: z.string().trim().min(1, "Tên tour không được để trống").max(255),

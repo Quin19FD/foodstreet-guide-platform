@@ -367,14 +367,6 @@ COPY public.favorite_pois (id, user_id, poi_id, created_at) FROM stdin;
 --
 
 COPY public.menu_items (id, poi_id, name, description, price, image_url, is_available, created_at, updated_at) FROM stdin;
-7bc39a13-d2bc-4c11-9ba6-15d9d4ad40f1	6267466c-c926-484e-b425-a78089218f1c	Há Cảo Đoàn Viên	Thanh tao , nhẹ nhàng	1500000	https://res.cloudinary.com/dxy2gp1lg/image/upload/v1774368322/foodstreet/vendor/images/w8zdquozcynhyujgowkt.jpg	t	2026-03-24 16:05:25.226	2026-03-24 16:05:25.226
-ff5fae51-5247-4514-a551-140f9450f938	6267466c-c926-484e-b425-a78089218f1c	Há Cảo Chiên	Đậm đà . Chuẩn vị Bắc Kinh	2000000	https://res.cloudinary.com/dxy2gp1lg/image/upload/v1774368323/foodstreet/vendor/images/xgu4zan6gb9khd8xk78d.jpg	t	2026-03-24 16:05:25.226	2026-03-24 16:05:25.226
-adf227e4-99d5-4019-915c-ec12832465a0	6267466c-c926-484e-b425-a78089218f1c	Mì Trương Hà Tây	Nhẹ nhàng	1500000	https://res.cloudinary.com/dxy2gp1lg/image/upload/v1774368321/foodstreet/vendor/images/opdsgckzkc7bf51o4ulj.jpg	t	2026-03-24 16:05:25.226	2026-03-24 16:05:25.226
-1c14092e-5b00-4056-b932-0918f2120ebe	6267466c-c926-484e-b425-a78089218f1c	Heo Quay Hoàng Gia	Đậm đà	1300000	https://res.cloudinary.com/dxy2gp1lg/image/upload/v1774368325/foodstreet/vendor/images/hmvbtegzry4rzlw4xbm6.jpg	t	2026-03-24 16:05:25.226	2026-03-24 16:05:25.226
-6bd35678-ca70-4ea4-8ee6-63510f87b0bf	6267466c-c926-484e-b425-a78089218f1c	Chả Cuốn	Giòn rụm , vàng óng	1200000	https://res.cloudinary.com/dxy2gp1lg/image/upload/v1774368323/foodstreet/vendor/images/jwvdktidtg7jvt119au9.jpg	t	2026-03-24 16:05:25.226	2026-03-24 16:05:25.226
-eaef692c-58e4-4247-8b7a-b31a603e3d8d	6267466c-c926-484e-b425-a78089218f1c	Hồng Bao	Bánh bao màu hồng	2400000	https://res.cloudinary.com/dxy2gp1lg/image/upload/v1774368323/foodstreet/vendor/images/rswcc5rlrjf2rheyx0xm.jpg	t	2026-03-24 16:05:25.226	2026-03-24 16:05:25.226
-da26be90-a5d3-42b3-b4ff-95b1078bca3d	6267466c-c926-484e-b425-a78089218f1c	Hải Sản	Đậm đà	2300000	https://res.cloudinary.com/dxy2gp1lg/image/upload/v1774368322/foodstreet/vendor/images/kzlit5skd8vpl8ogmweq.jpg	t	2026-03-24 16:05:25.226	2026-03-24 16:05:25.226
-ba3d200b-e25c-45d9-953a-db1914b5a9a7	703466bf-e4f8-4698-a6c9-b3ec14d21093	Món 1	MÔ TẢ	1500000	https://res.cloudinary.com/dxy2gp1lg/image/upload/v1774448981/foodstreet/vendor/images/mx7hzxxtl7rhjnnvednz.jpg	t	2026-03-25 14:29:41.759	2026-03-25 14:29:41.759
 \.
 
 
@@ -399,10 +391,6 @@ COPY public.poi_audios (id, translation_id, audio_url, is_active, created_at) FR
 --
 
 COPY public.poi_images (id, poi_id, image_url, description) FROM stdin;
-d7133dd5-cc92-4c47-96c4-7f15d47d115b	6267466c-c926-484e-b425-a78089218f1c	https://res.cloudinary.com/dxy2gp1lg/image/upload/v1774368309/foodstreet/vendor/images/ly1suardzvystsww9i44.jpg	Nhà hàng kiến trúc kiểu Trung Hoa
-96bc34fa-256f-46a8-8c7f-8e2c0a6b5b22	6267466c-c926-484e-b425-a78089218f1c	https://res.cloudinary.com/dxy2gp1lg/image/upload/v1774368310/foodstreet/vendor/images/jrg6n0chruknuoj3ayau.jpg	Tone chủ đạo màu đỏ , kiến trúc truyền thống cổ điển
-25c6262e-8264-4a58-932b-816f1c10dfcd	6267466c-c926-484e-b425-a78089218f1c	https://res.cloudinary.com/dxy2gp1lg/image/upload/v1774368313/foodstreet/vendor/images/y8mh7bisa1rabr7vq5r2.jpg	Nơi ăn uống rộng rãi riêng tư, phục vụ tận tâm
-0e9fd362-6f75-4e50-b560-c8f7368415d2	703466bf-e4f8-4698-a6c9-b3ec14d21093	https://res.cloudinary.com/dxy2gp1lg/image/upload/v1774448980/foodstreet/vendor/images/kht2wcwptgrxep2i1ixc.jpg	mô tả
 \.
 
 
@@ -411,8 +399,6 @@ d7133dd5-cc92-4c47-96c4-7f15d47d115b	6267466c-c926-484e-b425-a78089218f1c	https:
 --
 
 COPY public.poi_translations (id, poi_id, language, name, description, audio_script, updated_at) FROM stdin;
-1b03dbcb-9b0a-48f9-8a7e-f37fdc5619c9	6267466c-c926-484e-b425-a78089218f1c	vi	Nhà Hàng Hồng Bao Bảo	Nhà hàng là điểm dừng chân lý tưởng dành cho thực khách yêu thích ẩm thực ngon và không gian thoải mái. Với phong cách phục vụ thân thiện và chuyên nghiệp, nhà hàng luôn chú trọng mang đến trải nghiệm dễ chịu cho mọi đối tượng khách hàng. Không gian được thiết kế gọn gàng, sạch sẽ, tạo cảm giác ấm cúng nhưng vẫn đủ thoải mái cho các buổi gặp gỡ gia đình, bạn bè hoặc đồng nghiệp.\n\nThực đơn của nhà hàng khá đa dạng, bao gồm nhiều món ăn được chế biến từ nguyên liệu tươi ngon, lựa chọn kỹ lưỡng mỗi ngày. Các món ăn được nêm nếm vừa vị, phù hợp với khẩu vị của nhiều thực khách khác nhau, từ những người yêu thích hương vị truyền thống cho đến những ai muốn trải nghiệm sự mới mẻ trong cách chế biến. Bên cạnh chất lượng món ăn, nhà hàng cũng chú trọng đến cách trình bày, mang lại cảm giác ngon miệng ngay từ cái nhìn đầu tiên.\n\nĐội ngũ nhân viên tại nhà hàng luôn sẵn sàng hỗ trợ và phục vụ khách hàng một cách tận tâm. Từ khâu đón tiếp đến lúc dùng bữa, mọi trải nghiệm đều được chăm chút cẩn thận nhằm mang lại sự hài lòng tối đa. Nhà hàng không chỉ là nơi thưởng thức ẩm thực mà còn là không gian để thư giãn, trò chuyện và tận hưởng những khoảnh khắc dễ chịu trong cuộc sống hàng ngày.	\N	2026-03-24 16:05:25.231
-11d6e92a-e254-4c77-be0b-722e7edcd79d	703466bf-e4f8-4698-a6c9-b3ec14d21093	vi	Nhà hàng Hồng Thiên Bảo CS2	Nhà hàng là điểm dừng chân lý tưởng dành cho thực khách yêu thích ẩm thực ngon và không gian thoải mái. Với phong cách phục vụ thân thiện và chuyên nghiệp, nhà hàng luôn chú trọng mang đến trải nghiệm dễ chịu cho mọi đối tượng khách hàng. Không gian được thiết kế gọn gàng, sạch sẽ, tạo cảm giác ấm cúng nhưng vẫn đủ thoải mái cho các buổi gặp gỡ gia đình, bạn bè hoặc đồng nghiệp.\n\nThực đơn của nhà hàng khá đa dạng, bao gồm nhiều món ăn được chế biến từ nguyên liệu tươi ngon, lựa chọn kỹ lưỡng mỗi ngày. Các món ăn được nêm nếm vừa vị, phù hợp với khẩu vị của nhiều thực khách khác nhau, từ những người yêu thích hương vị truyền thống cho đến những ai muốn trải nghiệm sự mới mẻ trong cách chế biến. Bên cạnh chất lượng món ăn, nhà hàng cũng chú trọng đến cách trình bày, mang lại cảm giác ngon miệng ngay từ cái nhìn đầu tiên.	\N	2026-03-25 14:29:41.763
 \.
 
 
@@ -429,8 +415,6 @@ COPY public.poi_views (id, poi_id, user_id, duration, created_at) FROM stdin;
 --
 
 COPY public.pois (id, name, slug, category, latitude, longitude, price_min, price_max, rating, created_at, updated_at, approved_at, approved_by, owner_id, rejection_reason, status, "submitCount", is_active) FROM stdin;
-6267466c-c926-484e-b425-a78089218f1c	Nhà Hàng Hồng Bao Bảo	\N	Nhà hàng	10.783285	106.706392	1500000	2500000	0	2026-03-24 16:05:25.207	2026-03-25 09:27:52.041	2026-03-25 08:28:33.723	774881f9-131a-470f-b759-11418f05fdc5	2b8867e7-ce0b-4946-9b37-435a3bffb688	\N	APPROVED	1	t
-703466bf-e4f8-4698-a6c9-b3ec14d21093	Nhà hàng Hồng Thiên Bảo CS2	\N	Nhà Hàng	10.831013	106.567205	1500000	2400000	0	2026-03-25 14:29:41.74	2026-03-25 14:30:08.073	2026-03-25 14:30:08.068	774881f9-131a-470f-b759-11418f05fdc5	2b8867e7-ce0b-4946-9b37-435a3bffb688	\N	APPROVED	1	t
 \.
 
 
@@ -455,8 +439,6 @@ COPY public.search_history (id, user_id, keyword, created_at) FROM stdin;
 --
 
 COPY public.tour_pois (id, tour_id, poi_id, stop_order) FROM stdin;
-068c0585-2c99-4112-a566-3fd39c48fee0	597bd6d6-adfd-4d4e-8ecb-50a2ee0b17e7	6267466c-c926-484e-b425-a78089218f1c	1
-6639f5b7-699e-4693-b8a7-2d204cd3ee99	597bd6d6-adfd-4d4e-8ecb-50a2ee0b17e7	703466bf-e4f8-4698-a6c9-b3ec14d21093	2
 \.
 
 
@@ -465,7 +447,6 @@ COPY public.tour_pois (id, tour_id, poi_id, stop_order) FROM stdin;
 --
 
 COPY public.tours (id, name, description, image_url, duration_minutes, created_at, updated_at, is_active) FROM stdin;
-597bd6d6-adfd-4d4e-8ecb-50a2ee0b17e7	TOUR DU LỊCH 1	Nhà hàng là điểm dừng chân lý tưởng dành cho thực khách yêu thích ẩm thực ngon và không gian thoải mái. Với phong cách phục vụ thân thiện và chuyên nghiệp, nhà hàng luôn chú trọng mang đến trải nghiệm dễ chịu cho mọi đối tượng khách hàng. Không gian được thiết kế gọn gàng, sạch sẽ, tạo cảm giác ấm cúng nhưng vẫn đủ thoải mái cho các buổi gặp gỡ gia đình, bạn bè hoặc đồng nghiệp.	https://res.cloudinary.com/dxy2gp1lg/image/upload/v1774450043/foodstreet/tours/ispz1vec24v2t6vtq5jb.jpg	150	2026-03-25 14:47:23.171	2026-03-25 14:48:32.927	t
 \.
 
 
@@ -517,10 +498,6 @@ fb287636-34a5-4b1d-9a6f-e01d4068b2ab	774881f9-131a-470f-b759-11418f05fdc5	ADMIN_
 --
 
 COPY public.users (id, email, password, name, phone_number, avatar_url, role, is_active, created_at, updated_at, last_login, refresh_token_hash, refresh_token_expiry, reset_password_token_hash, reset_password_token_expiry, approved_at, approved_by, rejection_reason, status) FROM stdin;
-6cd6baf2-ecb3-4697-9a95-3406a64f11d4	domaianhh20@gmail.com	scrypt$qIuZYoG2wgJSSlPjrS2zLA$IlTF1njBDkl2pvz4njBoWjx3M1GwNvwk8vZjWJej0efq8kC-Q33KgeCXAFGahcYYQOh620BdKPDmurI1tYtvhQ	Nhà hàng Thịnh Phước	\N	\N	VENDOR	t	2026-03-19 15:49:35.232	2026-03-19 15:53:44.524	2026-03-19 15:53:44.519	3ea1a971b954927983092178e6bbb8f2ccb87faa0e2445bcdcb9960b55a8ca5d	2026-04-18 15:53:44.519	\N	\N	2026-03-19 15:52:21.481	774881f9-131a-470f-b759-11418f05fdc5	\N	APPROVED
-774881f9-131a-470f-b759-11418f05fdc5	maianhdo20042303@gmail.com	scrypt$jcPOaLJe8dTL8fjTTLcMgg$73tWGI_nTqqdPe2p56TjY2PSybZgwKfXWi-hucx1Hmsmdoiay6MAXNDj86pNA7ba-UHcl77NqMJ2OFJAQelizw	Đỗ Mai Anh	\N	\N	ADMIN	t	2026-03-14 16:19:35.45	2026-03-25 08:37:22.309	2026-03-25 08:37:22.306	a36749ec3a9a03f9eeabc205ebb405c0385f1b03d3c7bd3c589233bd25b7c15a	2026-04-24 08:37:22.306	\N	\N	2026-03-14 16:19:35.236	\N	\N	APPROVED
-2b8867e7-ce0b-4946-9b37-435a3bffb688	manhmanh2332004@gmail.com	scrypt$GtN5HjGoY1Ns7qv3smN98A$NnfNILR8FI4TRnUjMUy-AprGCu3kgYRbqEJQAbqBE7kPxP4vzfsxUGmuGMP0jYlsnD8pMxKmHS2nnFwsZC6CoA	Nhà hàng MAnhMAnh	\N	\N	VENDOR	t	2026-03-24 12:51:22.108	2026-03-25 09:27:52.041	2026-03-25 08:40:31.345	\N	\N	\N	\N	2026-03-24 12:52:17.952	774881f9-131a-470f-b759-11418f05fdc5	\N	APPROVED
-2c62f63e-6ceb-4fb5-aa07-eae2cb41776f	manhh23021004@gmail.com	scrypt$LYXdCjXxAuvAJd73mYFQQQ$coi67_ZoPU-E5f5BAgb6zcSrpFThliLpKtPajklYkNk1Rh_NqydgXcGi488F37DJOHFvIKu_BBlyuPtIyrK_CQ	Mai Anh	\N	\N	USER	t	2026-03-26 06:36:41.212	2026-03-26 06:36:41.212	2026-03-26 06:36:41.147	dcb00135e67b4bd068c8280bde86d9a20268692a4750ea155dd0085b4c1a8d5e	2026-04-25 06:36:41.147	\N	\N	2026-03-26 06:36:41.147	\N	\N	APPROVED
 \.
 
 

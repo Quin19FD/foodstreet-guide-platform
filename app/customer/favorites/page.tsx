@@ -1,61 +1,63 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import {
-  Heart,
-  MapPin,
-  Star,
-  Navigation,
-  Trash2,
-} from "lucide-react";
+import { Heart, MapPin, Navigation, Trash2, Loader2 } from "lucide-react";
 import { cn } from "@/shared/utils";
-import { mockPlatformService } from "@/application/services/mock-platform";
 
-// Mock favorite data using actual POI IDs
-const mockFavoritePOIIds = ["p1", "p4", "p7", "p10"];
+type PoiItem = {
+  id: string;
+  name: string;
+  description: string;
+  type: "FOOD_STALL" | "SUPPORTING_FACILITY";
+  category?: string | null;
+  imageUrl?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  favoritedAt: Date;
+};
 
 function FavoritePOICard({
   poi,
   onRemove,
 }: {
-  poi: {
-    id: string;
-    name: string;
-    description: string;
-    type: "FOOD_STALL" | "SUPPORTING_FACILITY";
-    imageUrl?: string;
-  };
+  poi: PoiItem;
   onRemove: () => void;
 }) {
   return (
     <Link
       href={`/customer/pois/${poi.id}`}
-      className="block rounded-2xl bg-white p-3 shadow-sm transition-shadow hover:shadow-md"
+      className="block card-interactive group"
     >
       <div className="flex gap-3">
         {/* Image */}
         <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-slate-100">
           {poi.imageUrl ? (
-            <img src={poi.imageUrl} alt={poi.name} className="h-full w-full object-cover" />
+            <img
+              src={poi.imageUrl}
+              alt={poi.name}
+              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
           ) : (
             <div className="flex h-full w-full items-center justify-center">
               <MapPin className="h-8 w-8 text-slate-300" />
             </div>
           )}
-          <div className="absolute left-1 top-1 rounded-full bg-orange-500 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+          <div className="absolute left-1 top-1 rounded-full bg-orange-500 px-1.5 py-0.5 text-[10px] font-semibold text-white shadow-sm">
             {poi.type === "FOOD_STALL" ? "Đồ ăn" : "Tiện ích"}
           </div>
         </div>
 
         {/* Info */}
         <div className="flex flex-1 flex-col">
-          <h3 className="line-clamp-1 font-semibold text-slate-900">{poi.name}</h3>
+          <h3 className="line-clamp-1 font-semibold text-slate-900 group-hover:text-orange-600 transition-colors">
+            {poi.name}
+          </h3>
           <p className="mt-1 line-clamp-2 flex-1 text-xs text-slate-500">
             {poi.description}
           </p>
           <div className="mt-2 flex items-center justify-between">
-            <div className="flex items-center gap-1 text-xs text-orange-600">
+            <div className="flex items-center gap-1 text-xs font-medium text-orange-600">
               <Navigation className="h-3 w-3" />
               <span>Chỉ đường</span>
             </div>
@@ -64,7 +66,8 @@ function FavoritePOICard({
                 e.preventDefault();
                 onRemove();
               }}
-              className="flex h-7 w-7 items-center justify-center rounded-full text-slate-400 hover:bg-red-50 hover:text-red-500"
+              className="flex h-7 w-7 items-center justify-center rounded-full text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors"
+              aria-label="Xóa khỏi yêu thích"
             >
               <Trash2 className="h-3.5 w-3.5" />
             </button>
@@ -76,35 +79,81 @@ function FavoritePOICard({
 }
 
 export default function CustomerFavoritesPage() {
-  // Get favorite POIs from mock service
-  const allPOIs = mockPlatformService.poi.listAll();
-  const favoritePOIs = allPOIs.filter((poi) => mockFavoritePOIIds.includes(poi.id));
+  const [favorites, setFavorites] = useState<PoiItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRemoving, setIsRemoving] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const [favorites, setFavorites] = useState(
-    favoritePOIs.map((poi) => ({
-      id: `fav-${poi.id}`,
-      poi,
-      createdAt: new Date(),
-    }))
-  );
+  // Fetch favorites from API
+  const fetchFavorites = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
 
-  const handleRemove = (id: string) => {
-    setFavorites((prev) => prev.filter((fav) => fav.id !== id));
+    try {
+      const res = await fetch("/api/customer/favorites");
+      const data = (await res.json()) as {
+        favorites?: PoiItem[];
+        total?: number;
+        error?: string;
+      };
+
+      if (!res.ok) {
+        throw new Error(data.error || "Không thể tải danh sách yêu thích");
+      }
+
+      setFavorites(data.favorites ?? []);
+    } catch (err) {
+      console.error("Error fetching favorites:", err);
+      setError(err instanceof Error ? err.message : "Lỗi khi tải danh sách");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchFavorites();
+  }, [fetchFavorites]);
+
+  // Handle remove favorite
+  const handleRemove = async (poiId: string) => {
+    setIsRemoving(poiId);
+
+    try {
+      const res = await fetch("/api/customer/favorites", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ poiId }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Không thể xóa khỏi yêu thích");
+      }
+
+      // Optimistically remove from list
+      setFavorites((prev) => prev.filter((poi) => poi.id !== poiId));
+    } catch (err) {
+      console.error("Error removing favorite:", err);
+      // Re-fetch on error
+      fetchFavorites();
+    } finally {
+      setIsRemoving(null);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pb-16">
+    <div className="min-h-screen bg-slate-50 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-0">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white px-4 py-3 shadow-sm">
+      <header className="glass-header sticky top-0 z-40 px-4 py-3">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-lg font-bold text-slate-900">Yêu thích</h1>
             <p className="text-xs text-slate-500">
-              {favorites.length} điểm đến đã lưu
+              {isLoading ? "Đang tải..." : `${favorites.length} điểm đến đã lưu`}
             </p>
           </div>
-          {favorites.length > 0 && (
-            <button className="text-sm font-medium text-orange-600">
+          {favorites.length > 0 && !isLoading && (
+            <button className="text-sm font-medium text-orange-600 hover:text-orange-700 transition-colors">
               Chỉnh sửa
             </button>
           )}
@@ -113,31 +162,57 @@ export default function CustomerFavoritesPage() {
 
       {/* Content */}
       <main className="p-4">
-        {favorites.length === 0 ? (
+        {isLoading ? (
+          // Loading state
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-24 animate-pulse rounded-2xl bg-slate-200"
+                style={{ animationDelay: `${i * 100}ms` }}
+              />
+            ))}
+          </div>
+        ) : error ? (
+          // Error state
           <div className="flex flex-col items-center py-16">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-red-100">
+              <Heart className="h-10 w-10 text-red-400" />
+            </div>
+            <h2 className="mt-4 font-semibold text-slate-700">Có lỗi xảy ra</h2>
+            <p className="mt-1 text-sm text-slate-500">{error}</p>
+            <button
+              onClick={fetchFavorites}
+              className="mt-4 rounded-xl bg-orange-500 px-6 py-2.5 font-semibold text-white transition-colors hover:bg-orange-600"
+            >
+              Thử lại
+            </button>
+          </div>
+        ) : favorites.length === 0 ? (
+          // Empty state
+          <div className="flex flex-col items-center py-16 animate-fade-in">
             <div className="flex h-20 w-20 items-center justify-center rounded-full bg-slate-100">
               <Heart className="h-10 w-10 text-slate-300" />
             </div>
-            <h2 className="mt-4 font-semibold text-slate-700">
-              Chưa có điểm yêu thích
-            </h2>
+            <h2 className="mt-4 font-semibold text-slate-700">Chưa có điểm yêu thích</h2>
             <p className="mt-1 text-center text-sm text-slate-500">
               Lưu những điểm đến bạn thích để dễ dàng tìm lại sau này
             </p>
             <Link
               href="/customer"
-              className="mt-4 rounded-xl bg-orange-500 px-6 py-2.5 font-semibold text-white transition-colors hover:bg-orange-600"
+              className="mt-4 rounded-xl bg-orange-500 px-6 py-2.5 font-semibold text-white transition-colors hover:bg-orange-600 shadow-md"
             >
               Khám phá ngay
             </Link>
           </div>
         ) : (
+          // Favorites list
           <div className="space-y-3">
-            {favorites.map((fav) => (
+            {favorites.map((poi) => (
               <FavoritePOICard
-                key={fav.id}
-                poi={fav.poi}
-                onRemove={() => handleRemove(fav.id)}
+                key={poi.id}
+                poi={poi}
+                onRemove={() => handleRemove(poi.id)}
               />
             ))}
           </div>

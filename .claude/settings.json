@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cmd /c \"dir app\\\\api /s /b 2>nul | findstr vendor\")",
+      "Bash(pnpm format:*)",
+      "mcp__zai-mcp-server__extract_text_from_screenshot",
+      "Bash(pnpm prisma:*)",
+      "mcp__plugin_playwright_playwright__browser_evaluate",
+      "mcp__plugin_playwright_playwright__browser_network_requests",
+      "mcp__plugin_playwright_playwright__browser_snapshot",
+      "mcp__plugin_serena_serena__replace_symbol_body",
+      "mcp__plugin_playwright_playwright__browser_click",
+      "mcp__plugin_playwright_playwright__browser_fill_form"
+    ]
+  }
+}

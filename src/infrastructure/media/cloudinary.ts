@@ -27,7 +27,9 @@ function sha1(input: string): string {
   return createHash("sha1").update(input).digest("hex");
 }
 
-export async function uploadToCloudinary(input: CloudinaryUploadInput): Promise<CloudinaryUploadResult> {
+export async function uploadToCloudinary(
+  input: CloudinaryUploadInput
+): Promise<CloudinaryUploadResult> {
   const env = getCloudinaryEnv();
   if (!env.cloudName) {
     throw new Error("Thiếu CLOUDINARY_CLOUD_NAME");
@@ -58,16 +60,14 @@ export async function uploadToCloudinary(input: CloudinaryUploadInput): Promise<
     body: formData,
   });
 
-  const data = (await response.json().catch(() => null)) as
-    | {
-        secure_url?: string;
-        public_id?: string;
-        resource_type?: string;
-        format?: string;
-        bytes?: number;
-        error?: { message?: string };
-      }
-    | null;
+  const data = (await response.json().catch(() => null)) as {
+    secure_url?: string;
+    public_id?: string;
+    resource_type?: string;
+    format?: string;
+    bytes?: number;
+    error?: { message?: string };
+  } | null;
 
   if (!response.ok || !data?.secure_url || !data.public_id) {
     throw new Error(data?.error?.message ?? "Upload Cloudinary thất bại");

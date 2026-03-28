@@ -45,4 +45,3 @@ export function checkAndRecordOtpSend(email: string, now = new Date()): OtpSendL
 
   return { ok: true };
 }
-
