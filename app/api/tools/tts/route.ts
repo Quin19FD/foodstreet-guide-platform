@@ -15,6 +15,58 @@ function jsonError(status: number, error: string) {
 }
 
 /**
+ * GET /api/tools/tts?text=...&lang=vi
+ * Proxy Google Translate TTS — trả về audio/mpeg stream.
+ * Dùng cho client-side Audio element (tránh CORS).
+ */
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const text = searchParams.get("text")?.trim() ?? "";
+  const lang = searchParams.get("lang")?.trim().toLowerCase() ?? "vi";
+
+  if (!text) {
+    return new NextResponse("Missing text", { status: 400 });
+  }
+  if (text.length > 500) {
+    return new NextResponse("Text too long", { status: 400 });
+  }
+
+  const tl = lang.split("-")[0];
+  const googleUrl =
+    `https://translate.google.com/translate_tts?ie=UTF-8` +
+    `&tl=${encodeURIComponent(tl)}` +
+    `&client=tw-ob` +
+    `&q=${encodeURIComponent(text)}`;
+
+  try {
+    const upstream = await fetch(googleUrl, {
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        Referer: "https://translate.google.com/",
+      },
+    });
+
+    if (!upstream.ok) {
+      return new NextResponse("TTS upstream error", { status: 502 });
+    }
+
+    const audioBuffer = await upstream.arrayBuffer();
+
+    return new NextResponse(audioBuffer, {
+      status: 200,
+      headers: {
+        "Content-Type": "audio/mpeg",
+        "Content-Length": String(audioBuffer.byteLength),
+        "Cache-Control": "public, max-age=86400",
+      },
+    });
+  } catch {
+    return new NextResponse("TTS fetch failed", { status: 502 });
+  }
+}
+
+/**
  * POST /api/tools/tts
  * Convert text to speech using Google Cloud Text-to-Speech API
  * 
@@ -66,19 +118,44 @@ export async function POST(request: NextRequest) {
   const apiKey = process.env.GOOGLE_TTS_API_KEY; // Alternative: API key
   
   if (!credentials && !apiKey) {
-    // Development/mock mode when credentials are not configured
+    // Fallback: proxy Google Translate TTS
+    const tl = language.split("-")[0];
+    const googleUrl =
+      `https://translate.google.com/translate_tts?ie=UTF-8` +
+      `&tl=${encodeURIComponent(tl)}` +
+      `&client=tw-ob` +
+      `&q=${encodeURIComponent(text.slice(0, 200))}`;
+
+    try {
+      const upstream = await fetch(googleUrl, {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          Referer: "https://translate.google.com/",
+        },
+      });
+
+      if (upstream.ok) {
+        const buffer = await upstream.arrayBuffer();
+        const base64 = Buffer.from(buffer).toString("base64");
+        return NextResponse.json({
+          audioContent: base64,
+          audioFormat: "mp3",
+          voice: "google-translate",
+          language: tl,
+        });
+      }
+    } catch {
+      // fall through to error
+    }
+
     return NextResponse.json({
       audioContent: null,
       audioFormat: "mp3",
       voice: selectedVoice,
       language: languageCode,
-      error: "Chưa cấu hình Google Cloud TTS. Vui lòng thiết lập GOOGLE_CLOUD_CREDENTIALS hoặc GOOGLE_TTS_API_KEY",
+      error: "Chưa cấu hình Google Cloud TTS và không thể kết nối Google Translate.",
       developmentMode: true,
-      preview: {
-        text: text.substring(0, 100) + (text.length > 100 ? "..." : ""),
-        textLength: text.length,
-        estimatedChars: text.length,
-      }
     });
   }
   

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Play, Pause, Volume2 } from "lucide-react";
 import { cn } from "@/shared/utils";
+import { speak, stopSpeaking } from "@/lib/tts";
 
 export function AudioPlayer({
   script,
@@ -26,51 +27,37 @@ export function AudioPlayer({
   }, [autoPlay]);
 
   const handlePlay = () => {
-    if ("speechSynthesis" in window) {
-      if (isPlaying) {
-        window.speechSynthesis.cancel();
-        setIsPlaying(false);
-        setIsSpeaking(false);
-        return;
-      }
+    if (isPlaying) {
+      stopSpeaking();
+      setIsPlaying(false);
+      setIsSpeaking(false);
+      return;
+    }
 
-      const utterance = new SpeechSynthesisUtterance(script || "");
-      const langCode = language || "vi-VN";
-      utterance.lang = langCode;
-      // Tìm voice phù hợp để đọc đúng ngôn ngữ (Chrome cần set voice rõ ràng)
-      if ("speechSynthesis" in window) {
-        const voices = window.speechSynthesis.getVoices();
-        const prefix = langCode.split("-")[0].toLowerCase();
-        const matched = voices.find((v) => v.lang.replace("_", "-").toLowerCase() === langCode.toLowerCase())
-          || voices.find((v) => v.lang.toLowerCase().startsWith(prefix));
-        if (matched) utterance.voice = matched;
-      }
-      utterance.rate = 0.9;
-
-      utterance.onstart = () => {
+    speak({
+      text: script || "",
+      lang: language || "vi",
+      rate: 0.9,
+      onStart: () => {
         setIsPlaying(true);
         setIsSpeaking(true);
-      };
-
-      utterance.onend = () => {
+      },
+      onEnd: () => {
         setIsPlaying(false);
         setIsSpeaking(false);
         setProgress(0);
-      };
-
-      utterance.onboundary = () => {
-        // Simulate progress
-        setProgress((prev) => Math.min(prev + 5, 95));
-      };
-
-      utteranceRef.current = utterance;
-      window.speechSynthesis.speak(utterance);
-    }
+      },
+      onError: () => {
+        setIsPlaying(false);
+        setIsSpeaking(false);
+        setProgress(0);
+      },
+    });
   };
 
   useEffect(() => {
     return () => {
-      window.speechSynthesis.cancel();
+      stopSpeaking();
     };
   }, []);
 

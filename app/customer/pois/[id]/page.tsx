@@ -2,7 +2,8 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, MapPin, Navigation, Play, Square } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { speak, stopSpeaking } from "@/lib/tts";
 
 type PoiDetail = {
   id: string;
@@ -38,28 +39,6 @@ function speechLang(code: string): string {
   return value;
 }
 
-let cachedVoices: SpeechSynthesisVoice[] = [];
-if (typeof window !== "undefined") {
-  cachedVoices = window.speechSynthesis.getVoices();
-  window.speechSynthesis.addEventListener("voiceschanged", () => {
-    cachedVoices = window.speechSynthesis.getVoices();
-  });
-}
-
-function getBestVoice(langCode: string) {
-  if (typeof window === "undefined") return null;
-  if (cachedVoices.length === 0) {
-    cachedVoices = window.speechSynthesis.getVoices();
-  }
-  const voices = cachedVoices;
-  const targetPrefix = langCode.split("-")[0].toLowerCase();
-  let voice = voices.find((v) => v.lang.replace("_", "-").toLowerCase() === langCode.toLowerCase());
-  if (!voice) {
-    voice = voices.find((v) => v.lang.toLowerCase().startsWith(targetPrefix));
-  }
-  return voice || null;
-}
-
 export default function POIDetailPage() {
   const router = useRouter();
   const params = useParams();
@@ -70,7 +49,6 @@ export default function POIDetailPage() {
   const [language, setLanguage] = useState("vi");
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [audioText, setAudioText] = useState<string | null>(null);
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -91,7 +69,7 @@ export default function POIDetailPage() {
 
     return () => {
       mounted = false;
-      if (typeof window !== "undefined") window.speechSynthesis.cancel();
+      if (typeof window !== "undefined") stopSpeaking();
     };
   }, [poiId]);
 
@@ -100,18 +78,18 @@ export default function POIDetailPage() {
     return poi.translations.find((item) => item.language.toLowerCase() === language.toLowerCase()) ?? null;
   }, [poi, language]);
 
-  const resolveAudioText = async () => {
+  const resolveAudioText = async (): Promise<{ text: string; lang: string } | null> => {
     if (!poi) return null;
 
     const target = translation;
-    if (target?.audioScript?.trim()) return target.audioScript.trim();
-    if (target?.description?.trim()) return target.description.trim();
+    if (target?.audioScript?.trim()) return { text: target.audioScript.trim(), lang: language };
+    if (target?.description?.trim()) return { text: target.description.trim(), lang: language };
 
     const vi = poi.translations.find((item) => item.language.toLowerCase() === "vi");
     const viText = vi?.audioScript?.trim() || vi?.description?.trim() || poi.description?.trim() || "";
     if (!viText) return null;
 
-    if (language.toLowerCase() === "vi") return viText;
+    if (language.toLowerCase() === "vi") return { text: viText, lang: "vi" };
 
     const res = await fetch("/api/tools/translate", {
       method: "POST",
@@ -119,38 +97,34 @@ export default function POIDetailPage() {
       body: JSON.stringify({ q: viText, source: "vi", target: language.toLowerCase() }),
     });
 
-    if (!res.ok) return viText;
+    if (!res.ok) return { text: viText, lang: "vi" };
 
     const data = (await res.json().catch(() => null)) as { translatedText?: string } | null;
-    return data?.translatedText?.trim() || viText;
+    const translated = data?.translatedText?.trim();
+    return translated ? { text: translated, lang: language } : { text: viText, lang: "vi" };
   };
 
   const handlePlay = async () => {
     if (!poi) return;
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    if (typeof window === "undefined") return;
 
-    window.speechSynthesis.cancel();
-    const text = await resolveAudioText();
-    setAudioText(text);
-    if (!text) return;
+    stopSpeaking();
+    const result = await resolveAudioText();
+    if (!result) return;
+    setAudioText(result.text);
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = speechLang(language);
-    const voice = getBestVoice(utterance.lang);
-    if (voice) utterance.voice = voice;
-    utterance.rate = 0.92;
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
-
-    utteranceRef.current = utterance;
-    window.speechSynthesis.speak(utterance);
+    speak({
+      text: result.text,
+      lang: result.lang,
+      rate: 0.92,
+      onStart: () => setIsSpeaking(true),
+      onEnd: () => setIsSpeaking(false),
+      onError: () => setIsSpeaking(false),
+    });
   };
 
   const handleStop = () => {
-    if (typeof window !== "undefined") {
-      window.speechSynthesis.cancel();
-    }
+    stopSpeaking();
     setIsSpeaking(false);
   };
 

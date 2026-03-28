@@ -14,6 +14,7 @@ import {
   Square,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { speak, stopSpeaking, pauseSpeaking, resumeSpeaking } from "@/lib/tts";
 
 type PoiStatus = "PENDING" | "APPROVED" | "REJECTED";
 
@@ -265,6 +266,7 @@ export function PoiDetailView(props: PoiDetailViewProps) {
   );
 
   const [targetLanguage, setTargetLanguage] = useState("vi");
+  const [previewLanguage, setPreviewLanguage] = useState("vi");
   const [countryLanguageOptions, setCountryLanguageOptions] = useState<Array<{ code: string; label: string }>>(
     [...LANGUAGE_FALLBACK_OPTIONS]
   );
@@ -283,6 +285,7 @@ export function PoiDetailView(props: PoiDetailViewProps) {
 
   useEffect(() => {
     setTranslatedPreview(viTranslation?.description ?? "");
+    setPreviewLanguage("vi");
     setSentenceIndex(0);
     setTranslateNotice(null);
   }, [viTranslation?.id]);
@@ -344,7 +347,7 @@ export function PoiDetailView(props: PoiDetailViewProps) {
   useEffect(() => {
     return () => {
       if (typeof window !== "undefined") {
-        window.speechSynthesis.cancel();
+        stopSpeaking();
       }
     };
   }, []);
@@ -352,7 +355,7 @@ export function PoiDetailView(props: PoiDetailViewProps) {
   const stopSpeech = () => {
     if (typeof window === "undefined") return;
     playbackTokenRef.current += 1;
-    window.speechSynthesis.cancel();
+    stopSpeaking();
     utteranceRef.current = null;
     setIsSpeaking(false);
     setIsSpeechPaused(false);
@@ -364,7 +367,7 @@ export function PoiDetailView(props: PoiDetailViewProps) {
 
     const token = playbackTokenRef.current + 1;
     playbackTokenRef.current = token;
-    window.speechSynthesis.cancel();
+    stopSpeaking();
 
     const speakNext = (currentIndex: number) => {
       if (playbackTokenRef.current !== token) return;
@@ -375,36 +378,31 @@ export function PoiDetailView(props: PoiDetailViewProps) {
         return;
       }
 
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = toSpeechLang(targetLanguage);
-      const voice = getBestVoice(utterance.lang);
-      if (voice) utterance.voice = voice;
-      utterance.rate = speechRate;
-      utterance.onstart = () => {
-        if (playbackTokenRef.current !== token) return;
-        setIsSpeaking(true);
-        setIsSpeechPaused(false);
-        setSentenceIndex(currentIndex);
-      };
-      utterance.onend = () => {
-        if (playbackTokenRef.current !== token) return;
-
-        if (continuous && currentIndex < viSentences.length - 1) {
-          speakNext(currentIndex + 1);
-          return;
-        }
-
-        setIsSpeaking(false);
-        setIsSpeechPaused(false);
-      };
-      utterance.onerror = () => {
-        if (playbackTokenRef.current !== token) return;
-        setIsSpeaking(false);
-        setIsSpeechPaused(false);
-      };
-
-      utteranceRef.current = utterance;
-      window.speechSynthesis.speak(utterance);
+      speak({
+        text,
+        lang: previewLanguage,
+        rate: speechRate,
+        onStart: () => {
+          if (playbackTokenRef.current !== token) return;
+          setIsSpeaking(true);
+          setIsSpeechPaused(false);
+          setSentenceIndex(currentIndex);
+        },
+        onEnd: () => {
+          if (playbackTokenRef.current !== token) return;
+          if (continuous && currentIndex < viSentences.length - 1) {
+            speakNext(currentIndex + 1);
+            return;
+          }
+          setIsSpeaking(false);
+          setIsSpeechPaused(false);
+        },
+        onError: () => {
+          if (playbackTokenRef.current !== token) return;
+          setIsSpeaking(false);
+          setIsSpeechPaused(false);
+        },
+      });
     };
 
     speakNext(index);
@@ -423,12 +421,12 @@ export function PoiDetailView(props: PoiDetailViewProps) {
     if (!isSpeaking && !isSpeechPaused) return;
 
     if (isSpeechPaused) {
-      window.speechSynthesis.resume();
+      resumeSpeaking();
       setIsSpeechPaused(false);
       return;
     }
 
-    window.speechSynthesis.pause();
+    pauseSpeaking();
     setIsSpeechPaused(true);
   };
 
@@ -436,22 +434,23 @@ export function PoiDetailView(props: PoiDetailViewProps) {
     if (typeof window === "undefined") return;
     stopSpeech();
 
-    const utterance = new SpeechSynthesisUtterance(description);
-    utterance.lang = toSpeechLang(language);
-    const voice = getBestVoice(utterance.lang);
-    if (voice) utterance.voice = voice;
-    utterance.rate = speechRate;
-    utterance.onstart = () => {
-      setIsSpeaking(true);
-      setIsSpeechPaused(false);
-    };
-    utterance.onend = () => {
-      setIsSpeaking(false);
-      setIsSpeechPaused(false);
-    };
-
-    utteranceRef.current = utterance;
-    window.speechSynthesis.speak(utterance);
+    speak({
+      text: description,
+      lang: language,
+      rate: speechRate,
+      onStart: () => {
+        setIsSpeaking(true);
+        setIsSpeechPaused(false);
+      },
+      onEnd: () => {
+        setIsSpeaking(false);
+        setIsSpeechPaused(false);
+      },
+      onError: () => {
+        setIsSpeaking(false);
+        setIsSpeechPaused(false);
+      },
+    });
   };
 
   const handleTranslatePreview = async () => {
@@ -463,6 +462,7 @@ export function PoiDetailView(props: PoiDetailViewProps) {
 
     if (targetLanguage === "vi") {
       setTranslatedPreview(viDescription);
+      setPreviewLanguage("vi");
       setSentenceIndex(0);
       setTranslateNotice("Đang dùng bản tiếng Việt gốc.");
       return;
@@ -476,6 +476,7 @@ export function PoiDetailView(props: PoiDetailViewProps) {
 
     if (existingTranslation?.description) {
       setTranslatedPreview(existingTranslation.description);
+      setPreviewLanguage(targetLanguage);
       setSentenceIndex(0);
       setTranslateNotice("Đã dùng bản dịch có sẵn của POI.");
       return;
@@ -498,6 +499,7 @@ export function PoiDetailView(props: PoiDetailViewProps) {
       if (!response.ok) {
         const data = (await response.json().catch(() => null)) as { error?: string } | null;
         setTranslatedPreview(viDescription);
+        setPreviewLanguage("vi");
         setSentenceIndex(0);
         setTranslateNotice(
           data?.error
@@ -514,16 +516,19 @@ export function PoiDetailView(props: PoiDetailViewProps) {
       const translatedText = data?.translatedText?.trim();
       if (!translatedText) {
         setTranslatedPreview(viDescription);
+        setPreviewLanguage("vi");
         setSentenceIndex(0);
         setTranslateNotice("Không nhận được nội dung dịch. Hệ thống đang đọc bản tiếng Việt gốc.");
         return;
       }
 
       setTranslatedPreview(translatedText);
+      setPreviewLanguage(targetLanguage);
       setSentenceIndex(0);
       setTranslateNotice(`Dịch tự động thành công (${data?.provider ?? "provider"}).`);
     } catch {
       setTranslatedPreview(viDescription);
+      setPreviewLanguage("vi");
       setSentenceIndex(0);
       setTranslateNotice("Lỗi kết nối khi dịch tự động. Hệ thống đang đọc bản tiếng Việt gốc.");
     } finally {

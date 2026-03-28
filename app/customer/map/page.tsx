@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import maplibregl from "maplibre-gl";
 import { MapPin, Navigation, Pause, Play, Search, Square, Wifi, WifiOff } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { speak as ttsSpeak, stopSpeaking as ttsStop } from "@/lib/tts";
 
 type PoiMapItem = {
   id: string;
@@ -79,25 +80,7 @@ function speechLang(code: string): string {
   return value;
 }
 
-let cachedVoices: SpeechSynthesisVoice[] = [];
-if (typeof window !== "undefined") {
-  cachedVoices = window.speechSynthesis.getVoices();
-  window.speechSynthesis.addEventListener("voiceschanged", () => {
-    cachedVoices = window.speechSynthesis.getVoices();
-  });
-}
-
-function getBestVoice(langCode: string) {
-  if (typeof window === "undefined") return null;
-  if (cachedVoices.length === 0) {
-    cachedVoices = window.speechSynthesis.getVoices();
-  }
-  const voices = cachedVoices;
-  const targetPrefix = langCode.split("-")[0].toLowerCase();
-  let voice = voices.find((v) => v.lang.replace("_", "-").toLowerCase() === langCode.toLowerCase());
-  if (!voice) {
-    voice = voices.find((v) => v.lang.toLowerCase().startsWith(targetPrefix));
-  }
+function splitSentences(text: string): string[] {
   return voice || null;
 }
 
@@ -298,7 +281,7 @@ export default function CustomerMapPage() {
 
   const processSpeechQueue = () => {
     if (queueProcessingRef.current || pauseRef.current) return;
-    if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+    if (typeof window === "undefined") return;
 
     const next = queueRef.current.shift();
     if (!next) {
@@ -313,40 +296,40 @@ export default function CustomerMapPage() {
     currentChunkRef.current = next;
     updateQueueCount();
 
-    const utter = new SpeechSynthesisUtterance(next.text);
-    utter.lang = next.lang;
-    const voice = getBestVoice(next.lang);
-    if (voice) utter.voice = voice;
-    utter.rate = 0.94;
-    utter.onstart = () => {
-      setIsSpeaking(true);
-      setIsPaused(false);
-    };
-    utter.onend = () => {
-      queueProcessingRef.current = false;
-      currentChunkRef.current = null;
-      setCurrentAudioLabel(null);
-
-      if (pauseAfterSentenceRef.current) {
-        pauseAfterSentenceRef.current = false;
-        pauseRef.current = true;
-        setIsPaused(true);
-        setIsSpeaking(false);
-        updateQueueCount();
-        return;
-      }
-
-      processSpeechQueue();
-    };
-    utter.onerror = () => {
-      queueProcessingRef.current = false;
-      currentChunkRef.current = null;
-      setCurrentAudioLabel(null);
-      processSpeechQueue();
-    };
-
     setCurrentAudioLabel(next.label);
-    window.speechSynthesis.speak(utter);
+
+    // Dùng TTS utility (tự động fallback Google Translate nếu không có voice)
+    ttsSpeak({
+      text: next.text,
+      lang: next.lang.split("-")[0] || next.lang,
+      rate: 0.94,
+      onStart: () => {
+        setIsSpeaking(true);
+        setIsPaused(false);
+      },
+      onEnd: () => {
+        queueProcessingRef.current = false;
+        currentChunkRef.current = null;
+        setCurrentAudioLabel(null);
+
+        if (pauseAfterSentenceRef.current) {
+          pauseAfterSentenceRef.current = false;
+          pauseRef.current = true;
+          setIsPaused(true);
+          setIsSpeaking(false);
+          updateQueueCount();
+          return;
+        }
+
+        processSpeechQueue();
+      },
+      onError: () => {
+        queueProcessingRef.current = false;
+        currentChunkRef.current = null;
+        setCurrentAudioLabel(null);
+        processSpeechQueue();
+      },
+    });
   };
 
   const enqueueSpeech = (items: SpeechChunk[]) => {
@@ -394,9 +377,7 @@ export default function CustomerMapPage() {
     setCurrentAudioLabel(null);
     updateQueueCount();
 
-    if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
-    }
+    ttsStop();
   };
 
   const pauseAudioQueue = () => {
@@ -562,8 +543,8 @@ export default function CustomerMapPage() {
       map.remove();
       mapRef.current = null;
 
-      if (typeof window !== "undefined" && "speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
+      if (typeof window !== "undefined") {
+        ttsStop();
       }
     };
   }, []);
