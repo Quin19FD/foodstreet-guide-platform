@@ -79,6 +79,28 @@ function speechLang(code: string): string {
   return value;
 }
 
+let cachedVoices: SpeechSynthesisVoice[] = [];
+if (typeof window !== "undefined") {
+  cachedVoices = window.speechSynthesis.getVoices();
+  window.speechSynthesis.addEventListener("voiceschanged", () => {
+    cachedVoices = window.speechSynthesis.getVoices();
+  });
+}
+
+function getBestVoice(langCode: string) {
+  if (typeof window === "undefined") return null;
+  if (cachedVoices.length === 0) {
+    cachedVoices = window.speechSynthesis.getVoices();
+  }
+  const voices = cachedVoices;
+  const targetPrefix = langCode.split("-")[0].toLowerCase();
+  let voice = voices.find((v) => v.lang.replace("_", "-").toLowerCase() === langCode.toLowerCase());
+  if (!voice) {
+    voice = voices.find((v) => v.lang.toLowerCase().startsWith(targetPrefix));
+  }
+  return voice || null;
+}
+
 function splitSentences(text: string): string[] {
   return text
     .split(/(?<=[.!?…])\s+|\n+/g)
@@ -293,6 +315,8 @@ export default function CustomerMapPage() {
 
     const utter = new SpeechSynthesisUtterance(next.text);
     utter.lang = next.lang;
+    const voice = getBestVoice(next.lang);
+    if (voice) utter.voice = voice;
     utter.rate = 0.94;
     utter.onstart = () => {
       setIsSpeaking(true);

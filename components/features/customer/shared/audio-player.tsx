@@ -35,7 +35,16 @@ export function AudioPlayer({
       }
 
       const utterance = new SpeechSynthesisUtterance(script || "");
-      utterance.lang = language || "vi-VN";
+      const langCode = language || "vi-VN";
+      utterance.lang = langCode;
+      // Tìm voice phù hợp để đọc đúng ngôn ngữ (Chrome cần set voice rõ ràng)
+      if ("speechSynthesis" in window) {
+        const voices = window.speechSynthesis.getVoices();
+        const prefix = langCode.split("-")[0].toLowerCase();
+        const matched = voices.find((v) => v.lang.replace("_", "-").toLowerCase() === langCode.toLowerCase())
+          || voices.find((v) => v.lang.toLowerCase().startsWith(prefix));
+        if (matched) utterance.voice = matched;
+      }
       utterance.rate = 0.9;
 
       utterance.onstart = () => {

@@ -175,9 +175,22 @@ function toSpeechLang(language: string): string {
   return speechMap[normalized] || normalized;
 }
 
+// Cache voices vì Chrome trả về [] cho getVoices() cho đến khi voiceschanged được fire.
+let cachedVoices: SpeechSynthesisVoice[] = [];
+if (typeof window !== "undefined") {
+  cachedVoices = window.speechSynthesis.getVoices();
+  window.speechSynthesis.addEventListener("voiceschanged", () => {
+    cachedVoices = window.speechSynthesis.getVoices();
+  });
+}
+
 function getBestVoice(langCode: string) {
   if (typeof window === "undefined") return null;
-  const voices = window.speechSynthesis.getVoices();
+  // Nếu cache rỗng, thử lấy lại một lần
+  if (cachedVoices.length === 0) {
+    cachedVoices = window.speechSynthesis.getVoices();
+  }
+  const voices = cachedVoices;
   const targetPrefix = langCode.split("-")[0].toLowerCase();
 
   let voice = voices.find((v) => v.lang.replace("_", "-").toLowerCase() === langCode.toLowerCase());
@@ -251,7 +264,7 @@ export function PoiDetailView(props: PoiDetailViewProps) {
     [poi.translations]
   );
 
-  const [targetLanguage, setTargetLanguage] = useState("en");
+  const [targetLanguage, setTargetLanguage] = useState("vi");
   const [countryLanguageOptions, setCountryLanguageOptions] = useState<Array<{ code: string; label: string }>>(
     [...LANGUAGE_FALLBACK_OPTIONS]
   );

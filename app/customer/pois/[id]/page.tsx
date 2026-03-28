@@ -38,6 +38,28 @@ function speechLang(code: string): string {
   return value;
 }
 
+let cachedVoices: SpeechSynthesisVoice[] = [];
+if (typeof window !== "undefined") {
+  cachedVoices = window.speechSynthesis.getVoices();
+  window.speechSynthesis.addEventListener("voiceschanged", () => {
+    cachedVoices = window.speechSynthesis.getVoices();
+  });
+}
+
+function getBestVoice(langCode: string) {
+  if (typeof window === "undefined") return null;
+  if (cachedVoices.length === 0) {
+    cachedVoices = window.speechSynthesis.getVoices();
+  }
+  const voices = cachedVoices;
+  const targetPrefix = langCode.split("-")[0].toLowerCase();
+  let voice = voices.find((v) => v.lang.replace("_", "-").toLowerCase() === langCode.toLowerCase());
+  if (!voice) {
+    voice = voices.find((v) => v.lang.toLowerCase().startsWith(targetPrefix));
+  }
+  return voice || null;
+}
+
 export default function POIDetailPage() {
   const router = useRouter();
   const params = useParams();
@@ -114,6 +136,8 @@ export default function POIDetailPage() {
 
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = speechLang(language);
+    const voice = getBestVoice(utterance.lang);
+    if (voice) utterance.voice = voice;
     utterance.rate = 0.92;
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
