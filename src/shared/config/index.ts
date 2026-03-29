@@ -2,7 +2,37 @@
  * Application Configuration
  *
  * Centralized configuration management.
+ * Throws at module evaluation time if critical env vars are missing.
  */
+
+// --- Critical env-var enforcement (runs once at import time) ---
+
+const _jwtSecret = process.env.JWT_SECRET;
+
+if (!_jwtSecret) {
+  throw new Error(
+    "[config] JWT_SECRET environment variable is required but not set. " +
+      "Refusing to start with no signing secret."
+  );
+}
+
+if (_jwtSecret === "change-me-in-production") {
+  throw new Error(
+    "[config] JWT_SECRET is still set to the default placeholder value " +
+      "'change-me-in-production'. Generate a secure secret and set it in your environment."
+  );
+}
+
+const _databaseUrl = process.env.DATABASE_URL;
+
+if (!_databaseUrl) {
+  throw new Error(
+    "[config] DATABASE_URL environment variable is required but not set. " +
+      "Refusing to start without a database connection string."
+  );
+}
+
+// --- Configuration object ---
 
 export const config = {
   google: {
@@ -25,7 +55,7 @@ export const config = {
   },
 
   auth: {
-    jwtSecret: process.env.JWT_SECRET ?? "change-me-in-production",
+    jwtSecret: _jwtSecret,
     jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? "7d",
     refreshTokenExpiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN ?? "30d",
   },

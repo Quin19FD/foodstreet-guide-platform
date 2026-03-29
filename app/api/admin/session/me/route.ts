@@ -10,7 +10,7 @@ export const runtime = "nodejs";
 function getBearerToken(request: NextRequest): string | null {
   const raw = request.headers.get("authorization");
   if (!raw) return null;
-  const match = raw.match(/^Bearer\\s+(.+)$/i);
+  const match = raw.match(/^Bearer\s+(.+)$/i);
   return match?.[1] ?? null;
 }
 
