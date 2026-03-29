@@ -4,11 +4,8 @@ import type { NextRequest } from "next/server";
 import { prisma } from "@/infrastructure/database/prisma/client";
 import type { POIStatus, UserRole, UserStatus } from "@prisma/client";
 
-import {
-  adminUsersPatchSchema,
-  adminUsersDeleteSchema,
-} from "@/application/validators/admin";
-import { requireAdmin, jsonError } from "../session/_shared";
+import { adminUsersDeleteSchema, adminUsersPatchSchema } from "@/application/validators/admin";
+import { jsonError, requireAdmin } from "../session/_shared";
 
 export const runtime = "nodejs";
 

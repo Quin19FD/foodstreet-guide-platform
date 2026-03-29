@@ -1,7 +1,7 @@
 "use client";
 
+import { Clock, MapPin, Search } from "lucide-react";
 import Link from "next/link";
-import { Search, Clock, MapPin } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 type TourItem = {

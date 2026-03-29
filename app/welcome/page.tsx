@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { MapPin, Globe, Navigation } from "lucide-react";
 import { cn } from "@/shared/utils";
+import { Globe, MapPin, Navigation } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 type Language = "vi" | "en" | "zh" | "ko";
 
@@ -113,6 +113,7 @@ export default function WelcomePage() {
         <div className="grid grid-cols-2 gap-3">
           {languages.map((lang) => (
             <button
+              type="button"
               key={lang.code}
               onClick={() => setSelectedLang(lang.code)}
               className={cn(
@@ -152,6 +153,7 @@ export default function WelcomePage() {
 
         {/* Get Started Button */}
         <button
+          type="button"
           onClick={handleGetStarted}
           disabled={isLoading}
           className={cn(

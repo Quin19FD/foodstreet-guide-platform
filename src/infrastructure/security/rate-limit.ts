@@ -21,9 +21,7 @@ export interface RateLimitConfig {
   maxHits: number;
 }
 
-export type RateLimitStatus =
-  | { ok: true }
-  | { ok: false; retryAfterSeconds: number };
+export type RateLimitStatus = { ok: true } | { ok: false; retryAfterSeconds: number };
 
 /**
  * Create a rate-limited check function bound to a specific globalThis store.
@@ -31,10 +29,7 @@ export type RateLimitStatus =
  * Each call site gets its own factory with an isolated store, so registration
  * limits don't interfere with login limits, etc.
  */
-export function createRateLimiter(
-  storeKey: string,
-  config: RateLimitConfig
-) {
+export function createRateLimiter(storeKey: string, config: RateLimitConfig) {
   // eslint-disable-next-line no-var
   let store: Map<string, Entry> | undefined;
 

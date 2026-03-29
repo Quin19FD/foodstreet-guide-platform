@@ -6,7 +6,7 @@ import { prisma } from "@/infrastructure/database/prisma/client";
 import { logUserActivity } from "@/infrastructure/logging/activity-log";
 import { sendVendorApprovedEmail, sendVendorRejectedEmail } from "@/infrastructure/vendor/mailer";
 
-import { requireAdmin, jsonError } from "../../session/_shared";
+import { jsonError, requireAdmin } from "../../session/_shared";
 
 export const runtime = "nodejs";
 
@@ -207,7 +207,8 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     return NextResponse.json({ ok: true, vendor: updated });
   } catch (error: unknown) {
     // Check for Prisma unique constraint violation via error code, not message content
-    const prismaCode = error && typeof error === "object" && "code" in error ? (error as { code: string }).code : "";
+    const prismaCode =
+      error && typeof error === "object" && "code" in error ? (error as { code: string }).code : "";
     if (prismaCode === "P2002") {
       return jsonError(409, "Email đã được sử dụng");
     }

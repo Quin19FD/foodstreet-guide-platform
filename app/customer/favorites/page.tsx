@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
-import { Heart, MapPin, Navigation, Trash2, Loader2 } from "lucide-react";
 import { cn } from "@/shared/utils";
+import { Heart, Loader2, MapPin, Navigation, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
 
 type PoiItem = {
   id: string;
@@ -25,10 +25,7 @@ function FavoritePOICard({
   onRemove: () => void;
 }) {
   return (
-    <Link
-      href={`/customer/pois/${poi.id}`}
-      className="block card-interactive group"
-    >
+    <Link href={`/customer/pois/${poi.id}`} className="block card-interactive group">
       <div className="flex gap-3">
         {/* Image */}
         <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-slate-100">
@@ -53,15 +50,14 @@ function FavoritePOICard({
           <h3 className="line-clamp-1 font-semibold text-slate-900 group-hover:text-orange-600 transition-colors">
             {poi.name}
           </h3>
-          <p className="mt-1 line-clamp-2 flex-1 text-xs text-slate-500">
-            {poi.description}
-          </p>
+          <p className="mt-1 line-clamp-2 flex-1 text-xs text-slate-500">{poi.description}</p>
           <div className="mt-2 flex items-center justify-between">
             <div className="flex items-center gap-1 text-xs font-medium text-orange-600">
               <Navigation className="h-3 w-3" />
               <span>Chỉ đường</span>
             </div>
             <button
+              type="button"
               onClick={(e) => {
                 e.preventDefault();
                 onRemove();
@@ -81,7 +77,7 @@ function FavoritePOICard({
 export default function CustomerFavoritesPage() {
   const [favorites, setFavorites] = useState<PoiItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isRemoving, setIsRemoving] = useState<string | null>(null);
+  const [_isRemoving, setIsRemoving] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Fetch favorites from API
@@ -153,7 +149,10 @@ export default function CustomerFavoritesPage() {
             </p>
           </div>
           {favorites.length > 0 && !isLoading && (
-            <button className="text-sm font-medium text-orange-600 hover:text-orange-700 transition-colors">
+            <button
+              type="button"
+              className="text-sm font-medium text-orange-600 hover:text-orange-700 transition-colors"
+            >
               Chỉnh sửa
             </button>
           )}
@@ -182,6 +181,7 @@ export default function CustomerFavoritesPage() {
             <h2 className="mt-4 font-semibold text-slate-700">Có lỗi xảy ra</h2>
             <p className="mt-1 text-sm text-slate-500">{error}</p>
             <button
+              type="button"
               onClick={fetchFavorites}
               className="mt-4 rounded-xl bg-orange-500 px-6 py-2.5 font-semibold text-white transition-colors hover:bg-orange-600"
             >
@@ -209,11 +209,7 @@ export default function CustomerFavoritesPage() {
           // Favorites list
           <div className="space-y-3">
             {favorites.map((poi) => (
-              <FavoritePOICard
-                key={poi.id}
-                poi={poi}
-                onRemove={() => handleRemove(poi.id)}
-              />
+              <FavoritePOICard key={poi.id} poi={poi} onRemove={() => handleRemove(poi.id)} />
             ))}
           </div>
         )}

@@ -193,17 +193,17 @@ export default function AdminDashboardPage() {
     const baseClass = "rounded-full px-2.5 py-1 text-xs font-semibold ";
 
     if (type === "poi") {
-      if (status === "APPROVED") return baseClass + "bg-emerald-100 text-emerald-700";
-      if (status === "REJECTED") return baseClass + "bg-rose-100 text-rose-700";
-      return baseClass + "bg-amber-100 text-amber-700";
+      if (status === "APPROVED") return `${baseClass}bg-emerald-100 text-emerald-700`;
+      if (status === "REJECTED") return `${baseClass}bg-rose-100 text-rose-700`;
+      return `${baseClass}bg-amber-100 text-amber-700`;
     }
 
     if (type === "tour") {
-      if (status === "Active") return baseClass + "bg-emerald-100 text-emerald-700";
-      return baseClass + "bg-slate-100 text-slate-600";
+      if (status === "Active") return `${baseClass}bg-emerald-100 text-emerald-700`;
+      return `${baseClass}bg-slate-100 text-slate-600`;
     }
 
-    return baseClass + "bg-slate-100 text-slate-600";
+    return `${baseClass}bg-slate-100 text-slate-600`;
   };
 
   const getTypeIcon = (type: string) => {

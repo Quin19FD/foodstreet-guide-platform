@@ -5,17 +5,17 @@
  * import from here and get the unified implementation with USER role baked in.
  */
 
-import type { NextResponse } from "next/server";
 import {
   CUSTOMER_AUTH_COOKIES,
-  createCustomerAccessToken,
-  verifyCustomerAccessToken as verifyCustomerAccessTokenUnified,
-  setAuthCookies as unifiedSetAuthCookies,
-  clearAuthCookies as unifiedClearAuthCookies,
-  jsonError,
-  type AccessTokenPayload as UnifiedAccessTokenPayload,
   type RoleAuthCookies,
+  type AccessTokenPayload as UnifiedAccessTokenPayload,
+  createCustomerAccessToken,
+  jsonError,
+  clearAuthCookies as unifiedClearAuthCookies,
+  setAuthCookies as unifiedSetAuthCookies,
+  verifyCustomerAccessToken as verifyCustomerAccessTokenUnified,
 } from "@/infrastructure/security/auth";
+import type { NextResponse } from "next/server";
 
 export const AUTH_COOKIES: RoleAuthCookies = CUSTOMER_AUTH_COOKIES;
 

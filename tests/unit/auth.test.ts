@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { NextRequest } from "next/server";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // ---------------------------------------------------------------------------
 // Stub environment and mock config BEFORE any module that imports it
@@ -42,22 +42,22 @@ vi.mock("@/infrastructure/database/prisma/client", () => ({
 // ---------------------------------------------------------------------------
 
 import {
+  ADMIN_AUTH_COOKIES,
+  AUTH_COOKIES,
+  CUSTOMER_AUTH_COOKIES,
+  type UserRole,
+  VENDOR_AUTH_COOKIES,
   createAccessToken,
-  verifyAccessToken,
+  createAdminAccessToken,
+  createCustomerAccessToken,
+  createVendorAccessToken,
   getBearerToken,
   jsonError,
-  createAdminAccessToken,
-  createVendorAccessToken,
-  createCustomerAccessToken,
-  verifyAdminAccessToken,
-  verifyVendorAccessToken,
-  verifyCustomerAccessToken,
-  AUTH_COOKIES,
-  ADMIN_AUTH_COOKIES,
-  VENDOR_AUTH_COOKIES,
-  CUSTOMER_AUTH_COOKIES,
   requireAuth,
-  type UserRole,
+  verifyAccessToken,
+  verifyAdminAccessToken,
+  verifyCustomerAccessToken,
+  verifyVendorAccessToken,
 } from "@/infrastructure/security/auth";
 
 // ---------------------------------------------------------------------------
@@ -68,7 +68,8 @@ function makeRequest(headers: Record<string, string> = {}): NextRequest {
   return {
     headers: new Headers(headers),
     cookies: {
-      get: (name: string) => (name === "fs_admin_access_token" && headers["cookie"] ? { value: "cookie-token" } : undefined),
+      get: (name: string) =>
+        name === "fs_admin_access_token" && headers.cookie ? { value: "cookie-token" } : undefined,
     },
   } as unknown as NextRequest;
 }
@@ -228,8 +229,7 @@ describe("requireAuth", () => {
     const req = {
       headers: new Headers(),
       cookies: {
-        get: (name: string) =>
-          name === "fs_admin_access_token" ? { value: token } : undefined,
+        get: (name: string) => (name === "fs_admin_access_token" ? { value: token } : undefined),
       },
     } as unknown as NextRequest;
 

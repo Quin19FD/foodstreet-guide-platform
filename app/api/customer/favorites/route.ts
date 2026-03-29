@@ -1,9 +1,9 @@
+import type { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import type { Prisma } from "@prisma/client";
 
 import { prisma } from "@/infrastructure/database/prisma/client";
-import { requireAuth, jsonError } from "@/infrastructure/security/auth";
+import { jsonError, requireAuth } from "@/infrastructure/security/auth";
 
 import { inferPoiType } from "../_shared";
 

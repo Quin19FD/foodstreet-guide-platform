@@ -32,11 +32,7 @@ export async function GET(request: NextRequest) {
   }
 
   const tl = lang.split("-")[0];
-  const googleUrl =
-    `https://translate.google.com/translate_tts?ie=UTF-8` +
-    `&tl=${encodeURIComponent(tl)}` +
-    `&client=tw-ob` +
-    `&q=${encodeURIComponent(text)}`;
+  const googleUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${encodeURIComponent(tl)}&client=tw-ob&q=${encodeURIComponent(text)}`;
 
   try {
     const upstream = await fetch(googleUrl, {
@@ -121,11 +117,7 @@ export async function POST(request: NextRequest) {
   if (!credentials && !apiKey) {
     // Fallback: proxy Google Translate TTS
     const tl = language.split("-")[0];
-    const googleUrl =
-      `https://translate.google.com/translate_tts?ie=UTF-8` +
-      `&tl=${encodeURIComponent(tl)}` +
-      `&client=tw-ob` +
-      `&q=${encodeURIComponent(text.slice(0, 200))}`;
+    const googleUrl = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${encodeURIComponent(tl)}&client=tw-ob&q=${encodeURIComponent(text.slice(0, 200))}`;
 
     try {
       const upstream = await fetch(googleUrl, {

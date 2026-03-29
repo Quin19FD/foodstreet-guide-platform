@@ -1,5 +1,5 @@
-import { CustomerBottomNav } from "@/components/features/customer/shared/customer-bottom-nav";
 import { FavoritesProvider } from "@/components/contexts/favorites-context";
+import { CustomerBottomNav } from "@/components/features/customer/shared/customer-bottom-nav";
 import { cn } from "@/shared/utils";
 
 export default function CustomerLayout({

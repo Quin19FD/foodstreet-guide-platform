@@ -1,10 +1,10 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, MapPin, Navigation, Play, Square, Heart } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { speak, stopSpeaking } from "@/lib/tts";
 import { useFavorites } from "@/components/contexts/favorites-context";
+import { speak, stopSpeaking } from "@/lib/tts";
+import { ArrowLeft, Heart, MapPin, Navigation, Play, Square } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 
 type PoiDetail = {
   id: string;
@@ -30,15 +30,6 @@ type PoiDetail = {
     audios: Array<{ id: string; audioUrl: string }>;
   }>;
 };
-
-function speechLang(code: string): string {
-  const value = code.toLowerCase();
-  if (value === "vi") return "vi-VN";
-  if (value === "en") return "en-US";
-  if (value === "fr") return "fr-FR";
-  if (value === "ja") return "ja-JP";
-  return value;
-}
 
 export default function POIDetailPage() {
   const router = useRouter();
@@ -143,20 +134,22 @@ export default function POIDetailPage() {
     setTimeout(() => setToggleSuccess(null), 2000);
   };
 
-  if (isLoading) return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50">
-      <div className="text-center">
-        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-orange-500 border-t-transparent" />
-        <p className="mt-4 text-sm text-slate-500">Đang tải POI...</p>
+  if (isLoading)
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+        <div className="text-center">
+          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-orange-500 border-t-transparent" />
+          <p className="mt-4 text-sm text-slate-500">Đang tải POI...</p>
+        </div>
       </div>
-    </div>
-  );
+    );
 
-  if (!poi) return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50">
-      <p className="text-sm text-slate-500">Không tìm thấy POI.</p>
-    </div>
-  );
+  if (!poi)
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+        <p className="text-sm text-slate-500">Không tìm thấy POI.</p>
+      </div>
+    );
 
   const isCurrentlyFavorited = isFavorited(poi.id);
 
@@ -167,6 +160,7 @@ export default function POIDetailPage() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
+              type="button"
               onClick={() => router.back()}
               className="flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm hover:bg-slate-50 transition-colors"
             >
@@ -175,13 +169,16 @@ export default function POIDetailPage() {
             <h1 className="font-semibold text-slate-900">Chi tiết POI</h1>
           </div>
           <button
+            type="button"
             onClick={handleToggleFavorite}
             disabled={isTogglingFavorite}
             className={`
               flex h-11 w-11 items-center justify-center rounded-full shadow-md transition-all duration-200 active:scale-90
-              ${isCurrentlyFavorited
-                ? "bg-red-500 text-white hover:bg-red-600"
-                : "bg-white text-red-500 hover:bg-red-50"}
+              ${
+                isCurrentlyFavorited
+                  ? "bg-red-500 text-white hover:bg-red-600"
+                  : "bg-white text-red-500 hover:bg-red-50"
+              }
               ${isTogglingFavorite ? "opacity-70" : ""}
             `}
             aria-label={isCurrentlyFavorited ? "Bỏ yêu thích" : "Thêm vào yêu thích"}
@@ -192,11 +189,11 @@ export default function POIDetailPage() {
         {/* Success/favorite status indicator */}
         {toggleSuccess !== null && (
           <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 animate-fade-in-up">
-            <div className={`rounded-full px-4 py-2 text-sm font-semibold shadow-lg ${
-              toggleSuccess
-                ? "bg-emerald-500 text-white"
-                : "bg-slate-700 text-white"
-            }`}>
+            <div
+              className={`rounded-full px-4 py-2 text-sm font-semibold shadow-lg ${
+                toggleSuccess ? "bg-emerald-500 text-white" : "bg-slate-700 text-white"
+              }`}
+            >
               {toggleSuccess ? "Đã thêm vào yêu thích" : "Đã bỏ yêu thích"}
             </div>
           </div>
@@ -213,9 +210,7 @@ export default function POIDetailPage() {
             </div>
             <div
               className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all ${
-                isCurrentlyFavorited
-                  ? "bg-red-100 text-red-500"
-                  : "bg-slate-100 text-slate-400"
+                isCurrentlyFavorited ? "bg-red-100 text-red-500" : "bg-slate-100 text-slate-400"
               }`}
             >
               <Heart className={`h-5 w-5 ${isCurrentlyFavorited ? "fill-current" : ""}`} />

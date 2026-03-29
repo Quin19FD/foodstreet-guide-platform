@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
 import {
   AlertCircle,
   Badge,
@@ -21,6 +20,7 @@ import {
   UserX,
   X,
 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 type UserRole = "USER" | "VENDOR" | "ADMIN";
 type UserStatus = "PENDING" | "APPROVED" | "REJECTED";
@@ -323,6 +323,7 @@ export default function UserManagement() {
             <p className="font-medium">{alert.message}</p>
           </div>
           <button
+            type="button"
             onClick={() => setAlert(null)}
             className="text-current/70 hover:text-current transition-colors"
           >
@@ -447,6 +448,7 @@ export default function UserManagement() {
               />
             </div>
             <button
+              type="button"
               onClick={handleSearch}
               disabled={isLoading}
               className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
@@ -454,6 +456,7 @@ export default function UserManagement() {
               Tìm kiếm
             </button>
             <button
+              type="button"
               onClick={() => {
                 setSearch("");
                 setRoleFilter("");
@@ -471,6 +474,7 @@ export default function UserManagement() {
             {selectedIds.size > 0 && (
               <>
                 <button
+                  type="button"
                   onClick={() => handleBulkAction("activate")}
                   disabled={isLoading}
                   className="inline-flex items-center gap-1.5 rounded-lg border border-green-300 bg-green-50 px-3 py-2 text-sm font-semibold text-green-700 transition-colors hover:bg-green-100 disabled:opacity-50"
@@ -478,6 +482,7 @@ export default function UserManagement() {
                   <UserCheck className="h-3.5 w-3.5" /> Kích hoạt
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleBulkAction("deactivate")}
                   disabled={isLoading}
                   className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 disabled:opacity-50"
@@ -485,6 +490,7 @@ export default function UserManagement() {
                   <UserX className="h-3.5 w-3.5" /> Vô hiệu
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleBulkAction("approve")}
                   disabled={isLoading}
                   className="inline-flex items-center gap-1.5 rounded-lg border border-green-300 bg-green-50 px-3 py-2 text-sm font-semibold text-green-700 transition-colors hover:bg-green-100 disabled:opacity-50"
@@ -492,6 +498,7 @@ export default function UserManagement() {
                   <CheckCircle2 className="h-3.5 w-3.5" /> Duyệt
                 </button>
                 <button
+                  type="button"
                   onClick={() => setRejectDialogOpen(true)}
                   disabled={isLoading}
                   className="inline-flex items-center gap-1.5 rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700 transition-colors hover:bg-rose-100 disabled:opacity-50"
@@ -499,6 +506,7 @@ export default function UserManagement() {
                   <ShieldX className="h-3.5 w-3.5" /> Từ chối
                 </button>
                 <button
+                  type="button"
                   onClick={handleDelete}
                   disabled={isLoading}
                   className="inline-flex items-center gap-1.5 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700 transition-colors hover:bg-red-100 disabled:opacity-50"
@@ -508,6 +516,7 @@ export default function UserManagement() {
               </>
             )}
             <button
+              type="button"
               onClick={loadUsers}
               disabled={isLoading}
               className="rounded-lg border border-slate-300 p-2 text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-50"
@@ -557,6 +566,7 @@ export default function UserManagement() {
       {/* Tabs */}
       <div className="flex gap-2 border-b border-slate-200">
         <button
+          type="button"
           onClick={() => setCurrentTab("all")}
           className={`px-4 py-2 text-sm font-semibold transition-colors ${
             currentTab === "all"
@@ -567,6 +577,7 @@ export default function UserManagement() {
           Tất cả
         </button>
         <button
+          type="button"
           onClick={() => setCurrentTab("vendors")}
           className={`px-4 py-2 text-sm font-semibold transition-colors ${
             currentTab === "vendors"
@@ -577,6 +588,7 @@ export default function UserManagement() {
           Vendors
         </button>
         <button
+          type="button"
           onClick={() => setCurrentTab("admins")}
           className={`px-4 py-2 text-sm font-semibold transition-colors ${
             currentTab === "admins"
@@ -587,6 +599,7 @@ export default function UserManagement() {
           Admins
         </button>
         <button
+          type="button"
           onClick={() => setCurrentTab("regular")}
           className={`px-4 py-2 text-sm font-semibold transition-colors ${
             currentTab === "regular"
@@ -597,6 +610,7 @@ export default function UserManagement() {
           Users
         </button>
         <button
+          type="button"
           onClick={() => setCurrentTab("pending")}
           className={`px-4 py-2 text-sm font-semibold transition-colors ${
             currentTab === "pending"
@@ -739,6 +753,7 @@ export default function UserManagement() {
         </p>
         <div className="flex items-center gap-2">
           <button
+            type="button"
             onClick={() => setSkip(Math.max(0, skip - take))}
             disabled={skip === 0 || isLoading}
             className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50"
@@ -746,6 +761,7 @@ export default function UserManagement() {
             <ChevronLeft className="h-4 w-4" /> Trang trước
           </button>
           <button
+            type="button"
             onClick={() => setSkip(skip + take)}
             disabled={skip + take >= total || isLoading}
             className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50"
@@ -772,6 +788,7 @@ export default function UserManagement() {
             />
             <div className="mt-6 flex justify-end gap-2">
               <button
+                type="button"
                 onClick={() => {
                   setRejectDialogOpen(false);
                   setRejectionReason("");
@@ -781,6 +798,7 @@ export default function UserManagement() {
                 Hủy
               </button>
               <button
+                type="button"
                 onClick={() => handleBulkAction("reject")}
                 disabled={!rejectionReason.trim() || isLoading}
                 className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-rose-700 disabled:opacity-50"

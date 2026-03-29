@@ -9,20 +9,20 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 import {
+  ADMIN_AUTH_COOKIES,
+  AUTH_COOKIES,
+  CUSTOMER_AUTH_COOKIES,
+  type RoleAuthCookies,
+  type UserRole,
+  VENDOR_AUTH_COOKIES,
+} from "@/infrastructure/security/auth-cookies";
+import {
+  type JwtPayload,
   parseDurationToSeconds,
   signJwtHs256,
   verifyJwtHs256,
-  type JwtPayload,
 } from "@/infrastructure/security/jwt";
 import { config } from "@/shared/config";
-import {
-  AUTH_COOKIES,
-  ADMIN_AUTH_COOKIES,
-  VENDOR_AUTH_COOKIES,
-  CUSTOMER_AUTH_COOKIES,
-  type UserRole,
-  type RoleAuthCookies,
-} from "@/infrastructure/security/auth-cookies";
 
 // Re-export cookie constants so existing consumers keep working
 export { AUTH_COOKIES, ADMIN_AUTH_COOKIES, VENDOR_AUTH_COOKIES, CUSTOMER_AUTH_COOKIES };
@@ -68,10 +68,7 @@ export function createAccessToken(
   });
 }
 
-export function verifyAccessToken(
-  role: UserRole,
-  token: string
-): AccessTokenPayload {
+export function verifyAccessToken(role: UserRole, token: string): AccessTokenPayload {
   const result = verifyJwtHs256<AccessTokenPayload>({
     token,
     secret: config.auth.jwtSecret,
@@ -190,11 +187,7 @@ export async function requireAuth(
 // jsonError — single implementation
 // ---------------------------------------------------------------------------
 
-export function jsonError(
-  status: number,
-  message: string,
-  extra?: Record<string, unknown>
-) {
+export function jsonError(status: number, message: string, extra?: Record<string, unknown>) {
   return NextResponse.json(
     {
       error: message,
@@ -218,11 +211,8 @@ export const createVendorAccessToken = (input: { userId: string; email: string }
 export const createCustomerAccessToken = (input: { userId: string; email: string }) =>
   createAccessToken("USER", input);
 
-export const verifyAdminAccessToken = (token: string) =>
-  verifyAccessToken("ADMIN", token);
+export const verifyAdminAccessToken = (token: string) => verifyAccessToken("ADMIN", token);
 
-export const verifyVendorAccessToken = (token: string) =>
-  verifyAccessToken("VENDOR", token);
+export const verifyVendorAccessToken = (token: string) => verifyAccessToken("VENDOR", token);
 
-export const verifyCustomerAccessToken = (token: string) =>
-  verifyAccessToken("USER", token);
+export const verifyCustomerAccessToken = (token: string) => verifyAccessToken("USER", token);

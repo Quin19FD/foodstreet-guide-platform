@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
 import { createRateLimiter, registrationLimiter } from "@/infrastructure/security/rate-limit";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 describe("createRateLimiter", () => {
   beforeEach(() => {

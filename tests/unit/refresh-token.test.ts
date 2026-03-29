@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   generateRefreshToken,
@@ -108,7 +108,7 @@ describe("rotateRefreshToken", () => {
 
     expect(prisma.user.updateMany).toHaveBeenCalledOnce();
     const call = vi.mocked(prisma.user.updateMany).mock.calls[0][0];
-    expect(call!.where).toEqual({
+    expect(call?.where).toEqual({
       id: userId,
       refreshTokenHash: currentTokenHash,
     });
@@ -126,7 +126,7 @@ describe("rotateRefreshToken", () => {
     });
 
     const call = vi.mocked(prisma.user.updateMany).mock.calls[0][0];
-    expect(call!.data).toEqual({
+    expect(call?.data).toEqual({
       refreshTokenHash: newTokenHash,
       refreshTokenExpiry: newExpiry,
       refreshTokenVersion: { increment: 1 },

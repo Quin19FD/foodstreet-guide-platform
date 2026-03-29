@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+import { requestOtpSchema } from "@/application/validation/password-reset";
 import { prisma } from "@/infrastructure/database/prisma/client";
 import { logUserActivity } from "@/infrastructure/logging/activity-log";
-import { config } from "@/shared/config";
-import { requestOtpSchema } from "@/application/validation/password-reset";
+import { sendPasswordResetOtpEmail } from "@/infrastructure/password-reset/mailer";
 import { generateNumericOtp, hashOtp } from "@/infrastructure/password-reset/otp";
 import { checkAndRecordOtpSend } from "@/infrastructure/password-reset/rate-limit";
-import { sendPasswordResetOtpEmail } from "@/infrastructure/password-reset/mailer";
+import { config } from "@/shared/config";
 
 export const runtime = "nodejs";
 

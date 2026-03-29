@@ -1,6 +1,6 @@
 "use client";
 
-import maplibregl from "maplibre-gl";
+import { pauseSpeaking, resumeSpeaking, speak, stopSpeaking } from "@/lib/tts";
 import {
   Globe2,
   Headphones,
@@ -13,8 +13,8 @@ import {
   SkipForward,
   Square,
 } from "lucide-react";
+import maplibregl from "maplibre-gl";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { speak, stopSpeaking, pauseSpeaking, resumeSpeaking } from "@/lib/tts";
 
 type PoiStatus = "PENDING" | "APPROVED" | "REJECTED";
 
@@ -154,84 +154,6 @@ function splitSentences(value: string): string[] {
     .filter(Boolean);
 }
 
-function toSpeechLang(language: string): string {
-  const normalized = language.toLowerCase();
-
-  // Ánh xạ các mã ngôn ngữ 2 ký tự sang mã ngôn ngữ đầy đủ (BCP-47)
-  // để Web Speech API có thể tìm đúng giọng đọc (voice).
-  const speechMap: Record<string, string> = {
-    vi: "vi-VN",
-    en: "en-US",
-    fr: "fr-FR",
-    de: "de-DE",
-    ja: "ja-JP",
-    ko: "ko-KR",
-    zh: "zh-CN",
-    th: "th-TH",
-    es: "es-ES",
-    pt: "pt-BR",
-    it: "it-IT",
-    ru: "ru-RU",
-    ar: "ar-SA",
-    hi: "hi-IN",
-    id: "id-ID",
-    ms: "ms-MY",
-    nl: "nl-NL",
-    pl: "pl-PL",
-    tr: "tr-TR",
-    uk: "uk-UA",
-    cs: "cs-CZ",
-    sv: "sv-SE",
-    da: "da-DK",
-    no: "nb-NO",
-    fi: "fi-FI",
-    hu: "hu-HU",
-    el: "el-GR",
-    he: "he-IL",
-    ro: "ro-RO",
-    bg: "bg-BG",
-    hr: "hr-HR",
-    sk: "sk-SK",
-    ta: "ta-IN",
-    te: "te-IN",
-    mr: "mr-IN",
-    bn: "bn-IN",
-    gu: "gu-IN",
-    kn: "kn-IN",
-    ml: "ml-IN",
-    pa: "pa-IN",
-    "zh-tw": "zh-TW",
-    "zh-hk": "zh-HK",
-  };
-
-  return speechMap[normalized] || normalized;
-}
-
-// Cache voices vì Chrome trả về [] cho getVoices() cho đến khi voiceschanged được fire.
-let cachedVoices: SpeechSynthesisVoice[] = [];
-if (typeof window !== "undefined") {
-  cachedVoices = window.speechSynthesis.getVoices();
-  window.speechSynthesis.addEventListener("voiceschanged", () => {
-    cachedVoices = window.speechSynthesis.getVoices();
-  });
-}
-
-function getBestVoice(langCode: string) {
-  if (typeof window === "undefined") return null;
-  // Nếu cache rỗng, thử lấy lại một lần
-  if (cachedVoices.length === 0) {
-    cachedVoices = window.speechSynthesis.getVoices();
-  }
-  const voices = cachedVoices;
-  const targetPrefix = langCode.split("-")[0].toLowerCase();
-
-  let voice = voices.find((v) => v.lang.replace("_", "-").toLowerCase() === langCode.toLowerCase());
-  if (!voice) {
-    voice = voices.find((v) => v.lang.toLowerCase().startsWith(targetPrefix));
-  }
-  return voice || null;
-}
-
 function PoiReadonlyMap({
   latitude,
   longitude,
@@ -349,7 +271,7 @@ export function PoiDetailView(props: PoiDetailViewProps) {
           const normalized = normalizeLanguageCode(firstLanguageCode);
           if (!normalized) continue;
           if (!map.has(normalized)) {
-            const languageName = item.languages![firstLanguageCode];
+            const languageName = item.languages?.[firstLanguageCode];
             map.set(normalized, `${languageName || countryName} (${normalized.toUpperCase()})`);
           }
         }
@@ -886,6 +808,7 @@ export function PoiDetailView(props: PoiDetailViewProps) {
                         className="rounded-lg border border-slate-200 bg-slate-50 p-2"
                       >
                         <audio controls className="w-full">
+                          <track kind="captions" />
                           <source src={audio.audioUrl} />
                         </audio>
                       </div>

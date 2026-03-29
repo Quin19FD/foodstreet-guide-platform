@@ -50,7 +50,7 @@ export default function AdminSettingsPage() {
     return avatarPreviewUrl ?? avatarUrl;
   }, [avatarPreviewUrl, avatarUrl, removeAvatar]);
 
-  const hasChanges = useMemo(() => {
+  const _hasChanges = useMemo(() => {
     return avatarFile !== null || removeAvatar;
   }, [avatarFile, removeAvatar]);
 
@@ -211,6 +211,7 @@ export default function AdminSettingsPage() {
               strokeLinejoin="round"
               className="lucide lucide-settings h-6 w-6"
             >
+              <title>Settings</title>
               <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
               <circle cx="12" cy="12" r="3" />
             </svg>
@@ -253,9 +254,9 @@ export default function AdminSettingsPage() {
                 <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                   {/* Avatar field */}
                   <div className="col-span-full">
-                    <label className="block text-sm font-medium leading-6 text-slate-900">
+                    <span className="block text-sm font-medium leading-6 text-slate-900">
                       Ảnh đại diện
-                    </label>
+                    </span>
                     <div className="mt-4 flex items-center gap-x-5">
                       {avatarToShow ? (
                         <img
@@ -456,7 +457,7 @@ export default function AdminSettingsPage() {
                     </dt>
                     <dd className="mt-1">
                       <span className="inline-flex items-center rounded-md bg-orange-50 px-3 py-1.5 text-xs font-semibold text-orange-700 ring-1 ring-inset ring-orange-600/20">
-                        <span className="mr-1.5 h-1.5 w-1.5 rounded-full bg-orange-500"></span>
+                        <span className="mr-1.5 h-1.5 w-1.5 rounded-full bg-orange-500" />
                         {config.app.environment.toUpperCase()}
                       </span>
                     </dd>

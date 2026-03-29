@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
 import {
   AlertCircle,
   CheckCircle2,
@@ -13,6 +12,7 @@ import {
   Volume2,
   X,
 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 import { AdminLayout } from "@/components/layouts/admin-layout";
 
@@ -110,8 +110,8 @@ export default function AdminTranslationsPage() {
       result = result.filter(
         (t) =>
           t.poi.name.toLowerCase().includes(search.toLowerCase()) ||
-          (t.name && t.name.toLowerCase().includes(search.toLowerCase())) ||
-          (t.description && t.description.toLowerCase().includes(search.toLowerCase()))
+          t.name?.toLowerCase().includes(search.toLowerCase()) ||
+          t.description?.toLowerCase().includes(search.toLowerCase())
       );
     }
 
@@ -222,6 +222,7 @@ export default function AdminTranslationsPage() {
               <p className="font-medium">{alert.message}</p>
             </div>
             <button
+              type="button"
               onClick={() => setAlert(null)}
               className="text-current/70 hover:text-current transition-colors"
             >
@@ -322,6 +323,7 @@ export default function AdminTranslationsPage() {
                 <option value="zh">中文</option>
               </select>
               <button
+                type="button"
                 onClick={loadTranslations}
                 disabled={isLoading}
                 className="rounded-lg border border-slate-300 p-2 text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
@@ -335,6 +337,7 @@ export default function AdminTranslationsPage() {
         {/* Tabs */}
         <div className="flex gap-2 border-b border-slate-200">
           <button
+            type="button"
             onClick={() => setCurrentTab("all")}
             className={`px-4 py-2 text-sm font-semibold transition-colors ${
               currentTab === "all"
@@ -345,6 +348,7 @@ export default function AdminTranslationsPage() {
             Tất cả
           </button>
           <button
+            type="button"
             onClick={() => setCurrentTab("with-audio")}
             className={`px-4 py-2 text-sm font-semibold transition-colors ${
               currentTab === "with-audio"
@@ -355,6 +359,7 @@ export default function AdminTranslationsPage() {
             Có Audio
           </button>
           <button
+            type="button"
             onClick={() => setCurrentTab("without-audio")}
             className={`px-4 py-2 text-sm font-semibold transition-colors ${
               currentTab === "without-audio"
@@ -476,6 +481,7 @@ export default function AdminTranslationsPage() {
           </p>
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={() => setSkip(Math.max(0, skip - take))}
               disabled={skip === 0 || isLoading}
               className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50"
@@ -483,6 +489,7 @@ export default function AdminTranslationsPage() {
               Trang trước
             </button>
             <button
+              type="button"
               onClick={() => setSkip(skip + take)}
               disabled={skip + take >= total || isLoading}
               className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50"

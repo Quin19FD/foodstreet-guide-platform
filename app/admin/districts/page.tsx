@@ -1,4 +1,4 @@
-import { MapPin, Construction } from "lucide-react";
+import { Construction, MapPin } from "lucide-react";
 
 import { AdminLayout } from "@/components/layouts/admin-layout";
 

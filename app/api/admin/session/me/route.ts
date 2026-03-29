@@ -3,8 +3,8 @@ import type { NextRequest } from "next/server";
 
 import { prisma } from "@/infrastructure/database/prisma/client";
 
-import { ADMIN_AUTH_COOKIES, jsonError, verifyAdminAccessToken } from "../_shared";
 import { getBearerToken } from "@/infrastructure/security/auth";
+import { ADMIN_AUTH_COOKIES, jsonError, verifyAdminAccessToken } from "../_shared";
 
 export const runtime = "nodejs";
 

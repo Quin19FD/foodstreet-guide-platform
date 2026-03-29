@@ -3,7 +3,11 @@ import type { NextRequest } from "next/server";
 
 import { prisma } from "@/infrastructure/database/prisma/client";
 import { parseDurationToSeconds } from "@/infrastructure/security/jwt";
-import { generateRefreshToken, hashRefreshToken, rotateRefreshToken } from "@/infrastructure/security/refresh-token";
+import {
+  generateRefreshToken,
+  hashRefreshToken,
+  rotateRefreshToken,
+} from "@/infrastructure/security/refresh-token";
 import { config } from "@/shared/config";
 
 import { AUTH_COOKIES, createCustomerAccessToken, jsonError, setAuthCookies } from "../_shared";

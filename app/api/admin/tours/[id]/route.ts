@@ -4,8 +4,8 @@ import type { NextRequest } from "next/server";
 import { randomUUID } from "node:crypto";
 import { adminUpdateTourSchema } from "@/application/validators/admin-tours";
 import { prisma } from "@/infrastructure/database/prisma/client";
-import { uploadToCloudinary } from "@/infrastructure/media/cloudinary";
 import { logUserActivity } from "@/infrastructure/logging/activity-log";
+import { uploadToCloudinary } from "@/infrastructure/media/cloudinary";
 
 import { jsonError } from "../../session/_shared";
 import { buildTourInclude, requireAdmin, toTourResponse } from "../_shared";
@@ -137,7 +137,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
   let rawPayload: Awaited<ReturnType<typeof parseUpdatePayload>>;
   try {
     rawPayload = await parseUpdatePayload(request);
-  } catch (error) {
+  } catch (_error) {
     return jsonError(400, "Dữ liệu không hợp lệ");
   }
 

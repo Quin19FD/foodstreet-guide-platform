@@ -1,8 +1,8 @@
 "use client";
 
+import { ArrowLeft, Clock, MapPin } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft, Clock, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type TourDetail = {
@@ -62,6 +62,7 @@ export default function TourDetailPage() {
       <header className="sticky top-0 z-40 bg-white/90 px-4 py-3 backdrop-blur">
         <div className="flex items-center gap-3">
           <button
+            type="button"
             onClick={() => router.back()}
             className="flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm"
           >

@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
 import {
   AlertCircle,
   Badge,
@@ -14,6 +13,7 @@ import {
   Volume2,
   X,
 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 import { AdminLayout } from "@/components/layouts/admin-layout";
 
@@ -104,7 +104,7 @@ export default function AdminAudioGuidesPage() {
       result = result.filter(
         (g) =>
           g.poiName.toLowerCase().includes(search.toLowerCase()) ||
-          (g.description && g.description.toLowerCase().includes(search.toLowerCase()))
+          g.description?.toLowerCase().includes(search.toLowerCase())
       );
     }
 
@@ -215,6 +215,7 @@ export default function AdminAudioGuidesPage() {
               <p className="font-medium">{alert.message}</p>
             </div>
             <button
+              type="button"
               onClick={() => setAlert(null)}
               className="text-current/70 hover:text-current transition-colors"
             >
@@ -315,6 +316,7 @@ export default function AdminAudioGuidesPage() {
                 <option value="zh">中文</option>
               </select>
               <button
+                type="button"
                 onClick={loadAudioGuides}
                 disabled={isLoading}
                 className="rounded-lg border border-slate-300 p-2 text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
@@ -328,6 +330,7 @@ export default function AdminAudioGuidesPage() {
         {/* Tabs */}
         <div className="flex gap-2 border-b border-slate-200">
           <button
+            type="button"
             onClick={() => setCurrentTab("all")}
             className={`px-4 py-2 text-sm font-semibold transition-colors ${
               currentTab === "all"
@@ -338,6 +341,7 @@ export default function AdminAudioGuidesPage() {
             Tất cả
           </button>
           <button
+            type="button"
             onClick={() => setCurrentTab("active")}
             className={`px-4 py-2 text-sm font-semibold transition-colors ${
               currentTab === "active"
@@ -348,6 +352,7 @@ export default function AdminAudioGuidesPage() {
             Hoạt động
           </button>
           <button
+            type="button"
             onClick={() => setCurrentTab("inactive")}
             className={`px-4 py-2 text-sm font-semibold transition-colors ${
               currentTab === "inactive"
@@ -461,6 +466,7 @@ export default function AdminAudioGuidesPage() {
           </p>
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={() => setSkip(Math.max(0, skip - take))}
               disabled={skip === 0 || isLoading}
               className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50"
@@ -468,6 +474,7 @@ export default function AdminAudioGuidesPage() {
               Trang trước
             </button>
             <button
+              type="button"
               onClick={() => setSkip(skip + take)}
               disabled={skip + take >= total || isLoading}
               className="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50"

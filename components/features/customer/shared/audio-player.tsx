@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { Play, Pause, Volume2 } from "lucide-react";
-import { cn } from "@/shared/utils";
 import { speak, stopSpeaking } from "@/lib/tts";
+import { cn } from "@/shared/utils";
+import { Pause, Play, Volume2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 export function AudioPlayer({
   script,
@@ -17,7 +17,7 @@ export function AudioPlayer({
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const _utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
 
   useEffect(() => {
     if (autoPlay && script && !isSpeaking) {
@@ -97,6 +97,7 @@ export function AudioPlayer({
       <div className="flex items-center justify-between">
         <p className="text-xs text-slate-500 line-clamp-2">{script}</p>
         <button
+          type="button"
           onClick={handlePlay}
           className={cn(
             "flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-all",

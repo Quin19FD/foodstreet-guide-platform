@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-import { ADMIN_AUTH_COOKIES, VENDOR_AUTH_COOKIES, CUSTOMER_AUTH_COOKIES } from "@/infrastructure/security/auth-cookies";
+import {
+  ADMIN_AUTH_COOKIES,
+  CUSTOMER_AUTH_COOKIES,
+  VENDOR_AUTH_COOKIES,
+} from "@/infrastructure/security/auth-cookies";
 
 /**
  * Middleware bảo vệ route admin/vendor/customer.
@@ -46,7 +50,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (pathname === "/customer/login" || pathname === "/customer/register" || pathname === "/customer/forgot-password") return NextResponse.next();
+  if (
+    pathname === "/customer/login" ||
+    pathname === "/customer/register" ||
+    pathname === "/customer/forgot-password"
+  )
+    return NextResponse.next();
 
   // Customer public pages (no auth required)
   if (pathname === "/customer") return NextResponse.next();

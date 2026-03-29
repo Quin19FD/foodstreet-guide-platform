@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
+import { useEffect, useRef, useState } from "react";
 import "mapbox-gl/dist/mapbox-gl.css";
 
 interface MapboxMapProps {
@@ -82,11 +82,13 @@ export function MapboxMap({
     if (!map.current) return;
 
     // Clear existing markers
-    markersRef.current.forEach((marker) => marker.remove());
+    for (const marker of markersRef.current.values()) {
+      marker.remove();
+    }
     markersRef.current.clear();
 
     // Add new markers for POIs
-    pois.forEach((poi) => {
+    for (const poi of pois) {
       if (!map.current) return;
 
       const el = document.createElement("div");
@@ -125,7 +127,7 @@ export function MapboxMap({
       if (selectedPOI === poi.id) {
         marker.togglePopup();
       }
-    });
+    }
   }, [pois, selectedPOI, onPOIClick]);
 
   return (

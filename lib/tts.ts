@@ -14,14 +14,14 @@
 // Voice cache
 // ---------------------------------------------------------------------------
 let cachedVoices: SpeechSynthesisVoice[] = [];
-let voicesReady = false;
+let _voicesReady = false;
 
 if (typeof window !== "undefined" && "speechSynthesis" in window) {
   cachedVoices = window.speechSynthesis.getVoices();
-  voicesReady = cachedVoices.length > 0;
+  _voicesReady = cachedVoices.length > 0;
   window.speechSynthesis.addEventListener("voiceschanged", () => {
     cachedVoices = window.speechSynthesis.getVoices();
-    voicesReady = true;
+    _voicesReady = true;
   });
 }
 

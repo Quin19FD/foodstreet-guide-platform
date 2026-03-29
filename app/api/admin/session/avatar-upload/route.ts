@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
       bytes: result.bytes,
       format: result.format,
     });
-  } catch (error) {
+  } catch (_error) {
     return jsonError(500, "Upload thất bại, vui lòng thử lại");
   }
 }

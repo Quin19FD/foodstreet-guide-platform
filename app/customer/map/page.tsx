@@ -1,11 +1,11 @@
 "use client";
 
+import { speak as ttsSpeak, stopSpeaking as ttsStop } from "@/lib/tts";
+import { MapPin, Navigation, Pause, Play, Search, Square, Wifi, WifiOff } from "lucide-react";
+import maplibregl from "maplibre-gl";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import maplibregl from "maplibre-gl";
-import { MapPin, Navigation, Pause, Play, Search, Square, Wifi, WifiOff } from "lucide-react";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { speak as ttsSpeak, stopSpeaking as ttsStop } from "@/lib/tts";
 
 type PoiMapItem = {
   id: string;
@@ -997,9 +997,11 @@ function CustomerMapContent() {
 
         {/* Status Indicators */}
         <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-          <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 ${
-            isOnline ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
-          }`}>
+          <span
+            className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 ${
+              isOnline ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
+            }`}
+          >
             {isOnline ? <Wifi className="h-3.5 w-3.5" /> : <WifiOff className="h-3.5 w-3.5" />}
             {isOnline ? "Online" : "Offline"}
           </span>
@@ -1139,17 +1141,34 @@ function CustomerMapContent() {
 
           {/* Audio Status with visual indicator */}
           <div className="mt-3 flex items-center gap-3">
-            <div className={`flex-1 rounded-full p-1 ${
-              isSpeaking ? "bg-gradient-to-r from-orange-400 to-amber-400" : "bg-slate-100"
-            }`}>
+            <div
+              className={`flex-1 rounded-full p-1 ${
+                isSpeaking ? "bg-gradient-to-r from-orange-400 to-amber-400" : "bg-slate-100"
+              }`}
+            >
               <div className="flex h-2 items-center gap-0.5 rounded-full bg-white/30 px-2">
                 {isSpeaking ? (
                   <>
-                    <span className="h-3 w-1 rounded-full bg-white animate-pulse" style={{ animationDelay: "0ms" }} />
-                    <span className="h-4 w-1 rounded-full bg-white animate-pulse" style={{ animationDelay: "100ms" }} />
-                    <span className="h-2 w-1 rounded-full bg-white animate-pulse" style={{ animationDelay: "200ms" }} />
-                    <span className="h-4 w-1 rounded-full bg-white animate-pulse" style={{ animationDelay: "300ms" }} />
-                    <span className="h-3 w-1 rounded-full bg-white animate-pulse" style={{ animationDelay: "400ms" }} />
+                    <span
+                      className="h-3 w-1 rounded-full bg-white animate-pulse"
+                      style={{ animationDelay: "0ms" }}
+                    />
+                    <span
+                      className="h-4 w-1 rounded-full bg-white animate-pulse"
+                      style={{ animationDelay: "100ms" }}
+                    />
+                    <span
+                      className="h-2 w-1 rounded-full bg-white animate-pulse"
+                      style={{ animationDelay: "200ms" }}
+                    />
+                    <span
+                      className="h-4 w-1 rounded-full bg-white animate-pulse"
+                      style={{ animationDelay: "300ms" }}
+                    />
+                    <span
+                      className="h-3 w-1 rounded-full bg-white animate-pulse"
+                      style={{ animationDelay: "400ms" }}
+                    />
                   </>
                 ) : (
                   <span className="h-2 w-full rounded-full bg-slate-200" />
@@ -1165,9 +1184,7 @@ function CustomerMapContent() {
                   ? "Đang tạm dừng..."
                   : "Sẵn sàng phát thuyết minh"}
             </p>
-            <span className="text-xs font-medium text-slate-500">
-              Hàng đợi: {queueCount} câu
-            </span>
+            <span className="text-xs font-medium text-slate-500">Hàng đợi: {queueCount} câu</span>
           </div>
         </div>
 
@@ -1242,9 +1259,7 @@ function CustomerMapContent() {
                 />
                 <div className="gradient-overlay absolute inset-0" />
                 <div className="absolute top-3 right-3">
-                  <span className="badge-primary shadow-sm">
-                    {selectedPoi.category ?? "POI"}
-                  </span>
+                  <span className="badge-primary shadow-sm">{selectedPoi.category ?? "POI"}</span>
                 </div>
               </div>
             )}

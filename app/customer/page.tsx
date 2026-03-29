@@ -1,26 +1,22 @@
 "use client";
 
-import Link from "next/link";
+import { useFavorites } from "@/components/contexts/favorites-context";
+import { EmptyState, SkeletonPOICard, SkeletonTourCard } from "@/components/ui/loading-skeleton";
 import {
-  Search,
-  MapPin,
-  Navigation,
-  Clock,
-  Utensils,
-  Coffee,
-  IceCream,
   Beef,
-  Star,
+  Clock,
+  Coffee,
   Compass,
   Heart,
+  IceCream,
+  MapPin,
+  Navigation,
+  Search,
+  Star,
+  Utensils,
 } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import {
-  SkeletonPOICard,
-  SkeletonTourCard,
-  EmptyState,
-} from "@/components/ui/loading-skeleton";
-import { useFavorites } from "@/components/contexts/favorites-context";
 
 type SearchType = "poi" | "tour";
 
@@ -148,26 +144,30 @@ export default function CustomerHomePage() {
     return pois.filter((poi) => {
       const categoryLower = poi.category?.toLowerCase() ?? "";
       if (selectedCategory === "food")
-        return categoryLower.includes("food") ||
-               categoryLower.includes("đồ ăn") ||
-               categoryLower.includes("món");
+        return (
+          categoryLower.includes("food") ||
+          categoryLower.includes("đồ ăn") ||
+          categoryLower.includes("món")
+        );
       if (selectedCategory === "drink")
-        return categoryLower.includes("drink") ||
-               categoryLower.includes("đồ uống") ||
-               categoryLower.includes("cafe") ||
-               categoryLower.includes("nước");
+        return (
+          categoryLower.includes("drink") ||
+          categoryLower.includes("đồ uống") ||
+          categoryLower.includes("cafe") ||
+          categoryLower.includes("nước")
+        );
       if (selectedCategory === "snack")
-        return categoryLower.includes("snack") ||
-               categoryLower.includes("ăn vặt") ||
-               categoryLower.includes("bánh");
+        return (
+          categoryLower.includes("snack") ||
+          categoryLower.includes("ăn vặt") ||
+          categoryLower.includes("bánh")
+        );
       return true;
     });
   }, [pois, selectedCategory]);
 
   const featuredPois = useMemo(() => {
-    return pois
-      .filter((poi) => poi.rating && poi.rating >= 4.5)
-      .slice(0, 3);
+    return pois.filter((poi) => poi.rating && poi.rating >= 4.5).slice(0, 3);
   }, [pois]);
 
   return (
@@ -188,8 +188,12 @@ export default function CustomerHomePage() {
         </div>
 
         {/* Search Type Toggle */}
-        <div className="mt-5 grid grid-cols-2 gap-3 animate-fade-in-up" style={{ animationDelay: "100ms" }}>
+        <div
+          className="mt-5 grid grid-cols-2 gap-3 animate-fade-in-up"
+          style={{ animationDelay: "100ms" }}
+        >
           <button
+            type="button"
             onClick={() => {
               setSearchType("poi");
               setSelectedCategory("all");
@@ -203,6 +207,7 @@ export default function CustomerHomePage() {
             Tìm POI
           </button>
           <button
+            type="button"
             onClick={() => setSearchType("tour")}
             className={`min-h-12 rounded-2xl px-4 py-3 text-sm font-semibold transition-all duration-200 ${
               searchType === "tour"
@@ -215,16 +220,11 @@ export default function CustomerHomePage() {
         </div>
 
         {/* Search Bar */}
-        <div
-          className="relative mt-4 animate-fade-in-up"
-          style={{ animationDelay: "200ms" }}
-        >
+        <div className="relative mt-4 animate-fade-in-up" style={{ animationDelay: "200ms" }}>
           <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-orange-400" />
           <input
             type="text"
-            placeholder={
-              searchType === "poi" ? "Tìm theo tên POI..." : "Tìm theo tên TOUR..."
-            }
+            placeholder={searchType === "poi" ? "Tìm theo tên POI..." : "Tìm theo tên TOUR..."}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="h-12 w-full rounded-2xl border-0 bg-white/95 pl-12 pr-4 text-[15px] shadow-lg outline-none placeholder:text-slate-400 focus:bg-white focus:ring-2 focus:ring-orange-400/50"
@@ -242,6 +242,7 @@ export default function CustomerHomePage() {
                 const isActive = selectedCategory === category.id;
                 return (
                   <button
+                    type="button"
                     key={category.id}
                     onClick={() => setSelectedCategory(category.id)}
                     className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium whitespace-nowrap transition-all duration-200 ${
@@ -263,9 +264,7 @@ export default function CustomerHomePage() {
         {isInitialLoad && searchType === "poi" && featuredPois.length > 0 && (
           <section className="animate-fade-in-up" style={{ animationDelay: "400ms" }}>
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="text-base font-semibold text-slate-800">
-                ⭐ Được đánh giá cao
-              </h2>
+              <h2 className="text-base font-semibold text-slate-800">⭐ Được đánh giá cao</h2>
               <Link
                 href="/customer?featured=1"
                 className="text-xs font-medium text-orange-500 hover:text-orange-600"
@@ -340,11 +339,7 @@ export default function CustomerHomePage() {
             filteredPois.length === 0 ? (
               <EmptyState
                 icon={Search}
-                title={
-                  searchQuery.trim()
-                    ? "Không tìm thấy kết quả"
-                    : "Chưa có POI nào"
-                }
+                title={searchQuery.trim() ? "Không tìm thấy kết quả" : "Chưa có POI nào"}
                 description={
                   searchQuery.trim()
                     ? "Thử tìm kiếm với từ khóa khác"
@@ -407,10 +402,13 @@ export default function CustomerHomePage() {
                                 : `${(poi.distanceMeters / 1000).toFixed(1)}km`}
                             </p>
                           ) : (
-                            <span className="badge-secondary">{poi.type === "FOOD_STALL" ? "Gian hàng" : "Tiện ích"}</span>
+                            <span className="badge-secondary">
+                              {poi.type === "FOOD_STALL" ? "Gian hàng" : "Tiện ích"}
+                            </span>
                           )}
                           {/* Favorite button */}
                           <button
+                            type="button"
                             onClick={(e) => {
                               e.preventDefault();
                               toggleFavorite(poi.id);
@@ -418,9 +416,11 @@ export default function CustomerHomePage() {
                             disabled={isTogglingFavorite}
                             className={`
                               flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 active:scale-90
-                              ${favorited
-                                ? "bg-red-500 text-white"
-                                : "bg-slate-100 text-slate-400 hover:bg-red-50 hover:text-red-500"}
+                              ${
+                                favorited
+                                  ? "bg-red-500 text-white"
+                                  : "bg-slate-100 text-slate-400 hover:bg-red-50 hover:text-red-500"
+                              }
                               ${isTogglingFavorite ? "opacity-60" : ""}
                             `}
                             aria-label={favorited ? "Bỏ yêu thích" : "Thêm vào yêu thích"}

@@ -1,6 +1,6 @@
+import type { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import type { Prisma } from "@prisma/client";
 
 import { prisma } from "@/infrastructure/database/prisma/client";
 

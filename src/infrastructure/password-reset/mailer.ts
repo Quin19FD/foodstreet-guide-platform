@@ -8,14 +8,14 @@ type SendOtpEmailInput = {
 
 function getEnv(name: string): string | null {
   const value = process.env[name];
-  return value && value.trim() ? value.trim() : null;
+  return value?.trim() ? value.trim() : null;
 }
 
 export async function sendPasswordResetOtpEmail(input: SendOtpEmailInput): Promise<void> {
   const host = getEnv("SMTP_HOST");
   const portRaw = getEnv("SMTP_PORT");
   const fromEnv = getEnv("SMTP_FROM");
-  const user = getEnv("SMTP_USER") ?? (fromEnv && fromEnv.includes("@") ? fromEnv : null);
+  const user = getEnv("SMTP_USER") ?? (fromEnv?.includes("@") ? fromEnv : null);
   const passRaw = getEnv("SMTP_PASS");
   const pass =
     host === "smtp.gmail.com" && passRaw?.includes(" ") ? passRaw.replaceAll(" ", "") : passRaw;

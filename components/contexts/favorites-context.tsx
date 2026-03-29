@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
+import { type ReactNode, createContext, useCallback, useContext, useEffect, useState } from "react";
 
 type FavoritesContextType = {
   isFavorited: (poiId: string) => boolean;
@@ -26,10 +26,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
   const [isInitialized, setIsInitialized] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const isFavorited = useCallback(
-    (poiId: string) => favorites.has(poiId),
-    [favorites]
-  );
+  const isFavorited = useCallback((poiId: string) => favorites.has(poiId), [favorites]);
 
   // Load favorites on mount - only if user is authenticated
   const loadFavorites = useCallback(async () => {
@@ -37,7 +34,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
 
     try {
       const res = await fetch("/api/customer/favorites");
-      
+
       if (res.status === 401) {
         // Not authenticated - this is expected for guest users
         setIsAuthenticated(false);
@@ -67,7 +64,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       // Check authentication first
       if (!isAuthenticated && isInitialized) {
         // Redirect to login or show login modal
-        window.location.href = "/customer/login?redirect=" + encodeURIComponent(window.location.pathname);
+        window.location.href = `/customer/login?redirect=${encodeURIComponent(window.location.pathname)}`;
         return false;
       }
 
@@ -91,9 +88,10 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
               return next;
             });
             return false; // Removed
-          } else if (res.status === 401) {
+          }
+          if (res.status === 401) {
             // Session expired - redirect to login
-            window.location.href = "/customer/login?redirect=" + encodeURIComponent(window.location.pathname);
+            window.location.href = `/customer/login?redirect=${encodeURIComponent(window.location.pathname)}`;
             return false;
           }
         } else {
@@ -111,9 +109,10 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
               return next;
             });
             return true; // Added
-          } else if (res.status === 401) {
+          }
+          if (res.status === 401) {
             // Session expired - redirect to login
-            window.location.href = "/customer/login?redirect=" + encodeURIComponent(window.location.pathname);
+            window.location.href = `/customer/login?redirect=${encodeURIComponent(window.location.pathname)}`;
             return false;
           }
         }
@@ -129,7 +128,9 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
   );
 
   return (
-    <FavoritesContext.Provider value={{ isFavorited, toggleFavorite, favorites, isLoading, isAuthenticated }}>
+    <FavoritesContext.Provider
+      value={{ isFavorited, toggleFavorite, favorites, isLoading, isAuthenticated }}
+    >
       {children}
     </FavoritesContext.Provider>
   );

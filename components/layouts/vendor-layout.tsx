@@ -1,14 +1,14 @@
 "use client";
 
 import {
+  BarChart3,
   ChevronLeft,
   ChevronRight,
   LogOut,
   MapPin,
+  Package,
   Settings,
   Store,
-  Package,
-  BarChart3,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -122,6 +122,7 @@ export function VendorLayout({ children }: { children: React.ReactNode }) {
               </div>
             )}
             <button
+              type="button"
               onClick={() => setIsCollapsed(!isCollapsed)}
               className="ml-auto rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
             >
@@ -145,9 +146,10 @@ export function VendorLayout({ children }: { children: React.ReactNode }) {
               <nav className="space-y-1">
                 {mainNavItems.map((item) => {
                   // Exact match for dashboard, startsWith for others
-                  const isActive = item.href === "/vendor"
-                    ? pathname === item.href
-                    : pathname?.startsWith(item.href);
+                  const isActive =
+                    item.href === "/vendor"
+                      ? pathname === item.href
+                      : pathname?.startsWith(item.href);
                   const Icon = item.icon;
                   return (
                     <Link
@@ -239,9 +241,8 @@ export function VendorLayout({ children }: { children: React.ReactNode }) {
         <div className="flex gap-1 overflow-x-auto border-t border-slate-100/50 bg-slate-50/50 px-2 py-2">
           {mainNavItems.map((item) => {
             // Exact match for dashboard, startsWith for others
-            const isActive = item.href === "/vendor"
-              ? pathname === item.href
-              : pathname?.startsWith(item.href);
+            const isActive =
+              item.href === "/vendor" ? pathname === item.href : pathname?.startsWith(item.href);
             const Icon = item.icon;
             return (
               <Link

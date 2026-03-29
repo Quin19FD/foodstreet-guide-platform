@@ -1,10 +1,10 @@
 "use client";
 
 import { ArrowLeft, CheckCircle2, Lock, RefreshCw, Unlock, XCircle } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 
-import { PoiDetailView, type PoiDetailData } from "@/components/poi/poi-detail-view";
+import { type PoiDetailData, PoiDetailView } from "@/components/poi/poi-detail-view";
 
 function pickError(input: unknown, fallback: string): string {
   if (!input || typeof input !== "object") return fallback;

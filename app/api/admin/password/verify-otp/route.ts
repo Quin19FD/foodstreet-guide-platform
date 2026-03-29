@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-import { prisma } from "@/infrastructure/database/prisma/client";
-import { config } from "@/shared/config";
 import { verifyOtpSchema } from "@/application/validation/password-reset";
+import { prisma } from "@/infrastructure/database/prisma/client";
 import { constantTimeEqualHex, hashOtp } from "@/infrastructure/password-reset/otp";
+import { config } from "@/shared/config";
 
 export const runtime = "nodejs";
 

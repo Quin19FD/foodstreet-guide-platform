@@ -32,8 +32,8 @@ import {
   X,
   XCircle,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 type PoiStatus = "PENDING" | "APPROVED" | "REJECTED";
 
@@ -816,10 +816,14 @@ export function AdminPoiManagement() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="my-4">
-            <label className="mb-2 block text-sm font-semibold text-slate-700">
+            <label
+              htmlFor="rejection-reason"
+              className="mb-2 block text-sm font-semibold text-slate-700"
+            >
               Lý do từ chối <span className="text-rose-500">*</span>
             </label>
             <textarea
+              id="rejection-reason"
               value={rejectionReason}
               onChange={(e) => setRejectionReason(e.target.value)}
               className="h-32 w-full rounded-2xl border-2 border-slate-200 bg-slate-50 p-3 text-sm outline-none ring-rose-500 transition-all focus:border-rose-400 focus:bg-white focus:ring-2"

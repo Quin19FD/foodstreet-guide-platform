@@ -8,6 +8,9 @@
 
 import {
   BarChart3,
+  Bell,
+  ChevronLeft,
+  ChevronRight,
   Compass,
   Headphones,
   ImageIcon,
@@ -19,9 +22,6 @@ import {
   Settings,
   Store,
   Users,
-  ChevronLeft,
-  ChevronRight,
-  Bell,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -192,6 +192,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               </div>
             )}
             <button
+              type="button"
               onClick={() => setIsCollapsed(!isCollapsed)}
               className="ml-auto rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
             >

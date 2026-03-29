@@ -21,7 +21,7 @@ export function SkeletonText({
     <div className={cn("space-y-2", className)}>
       {Array.from({ length: lines }).map((_, i) => (
         <div
-          key={i}
+          key={`line-${i}`}
           className="skeleton-text"
           style={{
             width: i === lines - 1 && lines > 1 ? "70%" : width,
@@ -58,9 +58,7 @@ export function SkeletonCard({
 }: BaseSkeletonProps & { withImage?: boolean }) {
   return (
     <div className={cn("rounded-2xl bg-white p-4 shadow-soft", className)}>
-      {withImage && (
-        <div className="skeleton-card mb-3 h-32 w-full rounded-xl" />
-      )}
+      {withImage && <div className="skeleton-card mb-3 h-32 w-full rounded-xl" />}
       <SkeletonText width="80%" lines={2} />
       <div className="mt-3 flex items-center gap-2">
         <SkeletonCircle size="sm" />
@@ -76,10 +74,7 @@ export function SkeletonCard({
 export function SkeletonPOICard({ className }: BaseSkeletonProps) {
   return (
     <div
-      className={cn(
-        "animate-fade-in-up rounded-2xl bg-white p-4 shadow-soft opacity-0",
-        className
-      )}
+      className={cn("animate-fade-in-up rounded-2xl bg-white p-4 shadow-soft opacity-0", className)}
       style={{ animationDelay: "100ms" }}
     >
       {/* Image */}
@@ -177,12 +172,7 @@ export function SkeletonStatsCard({ className }: BaseSkeletonProps) {
  */
 export function SkeletonMenuItem({ className }: BaseSkeletonProps) {
   return (
-    <div
-      className={cn(
-        "flex items-center gap-3 rounded-xl bg-white p-3 shadow-soft",
-        className
-      )}
-    >
+    <div className={cn("flex items-center gap-3 rounded-xl bg-white p-3 shadow-soft", className)}>
       <div className="skeleton-circle h-10 w-10" />
       <div className="flex-1">
         <div className="skeleton h-4 w-32" />
@@ -206,7 +196,7 @@ export function SkeletonGrid({
   return (
     <div className={cn("grid gap-3 sm:grid-cols-2", className)}>
       {Array.from({ length: count }).map((_, i) => (
-        <Skeleton key={i} index={i} />
+        <Skeleton key={`skeleton-${i}`} index={i} />
       ))}
     </div>
   );
@@ -281,9 +271,7 @@ export function EmptyState({
         </div>
       )}
       <h3 className="text-lg font-semibold text-slate-800">{title}</h3>
-      {description && (
-        <p className="mt-1 text-sm text-slate-500">{description}</p>
-      )}
+      {description && <p className="mt-1 text-sm text-slate-500">{description}</p>}
       {action && <div className="mt-4">{action}</div>}
     </div>
   );

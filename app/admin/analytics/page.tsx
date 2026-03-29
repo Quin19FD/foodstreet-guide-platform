@@ -1,18 +1,18 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
 import {
   Activity,
   BarChart3,
+  Compass,
   Eye,
+  Headphones,
+  Languages,
   MapPin,
   RefreshCw,
   Users,
   Volume2,
-  Headphones,
-  Languages,
-  Compass,
 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 import { AdminLayout } from "@/components/layouts/admin-layout";
 
@@ -93,16 +93,16 @@ export default function AdminAnalyticsPage() {
       let totalAudioGuides = 0;
       let totalTranslations = 0;
 
-      pois.forEach((poi: any) => {
+      for (const poi of pois) {
         if (poi.translations) {
           totalTranslations += poi.translations.length;
-          poi.translations.forEach((t: any) => {
+          for (const t of poi.translations) {
             if (t.audios) {
               totalAudioGuides += t.audios.length;
             }
-          });
+          }
         }
-      });
+      }
 
       const totalReviews = pois.reduce((acc: number, poi: any) => {
         // Reviews count from POI stats (if available)
@@ -159,6 +159,7 @@ export default function AdminAnalyticsPage() {
               </div>
             </div>
             <button
+              type="button"
               onClick={loadAnalytics}
               disabled={isLoading}
               className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:opacity-50"

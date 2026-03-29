@@ -1,23 +1,23 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useState, useCallback } from "react";
 import {
-  User,
-  Settings,
-  History,
-  Heart,
-  Star,
-  Globe,
   Bell,
   ChevronRight,
+  Clock,
+  Globe,
+  Heart,
+  History,
+  Loader2,
   LogOut,
   MapPin,
-  Clock,
-  Trophy,
+  Settings,
+  Star,
   TrendingUp,
-  Loader2,
+  Trophy,
+  User,
 } from "lucide-react";
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
 
 const menuItems = [
   {
@@ -118,6 +118,7 @@ function MenuItem({
 
   return (
     <button
+      type="button"
       onClick={onClick}
       className="group flex w-full items-center gap-3 rounded-2xl bg-white p-4 shadow-soft hover:shadow-medium transition-all duration-200 active:scale-[0.98]"
     >
@@ -129,7 +130,7 @@ function MenuItem({
 export default function CustomerProfilePage() {
   const [stats, setStats] = useState<UserStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [_error, setError] = useState<string | null>(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   // Logout handler
@@ -207,7 +208,10 @@ export default function CustomerProfilePage() {
         {/* Background decorations */}
         <div className="absolute inset-0 opacity-20">
           <div className="absolute top-4 right-4 h-32 w-32 rounded-full bg-white/30 animate-float" />
-          <div className="absolute bottom-8 left-8 h-24 w-24 rounded-full bg-white/20 animate-float" style={{ animationDelay: "1s" }} />
+          <div
+            className="absolute bottom-8 left-8 h-24 w-24 rounded-full bg-white/20 animate-float"
+            style={{ animationDelay: "1s" }}
+          />
         </div>
 
         <div className="relative z-10">
@@ -233,7 +237,10 @@ export default function CustomerProfilePage() {
 
           {/* Stats Cards */}
           <div className="mt-6 grid grid-cols-3 gap-3">
-            <div className="animate-fade-in-up opacity-0 rounded-2xl bg-white/20 p-3 text-center backdrop-blur-sm hover:bg-white/25 transition-colors" style={{ animationDelay: "100ms" }}>
+            <div
+              className="animate-fade-in-up opacity-0 rounded-2xl bg-white/20 p-3 text-center backdrop-blur-sm hover:bg-white/25 transition-colors"
+              style={{ animationDelay: "100ms" }}
+            >
               {isLoading ? (
                 <Loader2 className="mx-auto h-6 w-6 animate-spin" />
               ) : (
@@ -244,7 +251,10 @@ export default function CustomerProfilePage() {
               )}
               <MapPin className="mx-auto mt-1 h-3 w-3 text-white/60" />
             </div>
-            <div className="animate-fade-in-up opacity-0 rounded-2xl bg-white/20 p-3 text-center backdrop-blur-sm hover:bg-white/25 transition-colors" style={{ animationDelay: "200ms" }}>
+            <div
+              className="animate-fade-in-up opacity-0 rounded-2xl bg-white/20 p-3 text-center backdrop-blur-sm hover:bg-white/25 transition-colors"
+              style={{ animationDelay: "200ms" }}
+            >
               {isLoading ? (
                 <Loader2 className="mx-auto h-6 w-6 animate-spin" />
               ) : (
@@ -255,7 +265,10 @@ export default function CustomerProfilePage() {
               )}
               <Heart className="mx-auto mt-1 h-3 w-3 text-white/60" />
             </div>
-            <div className="animate-fade-in-up opacity-0 rounded-2xl bg-white/20 p-3 text-center backdrop-blur-sm hover:bg-white/25 transition-colors" style={{ animationDelay: "300ms" }}>
+            <div
+              className="animate-fade-in-up opacity-0 rounded-2xl bg-white/20 p-3 text-center backdrop-blur-sm hover:bg-white/25 transition-colors"
+              style={{ animationDelay: "300ms" }}
+            >
               {isLoading ? (
                 <Loader2 className="mx-auto h-6 w-6 animate-spin" />
               ) : (
@@ -271,11 +284,17 @@ export default function CustomerProfilePage() {
       </header>
 
       {/* Achievement Badges */}
-      <section className="px-4 -mt-4 relative z-20 animate-fade-in-up" style={{ animationDelay: "400ms" }}>
+      <section
+        className="px-4 -mt-4 relative z-20 animate-fade-in-up"
+        style={{ animationDelay: "400ms" }}
+      >
         <div className="card-elevated p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-sm font-semibold text-slate-800">Thành tích</h3>
-            <Link href="/customer/achievements" className="text-xs font-medium text-orange-500 hover:text-orange-600">
+            <Link
+              href="/customer/achievements"
+              className="text-xs font-medium text-orange-500 hover:text-orange-600"
+            >
               Xem tất cả
             </Link>
           </div>
@@ -360,6 +379,7 @@ export default function CustomerProfilePage() {
 
         {/* Logout Button */}
         <button
+          type="button"
           onClick={handleLogout}
           disabled={isLoggingOut}
           className="group flex w-full items-center gap-3 rounded-2xl bg-white p-4 shadow-soft hover:shadow-red-100 hover:bg-red-50 transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"

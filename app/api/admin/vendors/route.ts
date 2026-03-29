@@ -9,7 +9,7 @@ import { hashPassword } from "@/infrastructure/security/password";
 import { sendVendorApprovedEmail, sendVendorRejectedEmail } from "@/infrastructure/vendor/mailer";
 import type { UserStatus } from "@prisma/client";
 
-import { requireAdmin, jsonError } from "../session/_shared";
+import { jsonError, requireAdmin } from "../session/_shared";
 
 export const runtime = "nodejs";
 

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+import { randomUUID } from "node:crypto";
 import { registerRequestSchema } from "@/application/validators/auth";
 import { prisma } from "@/infrastructure/database/prisma/client";
 import { parseDurationToSeconds } from "@/infrastructure/security/jwt";
@@ -8,7 +9,6 @@ import { hashPassword } from "@/infrastructure/security/password";
 import { registrationLimiter } from "@/infrastructure/security/rate-limit";
 import { generateRefreshToken, hashRefreshToken } from "@/infrastructure/security/refresh-token";
 import { config } from "@/shared/config";
-import { randomUUID } from "node:crypto";
 
 import { createCustomerAccessToken, jsonError, setAuthCookies } from "../_shared";
 
