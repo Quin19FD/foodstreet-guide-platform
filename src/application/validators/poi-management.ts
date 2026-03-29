@@ -35,6 +35,9 @@ const menuItemUpdateSchema = z.object({
   isAvailable: z.boolean().optional(),
 });
 
+/** Schema for PATCH /api/vendor/menu-items/:id — no id field (comes from URL). */
+export const menuItemPatchSchema = menuItemUpdateSchema.omit({ id: true });
+
 const translationCreateSchema = z.object({
   language: languageCodeSchema,
   name: z.string().trim().min(1).max(255).optional(),

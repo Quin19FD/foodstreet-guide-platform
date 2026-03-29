@@ -4,6 +4,10 @@ import type { NextRequest } from "next/server";
 import { prisma } from "@/infrastructure/database/prisma/client";
 import type { POIStatus, UserRole, UserStatus } from "@prisma/client";
 
+import {
+  adminUsersPatchSchema,
+  adminUsersDeleteSchema,
+} from "@/application/validators/admin";
 import { requireAdmin, jsonError } from "../session/_shared";
 
 export const runtime = "nodejs";
@@ -92,22 +96,12 @@ export async function PATCH(request: NextRequest) {
   if (adminResult instanceof NextResponse) return adminResult;
 
   const body = await request.json().catch(() => null);
-  if (!body || !Array.isArray(body.ids) || body.ids.length === 0) {
-    return jsonError(400, "Dữ liệu không hợp lệ", {
-      field: "ids",
-      message: "Vui lòng chọn ít nhất một user",
-    });
+  const parsed = adminUsersPatchSchema.safeParse(body);
+  if (!parsed.success) {
+    return jsonError(400, "Dữ liệu không hợp lệ", { issues: parsed.error.issues });
   }
 
-  const { ids, action, rejectionReason } = body as {
-    ids: string[];
-    action: "activate" | "deactivate" | "approve" | "reject";
-    rejectionReason?: string;
-  };
-
-  if (action === "reject" && !rejectionReason) {
-    return jsonError(400, "Vui lòng nhập lý do từ chối", { field: "rejectionReason" });
-  }
+  const { ids, action, rejectionReason } = parsed.data;
 
   const now = new Date();
 
@@ -179,14 +173,12 @@ export async function DELETE(request: NextRequest) {
   if (adminResult instanceof NextResponse) return adminResult;
 
   const body = await request.json().catch(() => null);
-  if (!body || !Array.isArray(body.ids) || body.ids.length === 0) {
-    return jsonError(400, "Dữ liệu không hợp lệ", {
-      field: "ids",
-      message: "Vui lòng chọn ít nhất một user",
-    });
+  const parsed = adminUsersDeleteSchema.safeParse(body);
+  if (!parsed.success) {
+    return jsonError(400, "Dữ liệu không hợp lệ", { issues: parsed.error.issues });
   }
 
-  const { ids } = body as { ids: string[] };
+  const { ids } = parsed.data;
 
   try {
     // Verify users exist and are not admins
