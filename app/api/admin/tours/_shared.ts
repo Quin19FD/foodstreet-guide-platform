@@ -1,18 +1,4 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-
-import {
-  requireAuth,
-  jsonError,
-} from "@/infrastructure/security/auth";
-
-export async function requireAdmin(
-  request: NextRequest
-): Promise<{ adminId: string } | NextResponse> {
-  const result = await requireAuth(request, "ADMIN");
-  if (result instanceof NextResponse) return result;
-  return { adminId: result.userId };
-}
+export { requireAdmin } from "../session/_shared";
 
 export function buildTourInclude() {
   return {
