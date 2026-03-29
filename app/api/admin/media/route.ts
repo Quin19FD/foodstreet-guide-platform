@@ -2,33 +2,17 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 import { prisma } from "@/infrastructure/database/prisma/client";
+import { requireAuth } from "@/infrastructure/security/auth";
 
 export const runtime = "nodejs";
-
-// Admin authentication check
-async function checkAdminAuth(request: NextRequest): Promise<NextResponse | null> {
-  const token = request.cookies.get("fs_admin_access_token")?.value ?? null;
-  if (!token) {
-    return NextResponse.json({ error: "Chưa đăng nhập" }, { status: 401 });
-  }
-
-  try {
-    const { verifyAdminAccessToken } = await import("@/app/api/admin/session/_shared");
-    verifyAdminAccessToken(token);
-  } catch {
-    return NextResponse.json({ error: "Phiên đăng nhập không hợp lệ" }, { status: 401 });
-  }
-
-  return null;
-}
 
 /**
  * GET /api/admin/media
  * List all media from POI images, Tour images, and User avatars
  */
 export async function GET(request: NextRequest) {
-  const authError = await checkAdminAuth(request);
-  if (authError) return authError;
+  const authResult = await requireAuth(request, "ADMIN");
+  if (authResult instanceof NextResponse) return authResult;
 
   const url = new URL(request.url);
   const type = url.searchParams.get("type")?.trim() ?? "all"; // all, poi, tour, user

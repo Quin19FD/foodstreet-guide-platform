@@ -1,11 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const ADMIN_ACCESS_COOKIE = "fs_admin_access_token";
-const ADMIN_REFRESH_COOKIE = "fs_admin_refresh_token";
-
-const VENDOR_ACCESS_COOKIE = "fs_vendor_access_token";
-const VENDOR_REFRESH_COOKIE = "fs_vendor_refresh_token";
+import { ADMIN_AUTH_COOKIES, VENDOR_AUTH_COOKIES } from "@/infrastructure/security/auth";
 
 /**
  * Middleware bảo vệ route admin/vendor.
@@ -26,8 +22,8 @@ export function middleware(request: NextRequest) {
   if (pathname === "/vendor/login" || pathname === "/vendor/register") return NextResponse.next();
 
   if (pathname === "/admin" || pathname.startsWith("/admin/")) {
-    const access = request.cookies.get(ADMIN_ACCESS_COOKIE)?.value;
-    const refresh = request.cookies.get(ADMIN_REFRESH_COOKIE)?.value;
+    const access = request.cookies.get(ADMIN_AUTH_COOKIES.access)?.value;
+    const refresh = request.cookies.get(ADMIN_AUTH_COOKIES.refresh)?.value;
 
     if (access || refresh) return NextResponse.next();
 
@@ -38,8 +34,8 @@ export function middleware(request: NextRequest) {
   }
 
   if (pathname === "/vendor" || pathname.startsWith("/vendor/")) {
-    const access = request.cookies.get(VENDOR_ACCESS_COOKIE)?.value;
-    const refresh = request.cookies.get(VENDOR_REFRESH_COOKIE)?.value;
+    const access = request.cookies.get(VENDOR_AUTH_COOKIES.access)?.value;
+    const refresh = request.cookies.get(VENDOR_AUTH_COOKIES.refresh)?.value;
 
     if (access || refresh) return NextResponse.next();
 
