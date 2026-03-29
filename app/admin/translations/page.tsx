@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   AlertCircle,
-  Badge,
   CheckCircle2,
   Filter,
   Globe,
@@ -454,11 +453,6 @@ export default function AdminTranslationsPage() {
                         >
                           {translation.audios.length}
                         </span>
-                        {translation.audios.length > 0 && (
-                          <Badge className="h-5 w-5" variant="secondary">
-                            {translation.audios.length}
-                          </Badge>
-                        )}
                       </div>
                     </td>
                     <td className="px-4 py-3 text-sm text-slate-700">

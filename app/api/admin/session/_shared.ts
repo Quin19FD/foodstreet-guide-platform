@@ -5,7 +5,8 @@
  * import from here and get the unified implementation with ADMIN role baked in.
  */
 
-import type { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import type { AccessTokenPayload } from "@/infrastructure/security/auth";
 import {
   ADMIN_AUTH_COOKIES,
@@ -14,6 +15,7 @@ import {
   setAuthCookies,
   clearAuthCookies,
   jsonError,
+  requireAuth,
 } from "@/infrastructure/security/auth";
 
 export { ADMIN_AUTH_COOKIES, jsonError };
@@ -47,4 +49,12 @@ export function createAdminAccessToken(input: { userId: string; email: string })
 
 export function verifyAdminAccessToken(token: string): AdminAccessTokenPayload {
   return verifyAccessToken("ADMIN", token) as AdminAccessTokenPayload;
+}
+
+export async function requireAdmin(
+  request: NextRequest
+): Promise<{ adminId: string; email: string; name: string | null } | NextResponse> {
+  const result = await requireAuth(request, "ADMIN");
+  if (result instanceof NextResponse) return result;
+  return { adminId: result.userId, email: result.email, name: result.name };
 }

@@ -6,7 +6,7 @@ import { prisma } from "@/infrastructure/database/prisma/client";
 import { logUserActivity } from "@/infrastructure/logging/activity-log";
 import { sendVendorApprovedEmail, sendVendorRejectedEmail } from "@/infrastructure/vendor/mailer";
 
-import { ADMIN_AUTH_COOKIES, jsonError, verifyAdminAccessToken } from "../../session/_shared";
+import { requireAdmin, jsonError } from "../../session/_shared";
 
 export const runtime = "nodejs";
 
@@ -25,26 +25,6 @@ const vendorSelect = {
   updatedAt: true,
   lastLogin: true,
 } as const;
-
-async function requireAdmin(request: NextRequest): Promise<{ adminId: string } | NextResponse> {
-  const cookieToken = request.cookies.get(ADMIN_AUTH_COOKIES.access)?.value ?? null;
-  if (!cookieToken) return jsonError(401, "Chưa đăng nhập");
-
-  let payload: { sub: string };
-  try {
-    payload = verifyAdminAccessToken(cookieToken);
-  } catch {
-    return jsonError(401, "Phiên đăng nhập không hợp lệ");
-  }
-
-  const admin = await prisma.user.findUnique({ where: { id: payload.sub } });
-  if (!admin) return jsonError(401, "Phiên đăng nhập không hợp lệ");
-  if (admin.role !== "ADMIN") return jsonError(403, "Không có quyền admin");
-  if (!admin.isActive) return jsonError(403, "Tài khoản admin đang bị khóa");
-  if (admin.status !== "APPROVED") return jsonError(403, "Tài khoản admin chưa được phê duyệt");
-
-  return { adminId: admin.id };
-}
 
 /**
  * GET /api/admin/vendors/:id

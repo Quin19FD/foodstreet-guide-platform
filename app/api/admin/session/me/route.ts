@@ -4,15 +4,9 @@ import type { NextRequest } from "next/server";
 import { prisma } from "@/infrastructure/database/prisma/client";
 
 import { ADMIN_AUTH_COOKIES, jsonError, verifyAdminAccessToken } from "../_shared";
+import { getBearerToken } from "@/infrastructure/security/auth";
 
 export const runtime = "nodejs";
-
-function getBearerToken(request: NextRequest): string | null {
-  const raw = request.headers.get("authorization");
-  if (!raw) return null;
-  const match = raw.match(/^Bearer\s+(.+)$/i);
-  return match?.[1] ?? null;
-}
 
 /**
  * GET /api/admin/session/me

@@ -15,18 +15,22 @@ import {
   type JwtPayload,
 } from "@/infrastructure/security/jwt";
 import { config } from "@/shared/config";
+import {
+  AUTH_COOKIES,
+  ADMIN_AUTH_COOKIES,
+  VENDOR_AUTH_COOKIES,
+  CUSTOMER_AUTH_COOKIES,
+  type UserRole,
+  type RoleAuthCookies,
+} from "@/infrastructure/security/auth-cookies";
+
+// Re-export cookie constants so existing consumers keep working
+export { AUTH_COOKIES, ADMIN_AUTH_COOKIES, VENDOR_AUTH_COOKIES, CUSTOMER_AUTH_COOKIES };
+export type { UserRole, RoleAuthCookies };
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
-
-export type UserRole = "ADMIN" | "VENDOR" | "USER";
-
-export type RoleAuthCookies = {
-  access: string;
-  refresh: string;
-  remember: string;
-};
 
 export type AuthenticatedUser = {
   userId: string;
@@ -41,26 +45,8 @@ export type AccessTokenPayload = JwtPayload & {
 };
 
 // ---------------------------------------------------------------------------
-// Cookie config per role
+// Cookie config per role — defined in auth-cookies.ts, re-exported above
 // ---------------------------------------------------------------------------
-
-export const AUTH_COOKIES: Record<UserRole, RoleAuthCookies> = {
-  ADMIN: {
-    access: "fs_admin_access_token",
-    refresh: "fs_admin_refresh_token",
-    remember: "fs_admin_remember_me",
-  },
-  VENDOR: {
-    access: "fs_vendor_access_token",
-    refresh: "fs_vendor_refresh_token",
-    remember: "fs_vendor_remember_me",
-  },
-  USER: {
-    access: "fs_customer_access_token",
-    refresh: "fs_customer_refresh_token",
-    remember: "fs_customer_remember_me",
-  },
-} as const;
 
 // ---------------------------------------------------------------------------
 // JWT creation & verification (role-parameterized)
@@ -240,7 +226,3 @@ export const verifyVendorAccessToken = (token: string) =>
 
 export const verifyCustomerAccessToken = (token: string) =>
   verifyAccessToken("USER", token);
-
-export const ADMIN_AUTH_COOKIES = AUTH_COOKIES.ADMIN;
-export const VENDOR_AUTH_COOKIES = AUTH_COOKIES.VENDOR;
-export const CUSTOMER_AUTH_COOKIES = AUTH_COOKIES.USER;

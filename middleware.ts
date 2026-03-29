@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-import { ADMIN_AUTH_COOKIES, VENDOR_AUTH_COOKIES } from "@/infrastructure/security/auth";
+import { ADMIN_AUTH_COOKIES, VENDOR_AUTH_COOKIES } from "@/infrastructure/security/auth-cookies";
 
 /**
  * Middleware bảo vệ route admin/vendor.
