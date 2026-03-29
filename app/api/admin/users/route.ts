@@ -166,9 +166,7 @@ export async function PATCH(request: NextRequest) {
     });
   } catch (error) {
     console.error("[ADMIN_USERS_PATCH]", error);
-    return jsonError(500, "Không thể cập nhật users", {
-      message: error instanceof Error ? error.message : "Unknown error",
-    });
+    return jsonError(500, "Không thể cập nhật users");
   }
 }
 
@@ -223,8 +221,6 @@ export async function DELETE(request: NextRequest) {
     });
   } catch (error) {
     console.error("[ADMIN_USERS_DELETE]", error);
-    return jsonError(500, "Không thể xóa users", {
-      message: error instanceof Error ? error.message : "Unknown error",
-    });
+    return jsonError(500, "Không thể xóa users");
   }
 }

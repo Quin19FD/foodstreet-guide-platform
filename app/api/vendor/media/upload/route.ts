@@ -60,6 +60,6 @@ export async function POST(request: NextRequest) {
       bytes: result.bytes,
     });
   } catch (error) {
-    return jsonError(500, error instanceof Error ? error.message : "Upload Cloudinary thất bại");
+    return jsonError(500, "Upload thất bại, vui lòng thử lại");
   }
 }

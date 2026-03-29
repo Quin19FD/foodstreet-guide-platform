@@ -143,7 +143,7 @@ export async function POST(request: NextRequest) {
   try {
     rawPayload = await parseCreatePayload(request);
   } catch (error) {
-    return jsonError(400, error instanceof Error ? error.message : "Dữ liệu upload không hợp lệ");
+    return jsonError(400, "Dữ liệu không hợp lệ");
   }
 
   const parsed = adminCreateTourSchema.safeParse(rawPayload);

@@ -206,15 +206,13 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
 
     return NextResponse.json({ ok: true, vendor: updated });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "";
-    if (
-      message.includes("Unique constraint") ||
-      message.includes("unique") ||
-      message.includes("P2002")
-    ) {
+    // Check for Prisma unique constraint violation via error code, not message content
+    const prismaCode = error && typeof error === "object" && "code" in error ? (error as { code: string }).code : "";
+    if (prismaCode === "P2002") {
       return jsonError(409, "Email đã được sử dụng");
     }
-    throw error;
+    console.error("[ADMIN_VENDOR_PATCH]", error);
+    return jsonError(500, "Không thể cập nhật thông tin vendor");
   }
 }
 
