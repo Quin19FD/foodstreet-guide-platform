@@ -57,8 +57,9 @@ model User {
 
   lastLogin DateTime? @map("last_login")
 
-  refreshTokenHash   String?   @map("refresh_token_hash")
-  refreshTokenExpiry DateTime? @map("refresh_token_expiry")
+  refreshTokenHash    String?   @map("refresh_token_hash")
+  refreshTokenExpiry  DateTime? @map("refresh_token_expiry")
+  refreshTokenVersion Int       @default(0) @map("refresh_token_version")
 
   resetPasswordTokenHash   String?   @map("reset_password_token_hash")
   resetPasswordTokenExpiry DateTime? @map("reset_password_token_expiry")
