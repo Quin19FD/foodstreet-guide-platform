@@ -6,6 +6,7 @@ import { prisma } from "@/infrastructure/database/prisma/client";
 import { logUserActivity } from "@/infrastructure/logging/activity-log";
 import { parseDurationToSeconds } from "@/infrastructure/security/jwt";
 import { hashPassword } from "@/infrastructure/security/password";
+import { registrationLimiter } from "@/infrastructure/security/rate-limit";
 import { generateRefreshToken, hashRefreshToken } from "@/infrastructure/security/refresh-token";
 import { config } from "@/shared/config";
 import { randomUUID } from "node:crypto";
@@ -30,6 +31,16 @@ export const runtime = "nodejs";
  * - { user, accessToken } + set cookies (giống /api/admin/session/login)
  */
 export async function POST(request: NextRequest) {
+  // Rate limit by client IP
+  const clientIp =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    request.headers.get("x-real-ip") ??
+    "unknown";
+  const rateLimitStatus = registrationLimiter.check(clientIp);
+  if (!rateLimitStatus.ok) {
+    return jsonError(429, "Quá nhiều yêu cầu. Vui lòng thử lại sau.");
+  }
+
   const body = await request.json().catch(() => null);
   const parsed = registerRequestSchema.safeParse(body);
   if (!parsed.success) {
@@ -43,9 +54,16 @@ export async function POST(request: NextRequest) {
     return jsonError(403, "Đã có tài khoản admin. Không thể tự đăng ký thêm.");
   }
 
+  // Return generic success for duplicate email to prevent enumeration
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
-    return jsonError(409, "Email đã được sử dụng");
+    return NextResponse.json(
+      {
+        ok: true,
+        message: "Đăng ký thành công",
+      },
+      { status: 200 }
+    );
   }
 
   const now = new Date();
