@@ -4,7 +4,12 @@ import { Camera, Check, Info, Loader2, Mail, Phone, Trash2, User } from "lucide-
 import { type ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 
 import { AdminLayout } from "@/components/layouts/admin-layout";
-import { config } from "@/shared/config";
+
+const publicAppConfig = {
+  name: "FoodStreet Guide",
+  environment: process.env.NODE_ENV ?? "development",
+  url: process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000",
+} as const;
 
 type MeResponse = {
   user: {
@@ -448,7 +453,7 @@ export default function AdminSettingsPage() {
                       Nền tảng
                     </dt>
                     <dd className="mt-2 text-sm text-slate-900 font-semibold bg-slate-50 inline-flex px-3 py-1.5 rounded-md border border-slate-100">
-                      {config.app.name}
+                      {publicAppConfig.name}
                     </dd>
                   </div>
                   <div className="sm:col-span-1">
@@ -458,7 +463,7 @@ export default function AdminSettingsPage() {
                     <dd className="mt-1">
                       <span className="inline-flex items-center rounded-md bg-orange-50 px-3 py-1.5 text-xs font-semibold text-orange-700 ring-1 ring-inset ring-orange-600/20">
                         <span className="mr-1.5 h-1.5 w-1.5 rounded-full bg-orange-500" />
-                        {config.app.environment.toUpperCase()}
+                        {publicAppConfig.environment.toUpperCase()}
                       </span>
                     </dd>
                   </div>
@@ -467,7 +472,7 @@ export default function AdminSettingsPage() {
                       Base URL
                     </dt>
                     <dd className="mt-2 text-sm text-slate-700 bg-slate-50 rounded-lg px-4 py-3 border border-slate-200 font-mono shadow-inner">
-                      {config.app.url}
+                      {publicAppConfig.url}
                     </dd>
                   </div>
                 </dl>
