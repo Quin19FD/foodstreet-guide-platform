@@ -3,50 +3,23 @@ import type { NextRequest } from "next/server";
 import type { Prisma } from "@prisma/client";
 
 import { prisma } from "@/infrastructure/database/prisma/client";
+import { requireAuth, jsonError } from "@/infrastructure/security/auth";
 
-import { AUTH_COOKIES, jsonError, verifyCustomerAccessToken } from "../auth/_shared";
 import { inferPoiType } from "../_shared";
 
 export const runtime = "nodejs";
-
-function getBearerToken(request: NextRequest): string | null {
-  const raw = request.headers.get("authorization");
-  if (!raw) return null;
-  const match = raw.match(/^Bearer\s+(.+)$/i);
-  return match?.[1] ?? null;
-}
 
 /**
  * GET /api/customer/favorites
  * Lấy danh sách POI yêu thích của user
  */
 export async function GET(request: NextRequest) {
-  const cookieToken = request.cookies.get(AUTH_COOKIES.access)?.value ?? null;
-  const token = cookieToken ?? getBearerToken(request);
-  if (!token) {
-    return jsonError(401, "Chưa đăng nhập");
-  }
-
-  let payload: { sub: string; email: string; role: "USER" };
-  try {
-    payload = verifyCustomerAccessToken(token);
-  } catch {
-    return jsonError(401, "Phiên đăng nhập không hợp lệ hoặc đã hết hạn");
-  }
-
-  // Verify user exists and is active
-  const user = await prisma.user.findUnique({
-    where: { id: payload.sub },
-    select: { id: true, role: true, status: true, isActive: true },
-  });
-
-  if (!user || !user.isActive || user.role !== "USER" || user.status !== "APPROVED") {
-    return jsonError(401, "Phiên đăng nhập không hợp lệ");
-  }
+  const auth = await requireAuth(request, "USER");
+  if (auth instanceof NextResponse) return auth;
 
   // Get favorite POIs
   const favorites = await prisma.favoritePOI.findMany({
-    where: { userId: user.id },
+    where: { userId: auth.userId },
     orderBy: { createdAt: "desc" },
     include: {
       poi: {
@@ -103,27 +76,8 @@ export async function GET(request: NextRequest) {
  * Thêm POI vào danh sách yêu thích
  */
 export async function POST(request: NextRequest) {
-  const cookieToken = request.cookies.get(AUTH_COOKIES.access)?.value ?? null;
-  const token = cookieToken ?? getBearerToken(request);
-  if (!token) {
-    return jsonError(401, "Chưa đăng nhập");
-  }
-
-  let payload: { sub: string; email: string; role: "USER" };
-  try {
-    payload = verifyCustomerAccessToken(token);
-  } catch {
-    return jsonError(401, "Phiên đăng nhập không hợp lệ hoặc đã hết hạn");
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { id: payload.sub },
-    select: { id: true, role: true, status: true, isActive: true },
-  });
-
-  if (!user || !user.isActive || user.role !== "USER" || user.status !== "APPROVED") {
-    return jsonError(401, "Phiên đăng nhập không hợp lệ");
-  }
+  const auth = await requireAuth(request, "USER");
+  if (auth instanceof NextResponse) return auth;
 
   try {
     const body = await request.json();
@@ -147,7 +101,7 @@ export async function POST(request: NextRequest) {
     const existing = await prisma.favoritePOI.findUnique({
       where: {
         userId_poiId: {
-          userId: user.id,
+          userId: auth.userId,
           poiId,
         },
       },
@@ -164,7 +118,7 @@ export async function POST(request: NextRequest) {
     const favorite = await prisma.favoritePOI.create({
       data: {
         id: crypto.randomUUID(),
-        userId: user.id,
+        userId: auth.userId,
         poiId,
       },
     });
@@ -184,27 +138,8 @@ export async function POST(request: NextRequest) {
  * Xóa POI khỏi danh sách yêu thích
  */
 export async function DELETE(request: NextRequest) {
-  const cookieToken = request.cookies.get(AUTH_COOKIES.access)?.value ?? null;
-  const token = cookieToken ?? getBearerToken(request);
-  if (!token) {
-    return jsonError(401, "Chưa đăng nhập");
-  }
-
-  let payload: { sub: string; email: string; role: "USER" };
-  try {
-    payload = verifyCustomerAccessToken(token);
-  } catch {
-    return jsonError(401, "Phiên đăng nhập không hợp lệ hoặc đã hết hạn");
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { id: payload.sub },
-    select: { id: true, role: true, status: true, isActive: true },
-  });
-
-  if (!user || !user.isActive || user.role !== "USER" || user.status !== "APPROVED") {
-    return jsonError(401, "Phiên đăng nhập không hợp lệ");
-  }
+  const auth = await requireAuth(request, "USER");
+  if (auth instanceof NextResponse) return auth;
 
   try {
     const body = await request.json();
@@ -217,7 +152,7 @@ export async function DELETE(request: NextRequest) {
     // Delete favorite
     const deleted = await prisma.favoritePOI.deleteMany({
       where: {
-        userId: user.id,
+        userId: auth.userId,
         poiId,
       },
     });

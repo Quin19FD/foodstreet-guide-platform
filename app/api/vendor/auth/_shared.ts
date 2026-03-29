@@ -1,101 +1,41 @@
-import { NextResponse } from "next/server";
+/**
+ * Vendor auth — thin re-export layer over unified auth module.
+ *
+ * All vendor routes (login, register, refresh, logout, me, profile, avatar-upload,
+ * pois, menu-items, media) import from here and get the unified implementation
+ * with VENDOR role baked in.
+ */
 
+import type { NextResponse } from "next/server";
 import {
-  parseDurationToSeconds,
-  signJwtHs256,
-  verifyJwtHs256,
-} from "@/infrastructure/security/jwt";
-import { config } from "@/shared/config";
+  VENDOR_AUTH_COOKIES,
+  createVendorAccessToken,
+  verifyVendorAccessToken as verifyVendorAccessTokenUnified,
+  setAuthCookies as unifiedSetAuthCookies,
+  clearAuthCookies as unifiedClearAuthCookies,
+  jsonError,
+  type AccessTokenPayload as UnifiedAccessTokenPayload,
+  type RoleAuthCookies,
+} from "@/infrastructure/security/auth";
 
-export const AUTH_COOKIES = {
-  access: "fs_vendor_access_token",
-  refresh: "fs_vendor_refresh_token",
-  remember: "fs_vendor_remember_me",
-} as const;
+export const AUTH_COOKIES: RoleAuthCookies = VENDOR_AUTH_COOKIES;
 
-export type AccessTokenPayload = {
-  sub: string;
-  email: string;
-  role: "VENDOR";
-  iat: number;
-  exp: number;
-};
+/** Narrow role from UserRole union to literal "VENDOR" for existing consumers. */
+export type AccessTokenPayload = UnifiedAccessTokenPayload & { role: "VENDOR" };
 
 export function setAuthCookies(
   response: NextResponse,
-  input: {
-    accessToken: string;
-    refreshToken: string;
-    rememberMe: boolean;
-  }
+  input: { accessToken: string; refreshToken: string; rememberMe: boolean }
 ): void {
-  const isProduction = process.env.NODE_ENV === "production";
-
-  const accessMaxAge = parseDurationToSeconds(config.auth.jwtExpiresIn);
-  const refreshMaxAge = parseDurationToSeconds(config.auth.refreshTokenExpiresIn);
-
-  response.cookies.set(AUTH_COOKIES.access, input.accessToken, {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: "lax",
-    path: "/",
-    maxAge: accessMaxAge,
-  });
-
-  response.cookies.set(AUTH_COOKIES.refresh, input.refreshToken, {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: "lax",
-    path: "/",
-    ...(input.rememberMe ? { maxAge: refreshMaxAge } : {}),
-  });
-
-  if (input.rememberMe) {
-    response.cookies.set(AUTH_COOKIES.remember, "1", {
-      httpOnly: false,
-      secure: isProduction,
-      sameSite: "lax",
-      path: "/",
-      maxAge: refreshMaxAge,
-    });
-  } else {
-    response.cookies.delete(AUTH_COOKIES.remember);
-  }
+  unifiedSetAuthCookies("VENDOR", response, input);
 }
 
 export function clearAuthCookies(response: NextResponse): void {
-  response.cookies.delete(AUTH_COOKIES.access);
-  response.cookies.delete(AUTH_COOKIES.refresh);
-  response.cookies.delete(AUTH_COOKIES.remember);
+  unifiedClearAuthCookies("VENDOR", response);
 }
 
-export function createVendorAccessToken(input: { userId: string; email: string }): string {
-  const expiresInSeconds = parseDurationToSeconds(config.auth.jwtExpiresIn);
-  return signJwtHs256({
-    payload: {
-      sub: input.userId,
-      email: input.email,
-      role: "VENDOR",
-    },
-    secret: config.auth.jwtSecret,
-    expiresInSeconds,
-  });
-}
+export { createVendorAccessToken, jsonError };
 
 export function verifyVendorAccessToken(token: string): AccessTokenPayload {
-  const result = verifyJwtHs256<AccessTokenPayload>({ token, secret: config.auth.jwtSecret });
-  if (result.payload.role !== "VENDOR") {
-    throw new Error("Invalid role");
-  }
-  return result.payload;
-}
-
-export function jsonError(status: number, message: string, extra?: Record<string, unknown>) {
-  return NextResponse.json(
-    {
-      error: message,
-      ...extra,
-    },
-    { status }
-  );
+  return verifyVendorAccessTokenUnified(token) as AccessTokenPayload;
 }

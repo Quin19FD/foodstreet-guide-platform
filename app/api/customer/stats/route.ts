@@ -2,51 +2,24 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 import { prisma } from "@/infrastructure/database/prisma/client";
-
-import { AUTH_COOKIES, jsonError, verifyCustomerAccessToken } from "../auth/_shared";
+import { requireAuth, jsonError } from "@/infrastructure/security/auth";
 
 export const runtime = "nodejs";
-
-function getBearerToken(request: NextRequest): string | null {
-  const raw = request.headers.get("authorization");
-  if (!raw) return null;
-  const match = raw.match(/^Bearer\s+(.+)$/i);
-  return match?.[1] ?? null;
-}
 
 /**
  * GET /api/customer/stats
  * Lấy thống kê hoạt động của user
  */
 export async function GET(request: NextRequest) {
-  const cookieToken = request.cookies.get(AUTH_COOKIES.access)?.value ?? null;
-  const token = cookieToken ?? getBearerToken(request);
-  if (!token) {
-    return jsonError(401, "Chưa đăng nhập");
-  }
-
-  let payload: { sub: string; email: string; role: "USER" };
-  try {
-    payload = verifyCustomerAccessToken(token);
-  } catch {
-    return jsonError(401, "Phiên đăng nhập không hợp lệ hoặc đã hết hạn");
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { id: payload.sub },
-    select: { id: true, role: true, status: true, isActive: true },
-  });
-
-  if (!user || !user.isActive || user.role !== "USER" || user.status !== "APPROVED") {
-    return jsonError(401, "Phiên đăng nhập không hợp lệ");
-  }
+  const auth = await requireAuth(request, "USER");
+  if (auth instanceof NextResponse) return auth;
 
   try {
     // Count unique POIs visited (from POIView)
     const visitedCount = await prisma.pOIView.groupBy({
       by: ["poiId"],
       where: {
-        userId: user.id,
+        userId: auth.userId,
       },
       _count: {
         poiId: true,
@@ -55,13 +28,13 @@ export async function GET(request: NextRequest) {
 
     // Count favorites
     const favoriteCount = await prisma.favoritePOI.count({
-      where: { userId: user.id },
+      where: { userId: auth.userId },
     });
 
-    // Count tours booked (from TourBooking if exists, or UserActivity)
+    // Count tours booked (from UserActivity)
     const tourBookings = await prisma.userActivity.count({
       where: {
-        userId: user.id,
+        userId: auth.userId,
         action: "BOOK_TOUR",
       },
     });
@@ -69,7 +42,7 @@ export async function GET(request: NextRequest) {
     // Count reviews written
     const reviewCount = await prisma.userActivity.count({
       where: {
-        userId: user.id,
+        userId: auth.userId,
         action: "REVIEW_POI",
       },
     });
