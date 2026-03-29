@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 
 import { prisma } from "@/infrastructure/database/prisma/client";
 import { parseDurationToSeconds } from "@/infrastructure/security/jwt";
-import { generateRefreshToken, hashRefreshToken } from "@/infrastructure/security/refresh-token";
+import { generateRefreshToken, hashRefreshToken, rotateRefreshToken } from "@/infrastructure/security/refresh-token";
 import { config } from "@/shared/config";
 
 import { AUTH_COOKIES, createVendorAccessToken, jsonError, setAuthCookies } from "../_shared";
@@ -33,18 +33,21 @@ export async function POST(request: NextRequest) {
   const accessToken = createVendorAccessToken({ userId: user.id, email: user.email });
 
   const newRefreshToken = generateRefreshToken();
-  const newRefreshTokenHash = hashRefreshToken(newRefreshToken);
   const newRefreshTokenExpiry = new Date(
     now.getTime() + parseDurationToSeconds(config.auth.refreshTokenExpiresIn) * 1000
   );
 
-  await prisma.user.update({
-    where: { id: user.id },
-    data: {
-      refreshTokenHash: newRefreshTokenHash,
-      refreshTokenExpiry: newRefreshTokenExpiry,
-    },
+  const { rotated } = await rotateRefreshToken({
+    prisma,
+    userId: user.id,
+    currentTokenHash: refreshTokenHash,
+    newToken: newRefreshToken,
+    newExpiry: newRefreshTokenExpiry,
   });
+
+  if (!rotated) {
+    return jsonError(401, "Phiên đăng nhập không hợp lệ, vui lòng đăng nhập lại");
+  }
 
   const response = NextResponse.json({
     user: {

@@ -56,7 +56,7 @@ export const config = {
 
   auth: {
     jwtSecret: _jwtSecret,
-    jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? "7d",
+    jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? "15m",
     refreshTokenExpiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN ?? "30d",
   },
 
