@@ -50,6 +50,81 @@ type ClusterCandidate = {
   memberCount: number;
 };
 
+type RouteInfo = {
+  distanceMeters: number;
+  durationSeconds: number;
+  source: "osrm" | "straight";
+};
+
+type RouteCacheItem = {
+  coordinates: [number, number][];
+  info: RouteInfo;
+};
+
+type MovementMode = "walk" | "motorbike";
+
+type MovementProfile = {
+  label: string;
+  baseAlertRadius: number;
+  minAlertRadius: number;
+  maxAlertRadius: number;
+  accuracyMultiplier: number;
+  accuracyCap: number;
+  speedMultiplier: number;
+  speedCap: number;
+  globalPromptIntervalMs: number;
+  dismissPromptCooldownMs: number;
+  clusterCooldownMs: number;
+  poiCooldownMs: number;
+  stabilityTicks: number;
+  exitPadding: number;
+  exitFloor: number;
+  promptTimeoutMs: number;
+  hint: string;
+};
+
+const MOVEMENT_MODE_STORAGE_KEY = "fs_customer_movement_mode";
+const MOVEMENT_PROFILES: Record<MovementMode, MovementProfile> = {
+  walk: {
+    label: "Đi bộ",
+    baseAlertRadius: 92,
+    minAlertRadius: 80,
+    maxAlertRadius: 170,
+    accuracyMultiplier: 0.75,
+    accuracyCap: 80,
+    speedMultiplier: 10,
+    speedCap: 50,
+    globalPromptIntervalMs: 32_000,
+    dismissPromptCooldownMs: 10 * 60_000,
+    clusterCooldownMs: 3 * 60_000,
+    poiCooldownMs: 7 * 60_000,
+    stabilityTicks: 2,
+    exitPadding: 36,
+    exitFloor: 140,
+    promptTimeoutMs: 28_000,
+    hint: "Hỏi sớm vừa phải, phù hợp khi bạn đi bộ quanh khu POI.",
+  },
+  motorbike: {
+    label: "Xe máy",
+    baseAlertRadius: 180,
+    minAlertRadius: 150,
+    maxAlertRadius: 290,
+    accuracyMultiplier: 0.9,
+    accuracyCap: 100,
+    speedMultiplier: 12,
+    speedCap: 80,
+    globalPromptIntervalMs: 58_000,
+    dismissPromptCooldownMs: 15 * 60_000,
+    clusterCooldownMs: 5 * 60_000,
+    poiCooldownMs: 10 * 60_000,
+    stabilityTicks: 3,
+    exitPadding: 70,
+    exitFloor: 210,
+    promptTimeoutMs: 18_000,
+    hint: "Hỏi sớm hơn và thưa hơn để kịp tốc độ di chuyển bằng xe máy.",
+  },
+};
+
 const OSM_STYLE: maplibregl.StyleSpecification = {
   version: 8,
   sources: {
@@ -65,18 +140,49 @@ const OSM_STYLE: maplibregl.StyleSpecification = {
 
 const ALERT_TRIGGER_RADIUS_METERS = 130;
 const CLUSTER_RADIUS_METERS = 90;
-const CLUSTER_COOLDOWN_MS = 4 * 60_000;
-const POI_COOLDOWN_MS = 8 * 60_000;
-const CLUSTER_EXIT_RADIUS_METERS = 180;
 const NETWORK_TIMEOUT_MS = 5000;
 const DEFAULT_CENTER: [number, number] = [106.7009, 10.7769];
+const ROUTE_SOURCE_ID = "customer-route-source";
+const ROUTE_LINE_LAYER_ID = "customer-route-line";
+const ROUTE_LINE_OUTLINE_LAYER_ID = "customer-route-line-outline";
+
+const LANGUAGE_PRESETS = [
+  "vi",
+  "en",
+  "fr",
+  "de",
+  "ja",
+  "ko",
+  "zh",
+  "th",
+  "es",
+  "pt",
+  "it",
+  "ru",
+  "id",
+  "ms",
+  "ar",
+  "hi",
+];
 
 function speechLang(code: string): string {
   const value = code.toLowerCase();
   if (value === "vi") return "vi-VN";
   if (value === "en") return "en-US";
   if (value === "fr") return "fr-FR";
+  if (value === "de") return "de-DE";
   if (value === "ja") return "ja-JP";
+  if (value === "ko") return "ko-KR";
+  if (value === "zh") return "zh-CN";
+  if (value === "th") return "th-TH";
+  if (value === "es") return "es-ES";
+  if (value === "pt") return "pt-BR";
+  if (value === "it") return "it-IT";
+  if (value === "ru") return "ru-RU";
+  if (value === "id") return "id-ID";
+  if (value === "ms") return "ms-MY";
+  if (value === "ar") return "ar-SA";
+  if (value === "hi") return "hi-IN";
   return value;
 }
 
@@ -99,6 +205,45 @@ function haversineMeters(lat1: number, lng1: number, lat2: number, lng2: number)
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return earthRadius * c;
+}
+
+function routeCacheKey(startLat: number, startLng: number, endLat: number, endLng: number): string {
+  const rounded = [startLat, startLng, endLat, endLng].map((value) => value.toFixed(4));
+  return rounded.join("|");
+}
+
+function formatRouteDistance(meters: number): string {
+  if (meters < 1000) return `${Math.round(meters)} m`;
+  return `${(meters / 1000).toFixed(1)} km`;
+}
+
+function formatRouteDuration(seconds: number): string {
+  const minutes = Math.max(1, Math.round(seconds / 60));
+  if (minutes < 60) return `${minutes} phút`;
+  const hours = Math.floor(minutes / 60);
+  const remainMinutes = minutes % 60;
+  return remainMinutes === 0 ? `${hours} giờ` : `${hours} giờ ${remainMinutes} phút`;
+}
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
+function computeAdaptiveAlertRadius(
+  profile: MovementProfile,
+  accuracyMeters: number | null,
+  speedMps: number | null
+): number {
+  let radius = profile.baseAlertRadius;
+  if (accuracyMeters != null) {
+    // GPS càng nhiễu thì cần nới bán kính để giảm bỏ sót POI.
+    radius += clamp(accuracyMeters * profile.accuracyMultiplier, 0, profile.accuracyCap);
+  }
+  if (speedMps != null && speedMps > 0) {
+    // Khi di chuyển nhanh, mở rộng ngưỡng để hỏi sớm hơn.
+    radius += clamp(speedMps * profile.speedMultiplier, 0, profile.speedCap);
+  }
+  return clamp(radius, profile.minAlertRadius, profile.maxAlertRadius);
 }
 
 async function fetchWithTimeout(input: string, init: RequestInit, timeoutMs = NETWORK_TIMEOUT_MS) {
@@ -135,7 +280,8 @@ function sortPoiByPriority(a: PoiMapItem, b: PoiMapItem): number {
 
 function buildClusterCandidates(
   nearbyPois: PoiMapItem[],
-  alertedPoiAt: Record<string, number>
+  alertedPoiAt: Record<string, number>,
+  recentPromptCooldownMs: number
 ): ClusterCandidate[] {
   type MutableCluster = {
     members: PoiMapItem[];
@@ -189,7 +335,7 @@ function buildClusterCandidates(
           const hasNarrationBoost = poi.viNarration?.trim() ? -30 : 0;
           const hasAudioBoost = (poi.languagesWithAudio?.length ?? 0) > 0 ? -20 : 0;
           const recentlyPromptedPenalty =
-            Date.now() - (alertedPoiAt[poi.id] ?? 0) < POI_COOLDOWN_MS ? 180 : 0;
+            Date.now() - (alertedPoiAt[poi.id] ?? 0) < recentPromptCooldownMs ? 180 : 0;
           const score =
             distance * 0.65 +
             priority * 0.25 +
@@ -228,10 +374,16 @@ function CustomerMapContent() {
   const mapRef = useRef<maplibregl.Map | null>(null);
   const userMarkerRef = useRef<maplibregl.Marker | null>(null);
   const poiMarkersRef = useRef<maplibregl.Marker[]>([]);
+  const routeCacheRef = useRef<Record<string, RouteCacheItem>>({});
+  const routedPoiRef = useRef<string | null>(null);
   const centeredOnceRef = useRef(false);
 
   const poiPromptedAtRef = useRef<Record<string, number>>({});
   const clusterPromptedAtRef = useRef<Record<string, number>>({});
+  const promptDecisionRef = useRef<Record<string, { decision: "accepted" | "dismissed" | "viewed"; at: number }>>({});
+  const proximityTicksRef = useRef<Record<string, number>>({});
+  const nearPromptStartedAtRef = useRef<number>(0);
+  const lastGlobalPromptAtRef = useRef<number>(0);
   const activeClusterRef = useRef<{ id: string; centerLat: number; centerLng: number } | null>(
     null
   );
@@ -252,6 +404,8 @@ function CustomerMapContent() {
 
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [isLocating, setIsLocating] = useState(true);
+  const [locationAccuracyMeters, setLocationAccuracyMeters] = useState<number | null>(null);
+  const [locationSpeedMps, setLocationSpeedMps] = useState<number | null>(null);
   const [pois, setPois] = useState<PoiMapItem[]>([]);
   const [queryInput, setQueryInput] = useState("");
   const [appliedQuery, setAppliedQuery] = useState("");
@@ -271,8 +425,14 @@ function CustomerMapContent() {
   const [locationHint, setLocationHint] = useState<string | null>(null);
   const [isLoadingPois, setIsLoadingPois] = useState(false);
   const [isOnline, setIsOnline] = useState<boolean>(true);
+  const [autoPromptEnabled, setAutoPromptEnabled] = useState(true);
+  const [movementMode, setMovementMode] = useState<MovementMode>("walk");
+  const [activeRoutePoiId, setActiveRoutePoiId] = useState<string | null>(null);
+  const [routeInfo, setRouteInfo] = useState<RouteInfo | null>(null);
+  const [isRouting, setIsRouting] = useState(false);
 
   const focusPoiId = searchParams.get("focusPoi");
+  const routeToPoiId = searchParams.get("routeTo");
 
   const selectedPoi = useMemo(
     () => pois.find((poi) => poi.id === selectedPoiId) ?? null,
@@ -280,12 +440,24 @@ function CustomerMapContent() {
   );
 
   const languageOptions = useMemo(() => {
-    const options = new Set<string>(["vi", "en"]);
+    const options = new Set<string>(LANGUAGE_PRESETS);
     for (const poi of pois) {
       for (const lang of poi.availableLanguages ?? []) options.add(lang.toLowerCase());
     }
     return Array.from(options);
   }, [pois]);
+
+  const movementProfile = useMemo(() => MOVEMENT_PROFILES[movementMode], [movementMode]);
+
+  const effectiveAlertRadius = useMemo(
+    () => computeAdaptiveAlertRadius(movementProfile, locationAccuracyMeters, locationSpeedMps),
+    [locationAccuracyMeters, locationSpeedMps, movementProfile]
+  );
+
+  const effectiveExitRadius = useMemo(
+    () => Math.max(movementProfile.exitFloor, effectiveAlertRadius + movementProfile.exitPadding),
+    [effectiveAlertRadius, movementProfile]
+  );
 
   const updateQueueCount = () => {
     setQueueCount(queueRef.current.length + (currentChunkRef.current ? 1 : 0));
@@ -542,6 +714,149 @@ function CustomerMapContent() {
     return viSource;
   };
 
+  const clearRouteLine = () => {
+    routedPoiRef.current = null;
+    const map = mapRef.current;
+    setIsRouting(false);
+    if (!map) {
+      setRouteInfo(null);
+      return;
+    }
+
+    if (map.getLayer(ROUTE_LINE_LAYER_ID)) map.removeLayer(ROUTE_LINE_LAYER_ID);
+    if (map.getLayer(ROUTE_LINE_OUTLINE_LAYER_ID)) map.removeLayer(ROUTE_LINE_OUTLINE_LAYER_ID);
+    if (map.getSource(ROUTE_SOURCE_ID)) map.removeSource(ROUTE_SOURCE_ID);
+    setRouteInfo(null);
+  };
+
+  const upsertRouteLine = (
+    coordinates: [number, number][],
+    info: RouteInfo,
+    fitToRoute = false
+  ) => {
+    const map = mapRef.current;
+    if (!map || coordinates.length < 2) return;
+
+    if (!map.isStyleLoaded()) {
+      map.once("load", () => upsertRouteLine(coordinates, info, fitToRoute));
+      return;
+    }
+
+    const sourceData = {
+      type: "Feature",
+      properties: {},
+      geometry: {
+        type: "LineString",
+        coordinates,
+      },
+    } as const;
+
+    const existing = map.getSource(ROUTE_SOURCE_ID) as maplibregl.GeoJSONSource | undefined;
+    if (existing) {
+      existing.setData(sourceData);
+    } else {
+      map.addSource(ROUTE_SOURCE_ID, {
+        type: "geojson",
+        data: sourceData,
+      });
+
+      map.addLayer({
+        id: ROUTE_LINE_OUTLINE_LAYER_ID,
+        type: "line",
+        source: ROUTE_SOURCE_ID,
+        layout: { "line-join": "round", "line-cap": "round" },
+        paint: {
+          "line-color": "#1e293b",
+          "line-width": 7,
+          "line-opacity": 0.45,
+        },
+      });
+
+      map.addLayer({
+        id: ROUTE_LINE_LAYER_ID,
+        type: "line",
+        source: ROUTE_SOURCE_ID,
+        layout: { "line-join": "round", "line-cap": "round" },
+        paint: {
+          "line-color": "#f97316",
+          "line-width": 4.5,
+          "line-opacity": 0.95,
+        },
+      });
+    }
+
+    if (fitToRoute) {
+      const bounds = new maplibregl.LngLatBounds(
+        [coordinates[0][0], coordinates[0][1]],
+        [coordinates[0][0], coordinates[0][1]]
+      );
+      for (const coordinate of coordinates) bounds.extend(coordinate);
+      map.fitBounds(bounds, { padding: 70, maxZoom: 16, duration: 700 });
+    }
+
+    setRouteInfo(info);
+  };
+
+  const fetchRouteToPoi = async (
+    from: { lat: number; lng: number },
+    to: { lat: number; lng: number }
+  ): Promise<RouteCacheItem> => {
+    const key = routeCacheKey(from.lat, from.lng, to.lat, to.lng);
+    if (routeCacheRef.current[key]) return routeCacheRef.current[key];
+
+    try {
+      const response = await fetchWithTimeout(
+        `https://router.project-osrm.org/route/v1/driving/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson`,
+        { method: "GET" },
+        NETWORK_TIMEOUT_MS
+      );
+
+      if (response.ok) {
+        const data = (await response.json().catch(() => null)) as {
+          routes?: Array<{
+            distance?: number;
+            duration?: number;
+            geometry?: { coordinates?: [number, number][] };
+          }>;
+        } | null;
+
+        const firstRoute = data?.routes?.[0];
+        const coordinates = firstRoute?.geometry?.coordinates ?? [];
+        if (coordinates.length >= 2) {
+          const payload: RouteCacheItem = {
+            coordinates,
+            info: {
+              distanceMeters: firstRoute?.distance ?? haversineMeters(from.lat, from.lng, to.lat, to.lng),
+              durationSeconds:
+                firstRoute?.duration ??
+                Math.max(240, haversineMeters(from.lat, from.lng, to.lat, to.lng) / 6),
+              source: "osrm",
+            },
+          };
+          routeCacheRef.current[key] = payload;
+          return payload;
+        }
+      }
+    } catch {
+      // fallback bên dưới
+    }
+
+    const straightDistance = haversineMeters(from.lat, from.lng, to.lat, to.lng);
+    const fallback: RouteCacheItem = {
+      coordinates: [
+        [from.lng, from.lat],
+        [to.lng, to.lat],
+      ],
+      info: {
+        distanceMeters: straightDistance,
+        durationSeconds: Math.max(240, straightDistance / 6),
+        source: "straight",
+      },
+    };
+    routeCacheRef.current[key] = fallback;
+    return fallback;
+  };
+
   useEffect(() => {
     setIsOnline(navigator.onLine);
 
@@ -565,6 +880,26 @@ function CustomerMapContent() {
   }, []);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = window.localStorage.getItem(MOVEMENT_MODE_STORAGE_KEY);
+    if (stored === "walk" || stored === "motorbike") {
+      setMovementMode(stored);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(MOVEMENT_MODE_STORAGE_KEY, movementMode);
+  }, [movementMode]);
+
+  useEffect(() => {
+    setNearPromptPoi(null);
+    setPromptClusterInfo(null);
+    proximityTicksRef.current = {};
+    activeClusterRef.current = null;
+  }, [movementMode]);
+
+  useEffect(() => {
     if (!mapContainerRef.current || mapRef.current) return;
 
     const map = new maplibregl.Map({
@@ -582,6 +917,9 @@ function CustomerMapContent() {
         marker.remove();
       }
       poiMarkersRef.current = [];
+      if (map.getLayer(ROUTE_LINE_LAYER_ID)) map.removeLayer(ROUTE_LINE_LAYER_ID);
+      if (map.getLayer(ROUTE_LINE_OUTLINE_LAYER_ID)) map.removeLayer(ROUTE_LINE_OUTLINE_LAYER_ID);
+      if (map.getSource(ROUTE_SOURCE_ID)) map.removeSource(ROUTE_SOURCE_ID);
       userMarkerRef.current?.remove();
       userMarkerRef.current = null;
       map.remove();
@@ -604,6 +942,12 @@ function CustomerMapContent() {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLocationAccuracyMeters(Number.isFinite(pos.coords.accuracy) ? pos.coords.accuracy : null);
+        setLocationSpeedMps(
+          typeof pos.coords.speed === "number" && Number.isFinite(pos.coords.speed)
+            ? Math.max(0, pos.coords.speed)
+            : null
+        );
         setLocationHint(null);
         setIsLocating(false);
       },
@@ -618,6 +962,12 @@ function CustomerMapContent() {
     watchIdRef.current = navigator.geolocation.watchPosition(
       (pos) => {
         setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLocationAccuracyMeters(Number.isFinite(pos.coords.accuracy) ? pos.coords.accuracy : null);
+        setLocationSpeedMps(
+          typeof pos.coords.speed === "number" && Number.isFinite(pos.coords.speed)
+            ? Math.max(0, pos.coords.speed)
+            : null
+        );
         setLocationHint(null);
       },
       () => {
@@ -742,6 +1092,47 @@ function CustomerMapContent() {
   }, [selectedPoi]);
 
   useEffect(() => {
+    if (!activeRoutePoiId || !userLocation) {
+      clearRouteLine();
+      return;
+    }
+
+    const routePoi =
+      pois.find((item) => item.id === activeRoutePoiId) ??
+      (selectedPoi?.id === activeRoutePoiId ? selectedPoi : null);
+
+    if (
+      !routePoi ||
+      typeof routePoi.latitude !== "number" ||
+      typeof routePoi.longitude !== "number"
+    ) {
+      clearRouteLine();
+      return;
+    }
+    const routeLat = routePoi.latitude;
+    const routeLng = routePoi.longitude;
+
+    let cancelled = false;
+    setIsRouting(true);
+
+    void (async () => {
+      const route = await fetchRouteToPoi(userLocation, {
+        lat: routeLat,
+        lng: routeLng,
+      });
+      if (cancelled) return;
+      const shouldFit = routedPoiRef.current !== routePoi.id;
+      upsertRouteLine(route.coordinates, route.info, shouldFit);
+      routedPoiRef.current = routePoi.id;
+      setIsRouting(false);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeRoutePoiId, pois, selectedPoi, userLocation]);
+
+  useEffect(() => {
     if (!focusPoiId || handledFocusPoiRef.current === focusPoiId) return;
 
     const localPoi = pois.find((item) => item.id === focusPoiId);
@@ -817,6 +1208,18 @@ function CustomerMapContent() {
   }, [focusPoiId, pois, userLocation]);
 
   useEffect(() => {
+    if (!routeToPoiId) return;
+    setSelectedPoiId(routeToPoiId);
+    setActiveRoutePoiId(routeToPoiId);
+  }, [routeToPoiId]);
+
+  useEffect(() => {
+    if (autoPromptEnabled) return;
+    setNearPromptPoi(null);
+    setPromptClusterInfo(null);
+  }, [autoPromptEnabled]);
+
+  useEffect(() => {
     if (!nearPromptPoi || !userLocation) return;
     if (typeof nearPromptPoi.latitude !== "number" || typeof nearPromptPoi.longitude !== "number")
       return;
@@ -827,14 +1230,14 @@ function CustomerMapContent() {
       nearPromptPoi.latitude,
       nearPromptPoi.longitude
     );
-    if (distance > CLUSTER_EXIT_RADIUS_METERS) {
+    if (distance > effectiveExitRadius) {
       setNearPromptPoi(null);
       setPromptClusterInfo(null);
     }
-  }, [nearPromptPoi, userLocation]);
+  }, [effectiveExitRadius, nearPromptPoi, userLocation]);
 
   useEffect(() => {
-    if (!userLocation) return;
+    if (!autoPromptEnabled || !userLocation) return;
 
     const active = activeClusterRef.current;
     if (active) {
@@ -844,32 +1247,56 @@ function CustomerMapContent() {
         active.centerLat,
         active.centerLng
       );
-      if (distanceFromActive > CLUSTER_EXIT_RADIUS_METERS) {
+      if (distanceFromActive > effectiveExitRadius) {
         activeClusterRef.current = null;
       }
     }
 
-    if (nearPromptPoi) return;
+    if (nearPromptPoi || (activeRoutePoiId && !isRouting)) return;
 
     const nearby = pois.filter((poi) => {
       if (typeof poi.latitude !== "number" || typeof poi.longitude !== "number") return false;
       const distance =
         poi.distanceMeters ??
         haversineMeters(userLocation.lat, userLocation.lng, poi.latitude, poi.longitude);
-      return distance <= ALERT_TRIGGER_RADIUS_METERS;
+      return distance <= effectiveAlertRadius;
     });
 
-    if (nearby.length === 0) return;
+    const nearbyIds = new Set<string>(nearby.map((item) => item.id));
+    for (const poiId of Object.keys(proximityTicksRef.current)) {
+      if (!nearbyIds.has(poiId)) delete proximityTicksRef.current[poiId];
+    }
+    for (const poi of nearby) {
+      proximityTicksRef.current[poi.id] = (proximityTicksRef.current[poi.id] ?? 0) + 1;
+    }
 
-    const candidates = buildClusterCandidates(nearby, poiPromptedAtRef.current);
+    const stableNearby = nearby.filter(
+      (poi) => (proximityTicksRef.current[poi.id] ?? 0) >= movementProfile.stabilityTicks
+    );
+
+    if (stableNearby.length === 0) return;
+
+    const candidates = buildClusterCandidates(
+      stableNearby,
+      poiPromptedAtRef.current,
+      movementProfile.poiCooldownMs
+    );
     if (candidates.length === 0) return;
 
     const now = Date.now();
+    if (now - lastGlobalPromptAtRef.current < movementProfile.globalPromptIntervalMs) return;
+
     const selectedCandidate = candidates.find((candidate) => {
       const clusterCooldown = now - (clusterPromptedAtRef.current[candidate.clusterId] ?? 0);
       const poiCooldown = now - (poiPromptedAtRef.current[candidate.topPoi.id] ?? 0);
-      if (clusterCooldown < CLUSTER_COOLDOWN_MS) return false;
-      if (poiCooldown < POI_COOLDOWN_MS) return false;
+      const decision = promptDecisionRef.current[candidate.topPoi.id];
+      if (
+        decision?.decision === "dismissed" &&
+        now - decision.at < movementProfile.dismissPromptCooldownMs
+      )
+        return false;
+      if (clusterCooldown < movementProfile.clusterCooldownMs) return false;
+      if (poiCooldown < movementProfile.poiCooldownMs) return false;
       if (activeClusterRef.current?.id === candidate.clusterId) return false;
       return true;
     });
@@ -878,17 +1305,22 @@ function CustomerMapContent() {
 
     clusterPromptedAtRef.current[selectedCandidate.clusterId] = now;
     poiPromptedAtRef.current[selectedCandidate.topPoi.id] = now;
+    lastGlobalPromptAtRef.current = now;
     activeClusterRef.current = {
       id: selectedCandidate.clusterId,
       centerLat: selectedCandidate.centerLat,
       centerLng: selectedCandidate.centerLng,
     };
 
+    nearPromptStartedAtRef.current = now;
     setNearPromptPoi(selectedCandidate.topPoi);
     setPromptClusterInfo({
       clusterId: selectedCandidate.clusterId,
       memberCount: selectedCandidate.memberCount,
     });
+
+    // Preload narration trước để người dùng bấm "Nghe" sẽ phản hồi nhanh hơn.
+    void getNarrationText(selectedCandidate.topPoi, language.toLowerCase());
 
     if (!isSpeaking && queueRef.current.length === 0 && !pauseRef.current) {
       enqueueSpeechBySentence(
@@ -899,7 +1331,31 @@ function CustomerMapContent() {
         selectedCandidate.topPoi.id
       );
     }
-  }, [isSpeaking, nearPromptPoi, pois, userLocation]);
+  }, [
+    activeRoutePoiId,
+    autoPromptEnabled,
+    effectiveAlertRadius,
+    effectiveExitRadius,
+    isRouting,
+    isSpeaking,
+    language,
+    nearPromptPoi,
+    pois,
+    movementProfile,
+    userLocation,
+  ]);
+
+  useEffect(() => {
+    if (!nearPromptPoi) return;
+
+    const timer = setTimeout(() => {
+      promptDecisionRef.current[nearPromptPoi.id] = { decision: "dismissed", at: Date.now() };
+      setNearPromptPoi(null);
+      setPromptClusterInfo(null);
+    }, movementProfile.promptTimeoutMs);
+
+    return () => clearTimeout(timer);
+  }, [movementProfile.promptTimeoutMs, nearPromptPoi]);
 
   const handleApplySearch = () => {
     setAppliedQuery(queryInput.trim());
@@ -907,6 +1363,17 @@ function CustomerMapContent() {
     if (userLocation) {
       void loadNearbyPois(userLocation.lat, userLocation.lng, queryInput.trim());
     }
+  };
+
+  const handleRouteToPoi = (poi: PoiMapItem) => {
+    if (typeof poi.latitude !== "number" || typeof poi.longitude !== "number") return;
+    setSelectedPoiId(poi.id);
+    setActiveRoutePoiId(poi.id);
+  };
+
+  const handleClearRoute = () => {
+    setActiveRoutePoiId(null);
+    clearRouteLine();
   };
 
   const handleListenNearbyPoi = async () => {
@@ -920,6 +1387,7 @@ function CustomerMapContent() {
       setNetworkHint("Mạng đang yếu, tạm phát thuyết minh tiếng Việt đã lưu.");
     }
 
+    promptDecisionRef.current[targetPoi.id] = { decision: "accepted", at: Date.now() };
     setNearPromptPoi(null);
     setPromptClusterInfo(null);
 
@@ -963,12 +1431,45 @@ function CustomerMapContent() {
             <h1 className="text-lg font-bold text-slate-900">Bản đồ POI</h1>
             <p className="text-xs text-slate-500">Vị trí: xanh / POI: cam</p>
           </div>
-          <Link
-            href="/customer"
-            className="rounded-xl bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm hover:shadow-md transition-shadow border border-slate-100"
-          >
-            Về trang tìm
-          </Link>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setAutoPromptEnabled((prev) => !prev)}
+              className={`rounded-xl px-3 py-2 text-xs font-semibold shadow-sm transition ${
+                autoPromptEnabled
+                  ? "border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-100"
+              }`}
+            >
+              {autoPromptEnabled ? "Auto hỏi: Bật" : "Auto hỏi: Tắt"}
+            </button>
+            <div className="flex items-center rounded-xl border border-slate-200 bg-white p-1 shadow-sm">
+              {(["walk", "motorbike"] as MovementMode[]).map((mode) => {
+                const active = movementMode === mode;
+                return (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => setMovementMode(mode)}
+                    title={MOVEMENT_PROFILES[mode].hint}
+                    className={`rounded-lg px-3 py-2 text-xs font-semibold transition ${
+                      active
+                        ? "bg-orange-500 text-white shadow-sm"
+                        : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                    }`}
+                  >
+                    {MOVEMENT_PROFILES[mode].label}
+                  </button>
+                );
+              })}
+            </div>
+            <Link
+              href="/customer"
+              className="rounded-xl border border-slate-100 bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm transition-shadow hover:shadow-md"
+            >
+              Về trang tìm
+            </Link>
+          </div>
         </div>
 
         {/* Search Bar */}
@@ -1009,6 +1510,18 @@ function CustomerMapContent() {
             <MapPin className="h-3.5 w-3.5" />
             {isLoadingPois ? "Đang cập nhật..." : `${pois.length} POI`}
           </span>
+          <span className="inline-flex items-center gap-1 rounded-full bg-orange-100 px-3 py-1.5 text-orange-700">
+            <Navigation className="h-3.5 w-3.5" />
+            Radius: ~{Math.round(effectiveAlertRadius)}m
+          </span>
+          <span className="inline-flex items-center gap-1 rounded-full bg-violet-100 px-3 py-1.5 text-violet-700">
+            Chế độ: {movementProfile.label}
+          </span>
+          {locationAccuracyMeters != null ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-indigo-100 px-3 py-1.5 text-indigo-700">
+              GPS ±{Math.round(locationAccuracyMeters)}m
+            </span>
+          ) : null}
           {isLocating ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-purple-100 px-3 py-1.5 text-purple-700 animate-pulse-soft">
               <Navigation className="h-3.5 w-3.5" />
@@ -1028,6 +1541,17 @@ function CustomerMapContent() {
             {networkHint}
           </p>
         ) : null}
+        <p className="mt-2 rounded-lg bg-violet-50 px-3 py-2 text-xs text-violet-700">
+          {movementProfile.hint}
+          {movementMode === "walk" && locationSpeedMps != null && locationSpeedMps > 7
+            ? " Tốc độ hiện tại khá cao, nếu bạn đang đi xe máy thì nên đổi chế độ để hệ thống hỏi sớm hơn."
+            : ""}
+        </p>
+        {!autoPromptEnabled ? (
+          <p className="mt-2 rounded-lg bg-slate-100 px-3 py-2 text-xs text-slate-600">
+            Auto hỏi thuyết minh đang tắt. Bạn vẫn có thể bấm POI để nghe thủ công.
+          </p>
+        ) : null}
       </header>
 
       <main className="space-y-4 p-4">
@@ -1035,6 +1559,31 @@ function CustomerMapContent() {
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-elevated">
           <div ref={mapContainerRef} className="h-[48vh] w-full sm:h-[52vh]" />
         </div>
+
+        {(isRouting || routeInfo) && (
+          <div className="rounded-2xl border border-blue-200 bg-blue-50 p-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="text-sm text-blue-900">
+                {isRouting ? (
+                  <span className="font-semibold">Đang tính tuyến đường trong ứng dụng...</span>
+                ) : routeInfo ? (
+                  <span className="font-semibold">
+                    Tuyến đường: {formatRouteDistance(routeInfo.distanceMeters)} -{" "}
+                    {formatRouteDuration(routeInfo.durationSeconds)}
+                    {routeInfo.source === "straight" ? " (ước lượng)" : ""}
+                  </span>
+                ) : null}
+              </div>
+              <button
+                type="button"
+                onClick={handleClearRoute}
+                className="rounded-lg border border-blue-200 bg-white px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100"
+              >
+                Xóa tuyến
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Nearby POI Alert - Enhanced */}
         {nearPromptPoi ? (
@@ -1067,6 +1616,12 @@ function CustomerMapContent() {
               <button
                 type="button"
                 onClick={() => {
+                  if (nearPromptPoi) {
+                    promptDecisionRef.current[nearPromptPoi.id] = {
+                      decision: "dismissed",
+                      at: Date.now(),
+                    };
+                  }
                   setNearPromptPoi(null);
                   setPromptClusterInfo(null);
                 }}
@@ -1076,7 +1631,13 @@ function CustomerMapContent() {
               </button>
               <button
                 type="button"
-                onClick={() => router.push(`/customer/pois/${nearPromptPoi.id}`)}
+                onClick={() => {
+                  promptDecisionRef.current[nearPromptPoi.id] = {
+                    decision: "viewed",
+                    at: Date.now(),
+                  };
+                  router.push(`/customer/pois/${nearPromptPoi.id}`);
+                }}
                 className="min-h-11 rounded-xl border-2 border-orange-200 px-4 py-2 text-sm font-semibold text-orange-700 hover:bg-orange-100 active:scale-[0.97] transition-all"
               >
                 Xem chi tiết
@@ -1283,14 +1844,22 @@ function CustomerMapContent() {
                 </button>
                 {typeof selectedPoi.latitude === "number" &&
                 typeof selectedPoi.longitude === "number" ? (
-                  <a
-                    href={`https://www.google.com/maps/dir/?api=1&destination=${selectedPoi.latitude},${selectedPoi.longitude}`}
-                    target="_blank"
-                    rel="noreferrer"
+                  <button
+                    type="button"
+                    onClick={() => handleRouteToPoi(selectedPoi)}
                     className="inline-flex min-h-11 items-center gap-1 rounded-xl border-2 border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 active:scale-[0.97] transition-all"
                   >
-                    <Navigation className="h-4 w-4" /> Chỉ đường
-                  </a>
+                    <Navigation className="h-4 w-4" /> Dẫn đường
+                  </button>
+                ) : null}
+                {activeRoutePoiId === selectedPoi.id ? (
+                  <button
+                    type="button"
+                    onClick={handleClearRoute}
+                    className="inline-flex min-h-11 items-center gap-1 rounded-xl border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-50 active:scale-[0.97] transition-all"
+                  >
+                    <Square className="h-4 w-4" /> Xóa tuyến
+                  </button>
                 ) : null}
               </div>
             </div>

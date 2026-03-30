@@ -264,3 +264,4 @@ export function VendorLayout({ children }: { children: React.ReactNode }) {
     </div>
   );
 }
+

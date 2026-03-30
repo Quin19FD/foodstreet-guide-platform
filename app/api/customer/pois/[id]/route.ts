@@ -63,10 +63,6 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
       latitude: poi.latitude,
       longitude: poi.longitude,
       rating: poi.rating,
-      directionUrl:
-        typeof poi.latitude === "number" && typeof poi.longitude === "number"
-          ? `https://www.google.com/maps/dir/?api=1&destination=${poi.latitude},${poi.longitude}`
-          : null,
       images: poi.images.map((image) => ({
         id: image.id,
         imageUrl: image.imageUrl,
