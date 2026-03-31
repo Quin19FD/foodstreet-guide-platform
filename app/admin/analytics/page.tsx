@@ -12,7 +12,7 @@ import {
   Users,
   Volume2,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { AdminLayout } from "@/components/layouts/admin-layout";
 
@@ -21,12 +21,17 @@ type AnalyticsData = {
   totalTours: number;
   totalUsers: number;
   totalVendors: number;
+  totalAdmins: number;
   totalAudioGuides: number;
   totalTranslations: number;
   totalReviews: number;
   totalFavorites: number;
+  totalPageViews: number;
+  totalPOIViews: number;
   activePOIs: number;
   activeTours: number;
+  pendingPOIs: number;
+  rejectedPOIs: number;
 };
 
 type AlertState = {
@@ -40,91 +45,54 @@ export default function AdminAnalyticsPage() {
     totalTours: 0,
     totalUsers: 0,
     totalVendors: 0,
+    totalAdmins: 0,
     totalAudioGuides: 0,
     totalTranslations: 0,
     totalReviews: 0,
     totalFavorites: 0,
+    totalPageViews: 0,
+    totalPOIViews: 0,
     activePOIs: 0,
     activeTours: 0,
+    pendingPOIs: 0,
+    rejectedPOIs: 0,
   });
   const [isLoading, setIsLoading] = useState(false);
   const [alert, setAlert] = useState<AlertState>(null);
 
   // Load analytics data
-  const loadAnalytics = async () => {
+  const loadAnalytics = useCallback(async () => {
     setIsLoading(true);
     setAlert(null);
 
     try {
-      // Fetch data from multiple endpoints
-      const [poisRes, toursRes, usersRes] = await Promise.all([
-        fetch("/api/admin/pois?take=100&skip=0&includeLocked=1", {
-          credentials: "include",
-        }),
-        fetch("/api/admin/tours?take=100&skip=0", {
-          credentials: "include",
-        }),
-        fetch("/api/admin/users?take=100&skip=0", {
-          credentials: "include",
-        }),
-      ]);
+      const res = await fetch("/api/admin/stats", {
+        credentials: "include",
+      });
 
-      if (!poisRes.ok || !toursRes.ok || !usersRes.ok) {
+      if (!res.ok) {
         throw new Error("Không thể tải dữ liệu analytics");
       }
 
-      const [poisData, toursData, usersData] = await Promise.all([
-        poisRes.json(),
-        toursRes.json(),
-        usersRes.json(),
-      ]);
-
-      const pois = poisData.pois || [];
-      const tours = toursData.tours || [];
-      const users = usersData.users || [];
-
-      // Calculate analytics
-      const totalPOIs = poisData.total || pois.length;
-      const totalTours = toursData.total || tours.length;
-      const totalUsers = usersData.total || users.length;
-      const totalVendors = users.filter((u: any) => u.role === "VENDOR").length;
-
-      // Count audio guides and translations from POI data
-      let totalAudioGuides = 0;
-      let totalTranslations = 0;
-
-      for (const poi of pois) {
-        if (poi.translations) {
-          totalTranslations += poi.translations.length;
-          for (const t of poi.translations) {
-            if (t.audios) {
-              totalAudioGuides += t.audios.length;
-            }
-          }
-        }
-      }
-
-      const totalReviews = pois.reduce((acc: number, poi: any) => {
-        // Reviews count from POI stats (if available)
-        return acc + (poi.reviewsCount || 0);
-      }, 0);
-
-      const activePOIs = pois.filter(
-        (poi: any) => poi.status === "APPROVED" && poi.isActive
-      ).length;
-      const activeTours = tours.filter((tour: any) => tour.isActive).length;
+      const data = await res.json();
+      const stats = data.stats ?? {};
 
       setAnalytics({
-        totalPOIs,
-        totalTours,
-        totalUsers,
-        totalVendors,
-        totalAudioGuides,
-        totalTranslations,
-        totalReviews,
-        totalFavorites: 0, // Would need separate API for favorites count
-        activePOIs,
-        activeTours,
+        totalPOIs: stats.totalPOIs ?? 0,
+        totalTours: stats.totalTours ?? 0,
+        totalUsers: stats.totalUsers ?? 0,
+        totalVendors: stats.totalVendors ?? 0,
+        totalAdmins: stats.totalAdmins ?? 0,
+        totalAudioGuides: stats.totalAudioGuides ?? 0,
+        totalTranslations: stats.totalTranslations ?? 0,
+        totalReviews: stats.totalReviews ?? 0,
+        totalFavorites: stats.totalFavorites ?? 0,
+        totalPageViews: stats.totalPageViews ?? 0,
+        totalPOIViews: stats.totalPOIViews ?? 0,
+        activePOIs: stats.activePOIs ?? 0,
+        activeTours: stats.activeTours ?? 0,
+        pendingPOIs: stats.pendingPOIs ?? 0,
+        rejectedPOIs: stats.rejectedPOIs ?? 0,
       });
     } catch (error) {
       console.error("Error loading analytics:", error);
@@ -135,11 +103,11 @@ export default function AdminAnalyticsPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    loadAnalytics();
-  }, []);
+    void loadAnalytics();
+  }, [loadAnalytics]);
 
   return (
     <AdminLayout>
@@ -312,6 +280,30 @@ export default function AdminAnalyticsPage() {
               </div>
             </div>
           </div>
+
+          <div className="rounded-xl bg-gradient-to-br from-fuchsia-50 to-fuchsia-100 border border-fuchsia-200 p-4 shadow-sm">
+            <div className="flex items-center gap-2">
+              <div className="rounded-lg bg-fuchsia-200 p-2">
+                <Activity className="h-4 w-4 text-fuchsia-700" />
+              </div>
+              <div>
+                <p className="text-lg font-bold text-fuchsia-900">{analytics.totalFavorites}</p>
+                <p className="text-xs text-fuchsia-700">Favorites</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 p-4 shadow-sm">
+            <div className="flex items-center gap-2">
+              <div className="rounded-lg bg-slate-200 p-2">
+                <Eye className="h-4 w-4 text-slate-700" />
+              </div>
+              <div>
+                <p className="text-lg font-bold text-slate-900">{analytics.totalPOIViews}</p>
+                <p className="text-xs text-slate-700">POI Views</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Usage Metrics */}
@@ -463,6 +455,34 @@ export default function AdminAnalyticsPage() {
                       }}
                     />
                   </div>
+                </div>
+                <div className="pt-2 text-xs text-slate-500">
+                  {analytics.pendingPOIs} chờ duyệt, {analytics.rejectedPOIs} bị từ chối
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <p className="text-sm font-medium text-slate-700">Sử dụng nền tảng</p>
+                <Eye className="h-4 w-4 text-slate-400" />
+              </div>
+              <div className="space-y-2 text-sm text-slate-600">
+                <div className="flex items-center justify-between">
+                  <span>Lượt xem POI</span>
+                  <span className="font-semibold text-slate-800">{analytics.totalPOIViews}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Favorites</span>
+                  <span className="font-semibold text-slate-800">{analytics.totalFavorites}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Admins</span>
+                  <span className="font-semibold text-slate-800">{analytics.totalAdmins}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span>Page views</span>
+                  <span className="font-semibold text-slate-800">{analytics.totalPageViews}</span>
                 </div>
               </div>
             </div>

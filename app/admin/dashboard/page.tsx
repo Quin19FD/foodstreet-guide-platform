@@ -1,7 +1,5 @@
 "use client";
 
-"use client";
-
 /**
  * Admin Dashboard Page
  *
@@ -12,7 +10,6 @@ import { AdminLayout } from "@/components/layouts/admin-layout";
 import {
   AlertCircle,
   Badge,
-  Bell,
   Building2,
   Check,
   CircleDollarSign,
@@ -21,7 +18,6 @@ import {
   MapPin,
   Menu,
   RefreshCw,
-  Search,
   ShieldCheck,
   ShieldX,
   Users,
@@ -34,12 +30,18 @@ type DashboardStats = {
   totalPOIs: number;
   pendingPOIs: number;
   approvedPOIs: number;
+  rejectedPOIs: number;
   totalTours: number;
   activeTours: number;
   totalUsers: number;
   totalVendors: number;
+  totalAdmins: number;
+  totalFavorites: number;
+  totalReviews: number;
   totalAudioGuides: number;
   totalTranslations: number;
+  totalPageViews: number;
+  totalPOIViews: number;
 };
 
 type RecentActivity = {
@@ -56,12 +58,18 @@ export default function AdminDashboardPage() {
     totalPOIs: 0,
     pendingPOIs: 0,
     approvedPOIs: 0,
+    rejectedPOIs: 0,
     totalTours: 0,
     activeTours: 0,
     totalUsers: 0,
     totalVendors: 0,
+    totalAdmins: 0,
+    totalFavorites: 0,
+    totalReviews: 0,
     totalAudioGuides: 0,
     totalTranslations: 0,
+    totalPageViews: 0,
+    totalPOIViews: 0,
   });
   const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -72,72 +80,52 @@ export default function AdminDashboardPage() {
     setErrorMessage(null);
 
     try {
-      // Fetch all data in parallel
-      const [poisRes, toursRes, usersRes] = await Promise.all([
-        fetch("/api/admin/pois?take=100&skip=0&includeLocked=1", {
-          method: "GET",
-          credentials: "include",
-        }),
-        fetch("/api/admin/tours?take=100&skip=0", {
-          method: "GET",
-          credentials: "include",
-        }),
-        fetch("/api/admin/users?take=100&skip=0", {
-          method: "GET",
-          credentials: "include",
-        }),
-      ]);
+      const res = await fetch("/api/admin/stats", {
+        method: "GET",
+        credentials: "include",
+      });
 
-      // Check if any request failed
-      if (!poisRes.ok || !toursRes.ok || !usersRes.ok) {
+      if (!res.ok) {
         throw new Error("Không thể tải dữ liệu dashboard");
       }
 
-      const [poisData, toursData, usersData] = await Promise.all([
-        poisRes.json(),
-        toursRes.json(),
-        usersRes.json(),
-      ]);
-
-      const pois = poisData.pois || [];
-      const tours = toursData.tours || [];
-      const users = usersData.users || [];
-
-      // Calculate stats
-      const pendingPOIs = pois.filter((poi: any) => poi.status === "PENDING").length;
-      const approvedPOIs = pois.filter((poi: any) => poi.status === "APPROVED").length;
-      const activeTours = tours.filter((tour: any) => tour.isActive).length;
-      const vendors = users.filter((user: any) => user.role === "VENDOR");
-
-      // Calculate translations and audio guides from POI data
-      const totalTranslations = pois.reduce((acc: number, poi: any) => {
-        return acc + (poi.translations?.length || 0);
-      }, 0);
-
-      const totalAudioGuides = pois.reduce((acc: number, poi: any) => {
-        return (
-          acc +
-          (poi.translations?.reduce((audioAcc: number, t: any) => {
-            return audioAcc + (t.audios?.length || 0);
-          }, 0) || 0)
-        );
-      }, 0);
+      const data = await res.json();
+      const fetchedStats = data.stats ?? {};
 
       setStats({
-        totalPOIs: poisData.total || pois.length,
-        pendingPOIs,
-        approvedPOIs,
-        totalTours: toursData.total || tours.length,
-        activeTours,
-        totalUsers: usersData.total || users.length,
-        totalVendors: vendors.length,
-        totalAudioGuides,
-        totalTranslations,
+        totalPOIs: fetchedStats.totalPOIs ?? 0,
+        pendingPOIs: fetchedStats.pendingPOIs ?? 0,
+        approvedPOIs: fetchedStats.approvedPOIs ?? 0,
+        rejectedPOIs: fetchedStats.rejectedPOIs ?? 0,
+        totalTours: fetchedStats.totalTours ?? 0,
+        activeTours: fetchedStats.activeTours ?? 0,
+        totalUsers: fetchedStats.totalUsers ?? 0,
+        totalVendors: fetchedStats.totalVendors ?? 0,
+        totalAdmins: fetchedStats.totalAdmins ?? 0,
+        totalFavorites: fetchedStats.totalFavorites ?? 0,
+        totalReviews: fetchedStats.totalReviews ?? 0,
+        totalAudioGuides: fetchedStats.totalAudioGuides ?? 0,
+        totalTranslations: fetchedStats.totalTranslations ?? 0,
+        totalPageViews: fetchedStats.totalPageViews ?? 0,
+        totalPOIViews: fetchedStats.totalPOIViews ?? 0,
       });
 
-      // Create recent activities from most recently updated items
+      const pois: Array<{
+        id: string;
+        name: string;
+        category?: string | null;
+        status: string;
+        updatedAt: string;
+      }> = data.recentPOIs || [];
+      const tours: Array<{
+        id: string;
+        name: string;
+        isActive: boolean;
+        updatedAt: string;
+      }> = data.recentTours || [];
+
       const activities: RecentActivity[] = [
-        ...pois.slice(0, 3).map((poi: any) => ({
+        ...pois.map((poi) => ({
           id: poi.id,
           type: "poi" as const,
           name: poi.name,
@@ -145,7 +133,7 @@ export default function AdminDashboardPage() {
           status: poi.status,
           updatedAt: poi.updatedAt,
         })),
-        ...tours.slice(0, 2).map((tour: any) => ({
+        ...tours.map((tour) => ({
           id: tour.id,
           type: "tour" as const,
           name: tour.name,
@@ -168,7 +156,7 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     void loadDashboardData();
-  }, []);
+  }, [loadDashboardData]);
 
   const formatNumber = (num: number): string => {
     return new Intl.NumberFormat("vi-VN").format(num);

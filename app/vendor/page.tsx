@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { VendorLayout } from "@/components/layouts/vendor-layout";
 import {
@@ -16,7 +16,7 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 type VendorStats = {
   totalPOIs: number;
@@ -27,6 +27,10 @@ type VendorStats = {
   activeProducts: number;
   totalViews: number;
   thisMonthViews: number;
+  totalFavorites: number;
+  totalReviews: number;
+  totalTranslations: number;
+  totalAudioGuides: number;
 };
 
 type RecentPOI = {
@@ -48,14 +52,67 @@ export default function VendorHomePage() {
     activeProducts: 0,
     totalViews: 0,
     thisMonthViews: 0,
+    totalFavorites: 0,
+    totalReviews: 0,
+    totalTranslations: 0,
+    totalAudioGuides: 0,
   });
   const [recentPOIs, setRecentPOIs] = useState<RecentPOI[]>([]);
-  const [isLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Vendor backend chưa được implement, hiển thị empty state
   useEffect(() => {
-    // Để trống
+    let isMounted = true;
+
+    const loadVendorStats = async () => {
+      setIsLoading(true);
+      setErrorMessage(null);
+
+      try {
+        const res = await fetch("/api/vendor/stats", {
+          credentials: "include",
+        });
+
+        if (!res.ok) {
+          throw new Error("Không thể tải dữ liệu dashboard vendor");
+        }
+
+        const data = await res.json();
+        const fetchedStats = data.stats ?? {};
+
+        if (!isMounted) return;
+
+        setStats({
+          totalPOIs: fetchedStats.totalPOIs ?? 0,
+          approvedPOIs: fetchedStats.approvedPOIs ?? 0,
+          pendingPOIs: fetchedStats.pendingPOIs ?? 0,
+          rejectedPOIs: fetchedStats.rejectedPOIs ?? 0,
+          totalProducts: fetchedStats.totalProducts ?? 0,
+          activeProducts: fetchedStats.activeProducts ?? 0,
+          totalViews: fetchedStats.totalViews ?? 0,
+          thisMonthViews: fetchedStats.thisMonthViews ?? 0,
+          totalFavorites: fetchedStats.totalFavorites ?? 0,
+          totalReviews: fetchedStats.totalReviews ?? 0,
+          totalTranslations: fetchedStats.totalTranslations ?? 0,
+          totalAudioGuides: fetchedStats.totalAudioGuides ?? 0,
+        });
+        setRecentPOIs(data.recentPOIs ?? []);
+      } catch (error) {
+        if (!isMounted) return;
+        console.error("Error loading vendor dashboard:", error);
+        setErrorMessage(
+          error instanceof Error ? error.message : "Không thể tải dữ liệu dashboard vendor"
+        );
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    void loadVendorStats();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const formatNumber = (num: number): string => {
@@ -85,7 +142,6 @@ export default function VendorHomePage() {
   return (
     <VendorLayout>
       <div className="space-y-6">
-        {/* Header */}
         <div className="flex flex-col gap-4 rounded-3xl border-2 border-slate-200 bg-white p-6 shadow-sm transition-all hover:border-orange-300 hover:shadow-md md:flex-row md:items-center md:justify-between">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
@@ -93,22 +149,19 @@ export default function VendorHomePage() {
                 <Building2 className="h-5 w-5 text-slate-500" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-slate-800">
-                  Vendor Dashboard
-                </h1>
-                <p className="text-xs text-slate-500">
-                  Quản lý gian hàng và sản phẩm của bạn
-                </p>
+                <h1 className="text-2xl font-bold text-slate-800">Vendor Dashboard</h1>
+                <p className="text-xs text-slate-500">Quản lý gian hàng và sản phẩm của bạn</p>
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <p className="text-xs text-slate-500">Tính năng vendor đang được phát triển</p>
+            <p className="text-xs text-slate-500">
+              {isLoading ? "Đang đồng bộ thống kê..." : "Thống kê đã được kết nối"}
+            </p>
           </div>
         </div>
 
-        {/* Messages */}
         {errorMessage ? (
           <div className="flex items-start gap-3 rounded-2xl border-2 border-rose-200 bg-rose-50 p-4 shadow-sm">
             <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-rose-600" />
@@ -126,19 +179,20 @@ export default function VendorHomePage() {
           </div>
         ) : null}
 
-        {/* Stats Cards */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <div className="group relative overflow-hidden rounded-2xl border-2 border-slate-200 bg-white p-4 shadow-sm transition-all hover:border-emerald-400 hover:shadow-lg hover:shadow-emerald-500/20">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider group-hover:text-emerald-600 transition-colors">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors group-hover:text-emerald-600">
                   Đã duyệt
                 </p>
-                <p className="mt-1 text-3xl font-bold text-slate-800 group-hover:text-emerald-600 transition-colors">{formatNumber(stats.approvedPOIs)}</p>
+                <p className="mt-1 text-3xl font-bold text-slate-800 transition-colors group-hover:text-emerald-600">
+                  {formatNumber(stats.approvedPOIs)}
+                </p>
                 <p className="mt-1 text-xs text-slate-500">POI đang hoạt động</p>
               </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 group-hover:bg-emerald-100 transition-colors">
-                <Check className="h-6 w-6 text-slate-500 group-hover:text-emerald-600 transition-colors" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 transition-colors group-hover:bg-emerald-100">
+                <Check className="h-6 w-6 text-slate-500 transition-colors group-hover:text-emerald-600" />
               </div>
             </div>
           </div>
@@ -146,14 +200,16 @@ export default function VendorHomePage() {
           <div className="group relative overflow-hidden rounded-2xl border-2 border-slate-200 bg-white p-4 shadow-sm transition-all hover:border-amber-400 hover:shadow-lg hover:shadow-amber-500/20">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider group-hover:text-amber-600 transition-colors">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors group-hover:text-amber-600">
                   Chờ duyệt
                 </p>
-                <p className="mt-1 text-3xl font-bold text-slate-800 group-hover:text-amber-600 transition-colors">{formatNumber(stats.pendingPOIs)}</p>
+                <p className="mt-1 text-3xl font-bold text-slate-800 transition-colors group-hover:text-amber-600">
+                  {formatNumber(stats.pendingPOIs)}
+                </p>
                 <p className="mt-1 text-xs text-slate-500">POI đang xem xét</p>
               </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 group-hover:bg-amber-100 transition-colors">
-                <Clock className="h-6 w-6 text-slate-500 group-hover:text-amber-600 transition-colors" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 transition-colors group-hover:bg-amber-100">
+                <Clock className="h-6 w-6 text-slate-500 transition-colors group-hover:text-amber-600" />
               </div>
             </div>
           </div>
@@ -161,14 +217,16 @@ export default function VendorHomePage() {
           <div className="group relative overflow-hidden rounded-2xl border-2 border-slate-200 bg-white p-4 shadow-sm transition-all hover:border-blue-400 hover:shadow-lg hover:shadow-blue-500/20">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider group-hover:text-blue-600 transition-colors">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors group-hover:text-blue-600">
                   Lượt xem
                 </p>
-                <p className="mt-1 text-3xl font-bold text-slate-800 group-hover:text-blue-600 transition-colors">{formatNumber(stats.thisMonthViews)}</p>
+                <p className="mt-1 text-3xl font-bold text-slate-800 transition-colors group-hover:text-blue-600">
+                  {formatNumber(stats.thisMonthViews)}
+                </p>
                 <p className="mt-1 text-xs text-slate-500">Tháng này</p>
               </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 group-hover:bg-blue-100 transition-colors">
-                <Eye className="h-6 w-6 text-slate-500 group-hover:text-blue-600 transition-colors" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 transition-colors group-hover:bg-blue-100">
+                <Eye className="h-6 w-6 text-slate-500 transition-colors group-hover:text-blue-600" />
               </div>
             </div>
           </div>
@@ -176,23 +234,42 @@ export default function VendorHomePage() {
           <div className="group relative overflow-hidden rounded-2xl border-2 border-slate-200 bg-white p-4 shadow-sm transition-all hover:border-purple-400 hover:shadow-lg hover:shadow-purple-500/20">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider group-hover:text-purple-600 transition-colors">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors group-hover:text-purple-600">
                   Tổng POI
                 </p>
-                <p className="mt-1 text-3xl font-bold text-slate-800 group-hover:text-purple-600 transition-colors">{formatNumber(stats.totalPOIs)}</p>
+                <p className="mt-1 text-3xl font-bold text-slate-800 transition-colors group-hover:text-purple-600">
+                  {formatNumber(stats.totalPOIs)}
+                </p>
                 <p className="mt-1 text-xs text-slate-500">Tất cả gian hàng</p>
               </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 group-hover:bg-purple-100 transition-colors">
-                <MapPin className="h-6 w-6 text-slate-500 group-hover:text-purple-600 transition-colors" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 transition-colors group-hover:bg-purple-100">
+                <MapPin className="h-6 w-6 text-slate-500 transition-colors group-hover:text-purple-600" />
+              </div>
+            </div>
+          </div>
+
+          <div className="group relative overflow-hidden rounded-2xl border-2 border-slate-200 bg-white p-4 shadow-sm transition-all hover:border-teal-400 hover:shadow-lg hover:shadow-teal-500/20">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 transition-colors group-hover:text-teal-600">
+                  Sản phẩm
+                </p>
+                <p className="mt-1 text-3xl font-bold text-slate-800 transition-colors group-hover:text-teal-600">
+                  {formatNumber(stats.totalProducts)}
+                </p>
+                <p className="mt-1 text-xs text-slate-500">
+                  {formatNumber(stats.activeProducts)} đang hoạt động
+                </p>
+              </div>
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 transition-colors group-hover:bg-teal-100">
+                <ShoppingCart className="h-6 w-6 text-slate-500 transition-colors group-hover:text-teal-600" />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Main Content */}
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
           <div className="space-y-4">
-            {/* Quick Actions */}
             <section className="rounded-3xl border-2 border-slate-200 bg-white p-6 shadow-sm">
               <div className="mb-5 flex items-center gap-2">
                 <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-orange-400 to-orange-600 shadow-md shadow-orange-500/20">
@@ -204,14 +281,16 @@ export default function VendorHomePage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <Link
                   href="/vendor/pois"
-                  className="group relative overflow-hidden rounded-2xl border-2 border-slate-200 bg-white p-5 transition-all hover:border-emerald-400 hover:shadow-lg hover:shadow-emerald-500/20 hover:-translate-y-1"
+                  className="group relative overflow-hidden rounded-2xl border-2 border-slate-200 bg-white p-5 transition-all hover:-translate-y-1 hover:border-emerald-400 hover:shadow-lg hover:shadow-emerald-500/20"
                 >
                   <div className="flex items-center gap-4">
                     <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-400 to-green-600 shadow-lg shadow-emerald-500/30 transition-all group-hover:scale-110 group-hover:rotate-3">
                       <MapPin className="h-7 w-7 text-white" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-base font-bold text-slate-800 group-hover:text-emerald-700 transition-colors">Quản lý POI</p>
+                      <p className="text-base font-bold text-slate-800 transition-colors group-hover:text-emerald-700">
+                        Quản lý POI
+                      </p>
                       <p className="mt-0.5 text-sm text-slate-500">Thêm, sửa gian hàng</p>
                     </div>
                   </div>
@@ -220,14 +299,16 @@ export default function VendorHomePage() {
 
                 <Link
                   href="/vendor/products"
-                  className="group relative overflow-hidden rounded-2xl border-2 border-slate-200 bg-white p-5 transition-all hover:border-blue-400 hover:shadow-lg hover:shadow-blue-500/20 hover:-translate-y-1"
+                  className="group relative overflow-hidden rounded-2xl border-2 border-slate-200 bg-white p-5 transition-all hover:-translate-y-1 hover:border-blue-400 hover:shadow-lg hover:shadow-blue-500/20"
                 >
                   <div className="flex items-center gap-4">
                     <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-400 to-indigo-600 shadow-lg shadow-blue-500/30 transition-all group-hover:scale-110 group-hover:rotate-3">
                       <ShoppingCart className="h-7 w-7 text-white" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-base font-bold text-slate-800 group-hover:text-blue-700 transition-colors">Sản phẩm</p>
+                      <p className="text-base font-bold text-slate-800 transition-colors group-hover:text-blue-700">
+                        Sản phẩm
+                      </p>
                       <p className="mt-0.5 text-sm text-slate-500">Quản lý menu</p>
                     </div>
                   </div>
@@ -236,13 +317,12 @@ export default function VendorHomePage() {
               </div>
             </section>
 
-            {/* Recent POIs */}
-            <section className="rounded-3xl border-2 border-slate-200 bg-white shadow-sm overflow-hidden">
-              <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4 bg-slate-50">
+            <section className="overflow-hidden rounded-3xl border-2 border-slate-200 bg-white shadow-sm">
+              <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-6 py-4">
                 <h2 className="text-base font-bold text-slate-800">Gian hàng gần đây</h2>
                 <Link
                   href="/vendor/pois"
-                  className="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium text-orange-600 hover:bg-orange-50 transition-colors"
+                  className="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-medium text-orange-600 transition-colors hover:bg-orange-50"
                 >
                   Xem tất cả
                   <MapPin className="h-3.5 w-3.5" />
@@ -278,23 +358,16 @@ export default function VendorHomePage() {
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {recentPOIs.map((poi) => (
-                        <tr
-                          key={poi.id}
-                          className="transition-colors hover:bg-orange-50/50"
-                        >
+                        <tr key={poi.id} className="transition-colors hover:bg-orange-50/50">
                           <td className="px-6 py-3">
                             <div className="flex items-center gap-2">
                               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-100">
                                 <MapPin className="h-4 w-4 text-orange-600" />
                               </div>
-                              <span className="font-medium text-slate-800">
-                                {poi.name}
-                              </span>
+                              <span className="font-medium text-slate-800">{poi.name}</span>
                             </div>
                           </td>
-                          <td className="px-6 py-3 text-slate-600">
-                            {poi.category}
-                          </td>
+                          <td className="px-6 py-3 text-slate-600">{poi.category}</td>
                           <td className="px-6 py-3">
                             <span className={getStatusBadge(poi.status)}>
                               {poi.status === "APPROVED"
@@ -304,13 +377,11 @@ export default function VendorHomePage() {
                                   : "Chờ duyệt"}
                             </span>
                           </td>
-                          <td className="px-6 py-3 text-slate-500">
-                            {formatDate(poi.updatedAt)}
-                          </td>
+                          <td className="px-6 py-3 text-slate-500">{formatDate(poi.updatedAt)}</td>
                           <td className="px-6 py-3">
                             <Link
                               href={`/vendor/pois/${poi.id}`}
-                              className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold text-orange-600 hover:bg-orange-50 transition-colors"
+                              className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-semibold text-orange-600 transition-colors hover:bg-orange-50"
                             >
                               <Edit className="h-3 w-3" />
                               Sửa
@@ -325,10 +396,8 @@ export default function VendorHomePage() {
             </section>
           </div>
 
-          {/* Sidebar */}
           <aside className="space-y-4">
-            {/* Pending Approvals Alert */}
-            {(stats.pendingPOIs > 0) && (
+            {stats.pendingPOIs > 0 && (
               <section className="rounded-3xl border-2 border-amber-200 bg-gradient-to-br from-amber-50 to-yellow-100 p-4 shadow-sm">
                 <div className="mb-3 flex items-center gap-2">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-200">
@@ -338,9 +407,7 @@ export default function VendorHomePage() {
                     <h3 className="text-sm font-bold text-amber-900">
                       {stats.pendingPOIs} POI chờ duyệt
                     </h3>
-                    <p className="text-xs text-amber-700">
-                      Admin đang xem xét gian hàng của bạn
-                    </p>
+                    <p className="text-xs text-amber-700">Admin đang xem xét gian hàng của bạn</p>
                   </div>
                 </div>
                 <Link
@@ -353,7 +420,6 @@ export default function VendorHomePage() {
               </section>
             )}
 
-            {/* Stats Summary */}
             <section className="rounded-3xl border-2 border-slate-200 bg-gradient-to-br from-slate-50 to-slate-100 p-4 shadow-sm">
               <div className="mb-3 flex items-center gap-2">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-200">
@@ -368,16 +434,25 @@ export default function VendorHomePage() {
                 </div>
                 <div className="flex items-center justify-between text-slate-600">
                   <span>Lượt xem tháng này</span>
-                  <span className="font-semibold text-emerald-600">{formatNumber(stats.thisMonthViews)}</span>
+                  <span className="font-semibold text-emerald-600">
+                    {formatNumber(stats.thisMonthViews)}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between text-slate-600">
                   <span>POI đang hoạt động</span>
                   <span className="font-semibold text-orange-600">{stats.approvedPOIs}</span>
                 </div>
+                <div className="flex items-center justify-between text-slate-600">
+                  <span>Favorites</span>
+                  <span className="font-semibold text-pink-600">{stats.totalFavorites}</span>
+                </div>
+                <div className="flex items-center justify-between text-slate-600">
+                  <span>Đánh giá</span>
+                  <span className="font-semibold text-slate-800">{stats.totalReviews}</span>
+                </div>
               </div>
             </section>
 
-            {/* Quick Tips */}
             <section className="rounded-3xl border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-amber-100 p-4 shadow-sm">
               <div className="mb-3 flex items-center gap-2">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-200">
@@ -397,5 +472,3 @@ export default function VendorHomePage() {
     </VendorLayout>
   );
 }
-
-
