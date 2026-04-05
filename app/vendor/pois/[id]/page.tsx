@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
 import { PoiDetailView, type PoiDetailData } from "@/components/poi/poi-detail-view";
+import { PoiQrPanel } from "@/components/poi/poi-qr-panel";
 import { VendorLayout } from "@/components/layouts/vendor-layout";
 
 type VendorMeResponse = {
@@ -194,43 +195,46 @@ export default function VendorPoiDetailPage() {
         ) : null}
 
         {poi ? (
-          <PoiDetailView
-            poi={poi}
-            headerActions={
-              <>
-                {poi.isActive === false ? (
-                  <button
-                    type="button"
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
-                    onClick={() => void unlockPoi()}
-                  >
-                    <Unlock className="h-3.5 w-3.5" />
-                    Mở khóa
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-100"
-                    onClick={() => void lockPoi()}
-                  >
-                    <Lock className="h-3.5 w-3.5" />
-                    Khóa
-                  </button>
-                )}
+          <>
+            <PoiQrPanel poiId={poi.id} poiName={poi.name} ownerLabel="vendor" />
+            <PoiDetailView
+              poi={poi}
+              headerActions={
+                <>
+                  {poi.isActive === false ? (
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
+                      onClick={() => void unlockPoi()}
+                    >
+                      <Unlock className="h-3.5 w-3.5" />
+                      Mở khóa
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-100"
+                      onClick={() => void lockPoi()}
+                    >
+                      <Lock className="h-3.5 w-3.5" />
+                      Khóa
+                    </button>
+                  )}
 
-                {poi.status === "REJECTED" ? (
-                  <button
-                    type="button"
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-orange-500 px-3 py-2 text-xs font-semibold text-white hover:bg-orange-600"
-                    onClick={() => void resubmitPoi()}
-                  >
-                    <RotateCcw className="h-3.5 w-3.5" />
-                    Gửi duyệt lại
-                  </button>
-                ) : null}
-              </>
-            }
-          />
+                  {poi.status === "REJECTED" ? (
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-orange-500 px-3 py-2 text-xs font-semibold text-white hover:bg-orange-600"
+                      onClick={() => void resubmitPoi()}
+                    >
+                      <RotateCcw className="h-3.5 w-3.5" />
+                      Gửi duyệt lại
+                    </button>
+                  ) : null}
+                </>
+              }
+            />
+          </>
         ) : null}
       </div>
     </VendorLayout>

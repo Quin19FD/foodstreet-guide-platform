@@ -1,13 +1,14 @@
 "use client";
 
 import { cn } from "@/shared/utils";
-import { Compass, Heart, Home, MapPin, User } from "lucide-react";
+import { Compass, Heart, Home, MapPin, QrCode, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const navItems = [
   { href: "/customer", label: "Khám phá", icon: Home },
   { href: "/customer/map", label: "Bản đồ", icon: MapPin },
+  { href: "/customer/scan", label: "Quét QR", icon: QrCode },
   { href: "/customer/tours", label: "Tour", icon: Compass },
   { href: "/customer/favorites", label: "Yêu thích", icon: Heart },
   { href: "/customer/profile", label: "Cá nhân", icon: User },

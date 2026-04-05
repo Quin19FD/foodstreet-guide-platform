@@ -1,9 +1,10 @@
 "use client";
 
-import { Edit3, Eye, Lock, Plus, RefreshCw, RotateCcw, Trash2, Unlock, Upload } from "lucide-react";
+import { Edit3, Eye, Lock, Plus, QrCode, RefreshCw, RotateCcw, Trash2, Unlock, Upload } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { getPoiQrInfo } from "@/shared/utils/poi-qr";
 import { PoiLocationPicker } from "./poi-location-picker";
 
 type PoiStatus = "PENDING" | "APPROVED" | "REJECTED";
@@ -469,6 +470,15 @@ export function VendorPoiManagement() {
     }
   };
 
+  const openPoiQr = (poi: Poi) => {
+    const qr = getPoiQrInfo(poi.id, 420);
+    if (!qr) {
+      setErrorMessage("Không thể tạo QR cho POI này.");
+      return;
+    }
+    window.open(qr.imageUrl, "_blank", "noopener,noreferrer");
+  };
+
   if (isCheckingAuth) {
     return <div className="p-6 text-sm text-slate-500">Đang kiểm tra phiên đăng nhập vendor...</div>;
   }
@@ -615,6 +625,15 @@ export function VendorPoiManagement() {
                             Gửi duyệt lại
                           </button>
                         ) : null}
+
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-violet-200 bg-violet-50 px-2.5 py-1.5 text-xs font-semibold text-violet-700 hover:bg-violet-100"
+                          onClick={() => openPoiQr(poi)}
+                        >
+                          <QrCode className="h-3.5 w-3.5" />
+                          QR
+                        </button>
 
                         <button
                           type="button"
@@ -1062,6 +1081,13 @@ export function VendorPoiManagement() {
     </div>
   );
 }
+
+
+
+
+
+
+
 
 
 

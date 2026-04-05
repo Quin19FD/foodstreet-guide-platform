@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { type PoiDetailData, PoiDetailView } from "@/components/poi/poi-detail-view";
+import { PoiQrPanel } from "@/components/poi/poi-qr-panel";
 
 function pickError(input: unknown, fallback: string): string {
   if (!input || typeof input !== "object") return fallback;
@@ -142,55 +143,58 @@ export function AdminPoiDetail() {
       ) : null}
 
       {poi ? (
-        <PoiDetailView
-          poi={poi}
-          showOwner
-          headerActions={
-            <>
-              {poi.status !== "APPROVED" ? (
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-500 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-600"
-                  onClick={() => void decide("APPROVE")}
-                >
-                  <CheckCircle2 className="h-3.5 w-3.5" />
-                  Duyệt POI
-                </button>
-              ) : null}
+        <>
+          <PoiQrPanel poiId={poi.id} poiName={poi.name} ownerLabel="admin" />
+          <PoiDetailView
+            poi={poi}
+            showOwner
+            headerActions={
+              <>
+                {poi.status !== "APPROVED" ? (
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-500 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-600"
+                    onClick={() => void decide("APPROVE")}
+                  >
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    Duyệt POI
+                  </button>
+                ) : null}
 
-              {poi.status !== "REJECTED" ? (
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-rose-500 px-3 py-2 text-xs font-semibold text-white hover:bg-rose-600"
-                  onClick={() => void decide("REJECT")}
-                >
-                  <XCircle className="h-3.5 w-3.5" />
-                  Từ chối
-                </button>
-              ) : null}
+                {poi.status !== "REJECTED" ? (
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-rose-500 px-3 py-2 text-xs font-semibold text-white hover:bg-rose-600"
+                    onClick={() => void decide("REJECT")}
+                  >
+                    <XCircle className="h-3.5 w-3.5" />
+                    Từ chối
+                  </button>
+                ) : null}
 
-              {poi.isActive === false ? (
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
-                  onClick={() => void toggleLock(false)}
-                >
-                  <Unlock className="h-3.5 w-3.5" />
-                  Mở khóa
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-100"
-                  onClick={() => void toggleLock(true)}
-                >
-                  <Lock className="h-3.5 w-3.5" />
-                  Khóa
-                </button>
-              )}
-            </>
-          }
-        />
+                {poi.isActive === false ? (
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
+                    onClick={() => void toggleLock(false)}
+                  >
+                    <Unlock className="h-3.5 w-3.5" />
+                    Mở khóa
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 hover:bg-rose-100"
+                    onClick={() => void toggleLock(true)}
+                  >
+                    <Lock className="h-3.5 w-3.5" />
+                    Khóa
+                  </button>
+                )}
+              </>
+            }
+          />
+        </>
       ) : null}
     </div>
   );

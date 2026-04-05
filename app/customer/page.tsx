@@ -11,6 +11,7 @@ import {
   IceCream,
   MapPin,
   Navigation,
+  QrCode,
   Search,
   Star,
   Utensils,
@@ -179,12 +180,22 @@ export default function CustomerHomePage() {
             <h1 className="text-2xl font-bold tracking-tight">Khám phá</h1>
             <p className="text-sm text-white/80">Tìm POI hoặc TOUR gần bạn</p>
           </div>
-          <Link
-            href="/customer/map"
-            className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20 text-white shadow-lg backdrop-blur-sm transition-all hover:bg-white/30 hover:scale-105 active:scale-95"
-          >
-            <MapPin className="h-6 w-6" />
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/customer/scan"
+              className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20 text-white shadow-lg backdrop-blur-sm transition-all hover:bg-white/30 hover:scale-105 active:scale-95"
+              aria-label="Quét QR"
+            >
+              <QrCode className="h-6 w-6" />
+            </Link>
+            <Link
+              href="/customer/map"
+              className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/20 text-white shadow-lg backdrop-blur-sm transition-all hover:bg-white/30 hover:scale-105 active:scale-95"
+              aria-label="Mở bản đồ"
+            >
+              <MapPin className="h-6 w-6" />
+            </Link>
+          </div>
         </div>
 
         {/* Search Type Toggle */}

@@ -23,6 +23,7 @@ import {
   Lock,
   MapPin,
   Menu,
+  QrCode,
   RefreshCw,
   Search,
   ShieldCheck,
@@ -34,6 +35,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { getPoiQrInfo } from "@/shared/utils/poi-qr";
 
 type PoiStatus = "PENDING" | "APPROVED" | "REJECTED";
 
@@ -296,6 +298,15 @@ export function AdminPoiManagement() {
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Có lỗi xảy ra");
     }
+  };
+
+  const openPoiQr = (poi: Poi) => {
+    const qr = getPoiQrInfo(poi.id, 420);
+    if (!qr) {
+      setErrorMessage("Không thể tạo QR cho POI này.");
+      return;
+    }
+    window.open(qr.imageUrl, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -646,6 +657,15 @@ export function AdminPoiManagement() {
 
                     <button
                       type="button"
+                      className="inline-flex items-center gap-1.5 rounded-xl border-2 border-violet-200 bg-violet-50 px-3 py-2 text-xs font-bold text-violet-700 transition-all hover:bg-violet-100"
+                      onClick={() => openPoiQr(poi)}
+                    >
+                      <QrCode className="h-3.5 w-3.5" />
+                      QR
+                    </button>
+
+                    <button
+                      type="button"
                       className="inline-flex items-center gap-1.5 rounded-xl border-2 border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 transition-all hover:border-teal-300 hover:bg-teal-50"
                       onClick={() => router.push(`/admin/pois/${poi.id}`)}
                     >
@@ -786,6 +806,15 @@ export function AdminPoiManagement() {
                               Khóa
                             </button>
                           )}
+
+                          <button
+                            type="button"
+                            className="inline-flex items-center gap-1.5 rounded-xl border-2 border-violet-200 bg-violet-50 px-3 py-2 text-xs font-bold text-violet-700 transition-all hover:bg-violet-100"
+                            onClick={() => openPoiQr(poi)}
+                          >
+                            <QrCode className="h-3.5 w-3.5" />
+                            QR
+                          </button>
 
                           <button
                             type="button"
