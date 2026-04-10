@@ -1,7 +1,8 @@
 "use client";
 
+import { useLiteMode } from "@/lib/hooks/use-lite-mode";
 import { speak as ttsSpeak, stopSpeaking as ttsStop } from "@/lib/tts";
-import { MapPin, Navigation, Pause, Play, Search, Square, Wifi, WifiOff } from "lucide-react";
+import { MapPin, Navigation, Pause, Play, Search, Square, Wifi, WifiOff, Zap } from "lucide-react";
 import maplibregl from "maplibre-gl";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -84,6 +85,7 @@ type MovementProfile = {
 };
 
 const MOVEMENT_MODE_STORAGE_KEY = "fs_customer_movement_mode";
+const AUTO_PROMPT_STORAGE_KEY = "customer_auto_prompt_enabled";
 const MOVEMENT_PROFILES: Record<MovementMode, MovementProfile> = {
   walk: {
     label: "Đi bộ",
@@ -138,7 +140,6 @@ const OSM_STYLE: maplibregl.StyleSpecification = {
   layers: [{ id: "osm", type: "raster", source: "osm" }],
 };
 
-const ALERT_TRIGGER_RADIUS_METERS = 130;
 const CLUSTER_RADIUS_METERS = 90;
 const NETWORK_TIMEOUT_MS = 5000;
 const DEFAULT_CENTER: [number, number] = [106.7009, 10.7769];
@@ -380,7 +381,9 @@ function CustomerMapContent() {
 
   const poiPromptedAtRef = useRef<Record<string, number>>({});
   const clusterPromptedAtRef = useRef<Record<string, number>>({});
-  const promptDecisionRef = useRef<Record<string, { decision: "accepted" | "dismissed" | "viewed"; at: number }>>({});
+  const promptDecisionRef = useRef<
+    Record<string, { decision: "accepted" | "dismissed" | "viewed"; at: number }>
+  >({});
   const proximityTicksRef = useRef<Record<string, number>>({});
   const nearPromptStartedAtRef = useRef<number>(0);
   const lastGlobalPromptAtRef = useRef<number>(0);
@@ -425,6 +428,7 @@ function CustomerMapContent() {
   const [locationHint, setLocationHint] = useState<string | null>(null);
   const [isLoadingPois, setIsLoadingPois] = useState(false);
   const [isOnline, setIsOnline] = useState<boolean>(true);
+  const { liteMode } = useLiteMode();
   const [autoPromptEnabled, setAutoPromptEnabled] = useState(true);
   const [movementMode, setMovementMode] = useState<MovementMode>("walk");
   const [activeRoutePoiId, setActiveRoutePoiId] = useState<string | null>(null);
@@ -596,7 +600,7 @@ function CustomerMapContent() {
       lat: String(lat),
       lng: String(lng),
       mode: "map",
-      take: "80",
+      take: liteMode ? "40" : "80",
     });
 
     if (keyword.trim()) params.set("q", keyword.trim());
@@ -826,7 +830,8 @@ function CustomerMapContent() {
           const payload: RouteCacheItem = {
             coordinates,
             info: {
-              distanceMeters: firstRoute?.distance ?? haversineMeters(from.lat, from.lng, to.lat, to.lng),
+              distanceMeters:
+                firstRoute?.distance ?? haversineMeters(from.lat, from.lng, to.lat, to.lng),
               durationSeconds:
                 firstRoute?.duration ??
                 Math.max(240, haversineMeters(from.lat, from.lng, to.lat, to.lng) / 6),
@@ -885,12 +890,28 @@ function CustomerMapContent() {
     if (stored === "walk" || stored === "motorbike") {
       setMovementMode(stored);
     }
+
+    const storedAutoPrompt = window.localStorage.getItem(AUTO_PROMPT_STORAGE_KEY);
+    if (storedAutoPrompt === "0") {
+      setAutoPromptEnabled(false);
+    }
   }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     window.localStorage.setItem(MOVEMENT_MODE_STORAGE_KEY, movementMode);
   }, [movementMode]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(AUTO_PROMPT_STORAGE_KEY, autoPromptEnabled ? "1" : "0");
+  }, [autoPromptEnabled]);
+
+  useEffect(() => {
+    if (liteMode) {
+      setAutoPromptEnabled(false);
+    }
+  }, [liteMode]);
 
   useEffect(() => {
     setNearPromptPoi(null);
@@ -942,7 +963,9 @@ function CustomerMapContent() {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        setLocationAccuracyMeters(Number.isFinite(pos.coords.accuracy) ? pos.coords.accuracy : null);
+        setLocationAccuracyMeters(
+          Number.isFinite(pos.coords.accuracy) ? pos.coords.accuracy : null
+        );
         setLocationSpeedMps(
           typeof pos.coords.speed === "number" && Number.isFinite(pos.coords.speed)
             ? Math.max(0, pos.coords.speed)
@@ -962,7 +985,9 @@ function CustomerMapContent() {
     watchIdRef.current = navigator.geolocation.watchPosition(
       (pos) => {
         setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        setLocationAccuracyMeters(Number.isFinite(pos.coords.accuracy) ? pos.coords.accuracy : null);
+        setLocationAccuracyMeters(
+          Number.isFinite(pos.coords.accuracy) ? pos.coords.accuracy : null
+        );
         setLocationSpeedMps(
           typeof pos.coords.speed === "number" && Number.isFinite(pos.coords.speed)
             ? Math.max(0, pos.coords.speed)
@@ -1434,11 +1459,14 @@ function CustomerMapContent() {
           <div className="flex items-center gap-2">
             <button
               type="button"
+              disabled={liteMode}
               onClick={() => setAutoPromptEnabled((prev) => !prev)}
               className={`rounded-xl px-3 py-2 text-xs font-semibold shadow-sm transition ${
-                autoPromptEnabled
-                  ? "border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-100"
+                liteMode
+                  ? "cursor-not-allowed border border-slate-200 bg-slate-100 text-slate-400"
+                  : autoPromptEnabled
+                    ? "border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                    : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-100"
               }`}
             >
               {autoPromptEnabled ? "Auto hỏi: Bật" : "Auto hỏi: Tắt"}
@@ -1517,6 +1545,11 @@ function CustomerMapContent() {
           <span className="inline-flex items-center gap-1 rounded-full bg-violet-100 px-3 py-1.5 text-violet-700">
             Chế độ: {movementProfile.label}
           </span>
+          {liteMode ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1.5 text-amber-700">
+              <Zap className="h-3.5 w-3.5" /> Lite mode
+            </span>
+          ) : null}
           {locationAccuracyMeters != null ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-indigo-100 px-3 py-1.5 text-indigo-700">
               GPS ±{Math.round(locationAccuracyMeters)}m
@@ -1587,7 +1620,9 @@ function CustomerMapContent() {
 
         {/* Nearby POI Alert - Enhanced */}
         {nearPromptPoi ? (
-          <div className="animate-fade-in-up rounded-2xl border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-amber-50 p-4 shadow-medium">
+          <div
+            className={`${liteMode ? "" : "animate-fade-in-up "}rounded-2xl border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-amber-50 p-4 shadow-medium`}
+          >
             <div className="flex items-start gap-3">
               <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-orange-500 text-white animate-pulse-soft">
                 <MapPin className="h-5 w-5" />
@@ -1776,12 +1811,14 @@ function CustomerMapContent() {
                   onTouchStart={() => setSelectedPoiId(poi.id)}
                   onMouseEnter={() => setSelectedPoiId(poi.id)}
                   onClick={() => router.push(`/customer/pois/${poi.id}`)}
-                  className={`min-w-[220px] snap-start rounded-xl border-2 p-3 text-left transition-all duration-200 animate-fade-in-up opacity-0 ${
+                  className={`min-w-[220px] snap-start rounded-xl border-2 p-3 text-left transition-all duration-200 ${
+                    liteMode ? "" : "animate-fade-in-up opacity-0"
+                  } ${
                     selectedPoiId === poi.id
                       ? "border-orange-400 bg-orange-50 shadow-medium scale-105"
                       : "border-slate-200 bg-white hover:border-orange-200 hover:shadow-soft"
                   }`}
-                  style={{ animationDelay: `${index * 50}ms` }}
+                  style={liteMode ? undefined : { animationDelay: `${index * 50}ms` }}
                 >
                   <p className="font-semibold text-slate-900 line-clamp-1">{poi.name}</p>
                   <p className="mt-1 line-clamp-2 text-sm text-slate-500">
@@ -1810,7 +1847,7 @@ function CustomerMapContent() {
 
         {/* Selected POI Detail - Enhanced */}
         {selectedPoi ? (
-          <div className="card-featured animate-scale-in">
+          <div className={`card-featured ${liteMode ? "" : "animate-scale-in"}`}>
             {selectedPoi.imageUrl && (
               <div className="relative aspect-video w-full">
                 <img

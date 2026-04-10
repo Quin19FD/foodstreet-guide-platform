@@ -1,5 +1,6 @@
 "use client";
 
+import { useLiteMode } from "@/lib/hooks/use-lite-mode";
 import {
   Bell,
   ChevronRight,
@@ -15,6 +16,7 @@ import {
   TrendingUp,
   Trophy,
   User,
+  Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
@@ -132,6 +134,7 @@ export default function CustomerProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [_error, setError] = useState<string | null>(null);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { liteMode, setLiteMode } = useLiteMode();
 
   // Logout handler
   const handleLogout = async () => {
@@ -216,7 +219,7 @@ export default function CustomerProfilePage() {
 
         <div className="relative z-10">
           {/* User Info */}
-          <div className="flex items-center gap-4 animate-fade-in-up">
+          <div className={`flex items-center gap-4 ${liteMode ? "" : "animate-fade-in-up"}`}>
             <div className="relative">
               <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm shadow-lg">
                 <User className="h-10 w-10" />
@@ -228,18 +231,25 @@ export default function CustomerProfilePage() {
             <div>
               <h1 className="text-xl font-bold">Khách tham quan</h1>
               <p className="text-sm text-white/80">Khám phá ẩm thực đường phố</p>
-              <span className="inline-flex items-center gap-1 mt-1 text-xs bg-white/20 rounded-full px-2 py-1 backdrop-blur-sm">
-                <Star className="h-3 w-3 fill-yellow-300 text-yellow-300" />
-                Thành viên tích cực
-              </span>
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                {liteMode ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-700">
+                    <Zap className="h-3 w-3" /> Lite mode bật
+                  </span>
+                ) : null}
+                <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-1 text-xs backdrop-blur-sm">
+                  <Star className="h-3 w-3 fill-yellow-300 text-yellow-300" />
+                  Thành viên tích cực
+                </span>
+              </div>
             </div>
           </div>
 
           {/* Stats Cards */}
           <div className="mt-6 grid grid-cols-3 gap-3">
             <div
-              className="animate-fade-in-up opacity-0 rounded-2xl bg-white/20 p-3 text-center backdrop-blur-sm hover:bg-white/25 transition-colors"
-              style={{ animationDelay: "100ms" }}
+              className={`${liteMode ? "" : "animate-fade-in-up opacity-0 "}rounded-2xl bg-white/20 p-3 text-center backdrop-blur-sm hover:bg-white/25 transition-colors`}
+              style={liteMode ? undefined : { animationDelay: "100ms" }}
             >
               {isLoading ? (
                 <Loader2 className="mx-auto h-6 w-6 animate-spin" />
@@ -252,8 +262,8 @@ export default function CustomerProfilePage() {
               <MapPin className="mx-auto mt-1 h-3 w-3 text-white/60" />
             </div>
             <div
-              className="animate-fade-in-up opacity-0 rounded-2xl bg-white/20 p-3 text-center backdrop-blur-sm hover:bg-white/25 transition-colors"
-              style={{ animationDelay: "200ms" }}
+              className={`${liteMode ? "" : "animate-fade-in-up opacity-0 "}rounded-2xl bg-white/20 p-3 text-center backdrop-blur-sm hover:bg-white/25 transition-colors`}
+              style={liteMode ? undefined : { animationDelay: "200ms" }}
             >
               {isLoading ? (
                 <Loader2 className="mx-auto h-6 w-6 animate-spin" />
@@ -266,8 +276,8 @@ export default function CustomerProfilePage() {
               <Heart className="mx-auto mt-1 h-3 w-3 text-white/60" />
             </div>
             <div
-              className="animate-fade-in-up opacity-0 rounded-2xl bg-white/20 p-3 text-center backdrop-blur-sm hover:bg-white/25 transition-colors"
-              style={{ animationDelay: "300ms" }}
+              className={`${liteMode ? "" : "animate-fade-in-up opacity-0 "}rounded-2xl bg-white/20 p-3 text-center backdrop-blur-sm hover:bg-white/25 transition-colors`}
+              style={liteMode ? undefined : { animationDelay: "300ms" }}
             >
               {isLoading ? (
                 <Loader2 className="mx-auto h-6 w-6 animate-spin" />
@@ -285,8 +295,8 @@ export default function CustomerProfilePage() {
 
       {/* Achievement Badges */}
       <section
-        className="px-4 -mt-4 relative z-20 animate-fade-in-up"
-        style={{ animationDelay: "400ms" }}
+        className={`px-4 -mt-4 relative z-20 ${liteMode ? "" : "animate-fade-in-up"}`}
+        style={liteMode ? undefined : { animationDelay: "400ms" }}
       >
         <div className="card-elevated p-4">
           <div className="flex items-center justify-between mb-3">
@@ -327,7 +337,10 @@ export default function CustomerProfilePage() {
         </div>
       </section>
 
-      <main className="p-4 space-y-4 animate-fade-in-up" style={{ animationDelay: "500ms" }}>
+      <main
+        className={`p-4 space-y-4 ${liteMode ? "" : "animate-fade-in-up"}`}
+        style={liteMode ? undefined : { animationDelay: "500ms" }}
+      >
         {/* Quick Actions */}
         <div className="grid grid-cols-2 gap-3">
           <Link
@@ -357,6 +370,35 @@ export default function CustomerProfilePage() {
                 {isLoading ? "..." : `${stats?.tourBookings ?? 0} đã đặt`}
               </p>
             </div>
+          </Link>
+        </div>
+
+        {/* Experience Mode */}
+        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-soft">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold text-slate-800">Chế độ trải nghiệm</p>
+              <p className="mt-1 text-xs text-slate-500">
+                Lite mode giúp giảm hiệu ứng, tiết kiệm pin và tải nhanh hơn trên thiết bị yếu.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setLiteMode(!liteMode)}
+              className={`rounded-lg px-3 py-2 text-xs font-semibold transition ${
+                liteMode
+                  ? "bg-amber-100 text-amber-700"
+                  : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+              }`}
+            >
+              {liteMode ? "Lite mode: Bật" : "Lite mode: Tắt"}
+            </button>
+          </div>
+          <Link
+            href="/customer/device-check"
+            className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-orange-600 hover:text-orange-700"
+          >
+            Kiểm tra lại cấu hình thiết bị <ChevronRight className="h-3.5 w-3.5" />
           </Link>
         </div>
 

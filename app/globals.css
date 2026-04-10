@@ -552,3 +552,29 @@
     @apply rounded-3xl bg-white shadow-elevated overflow-hidden;
   }
 }
+
+/* ========================================
+   CUSTOMER LITE MODE OVERRIDES
+   ======================================== */
+
+.customer-lite .animate-fade-in-up,
+.customer-lite .animate-fade-in,
+.customer-lite .animate-slide-in-right,
+.customer-lite .animate-scale-in,
+.customer-lite .animate-bounce-subtle,
+.customer-lite .animate-float,
+.customer-lite .animate-pulse-soft {
+  animation: none !important;
+}
+
+.customer-lite .gradient-animated {
+  animation: none !important;
+  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+}
+
+.customer-lite .card-elevated,
+.customer-lite .card-interactive,
+.customer-lite .hover-lift,
+.customer-lite .hover-scale {
+  transition: none !important;
+}

@@ -1,6 +1,7 @@
 "use client";
 
-import { Clock, MapPin, Search } from "lucide-react";
+import { useLiteMode } from "@/lib/hooks/use-lite-mode";
+import { Clock, MapPin, Search, Zap } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
@@ -17,6 +18,7 @@ export default function CustomerToursPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [tours, setTours] = useState<TourItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const { liteMode } = useLiteMode();
 
   useEffect(() => {
     const controller = new AbortController();
@@ -24,7 +26,7 @@ export default function CustomerToursPage() {
       setIsLoading(true);
       try {
         const params = new URLSearchParams();
-        params.set("take", "30");
+        params.set("take", liteMode ? "15" : "30");
         if (searchQuery.trim()) params.set("q", searchQuery.trim());
         const res = await fetch(`/api/customer/tours?${params.toString()}`, {
           signal: controller.signal,
@@ -42,7 +44,7 @@ export default function CustomerToursPage() {
       controller.abort();
       clearTimeout(timer);
     };
-  }, [searchQuery]);
+  }, [searchQuery, liteMode]);
 
   const emptyMessage = useMemo(() => {
     if (isLoading) return "Đang tải danh sách tour...";
@@ -53,8 +55,17 @@ export default function CustomerToursPage() {
   return (
     <div className="min-h-screen bg-slate-50 pb-[calc(5rem+env(safe-area-inset-bottom))]">
       <header className="sticky top-0 z-40 bg-white/95 px-4 py-3 shadow-sm backdrop-blur">
-        <h1 className="text-lg font-bold text-slate-900">Food Tours</h1>
-        <p className="text-xs text-slate-500">{tours.length} tour</p>
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <h1 className="text-lg font-bold text-slate-900">Food Tours</h1>
+            <p className="text-xs text-slate-500">{tours.length} tour</p>
+          </div>
+          {liteMode ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-700">
+              <Zap className="h-3 w-3" /> Lite mode
+            </span>
+          ) : null}
+        </div>
 
         <div className="relative mt-3">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />

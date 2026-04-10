@@ -2,6 +2,7 @@
 
 import { useFavorites } from "@/components/contexts/favorites-context";
 import { EmptyState, SkeletonPOICard, SkeletonTourCard } from "@/components/ui/loading-skeleton";
+import { useLiteMode } from "@/lib/hooks/use-lite-mode";
 import {
   Beef,
   Clock,
@@ -15,6 +16,7 @@ import {
   Search,
   Star,
   Utensils,
+  Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -60,6 +62,7 @@ export default function CustomerHomePage() {
   const [tours, setTours] = useState<TourItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const { liteMode } = useLiteMode();
 
   // Favorites hook
   const { isFavorited, toggleFavorite, isLoading: isTogglingFavorite } = useFavorites();
@@ -88,7 +91,7 @@ export default function CustomerHomePage() {
         if (searchType === "poi") {
           const params = new URLSearchParams();
           params.set("mode", "summary");
-          params.set("take", "36");
+          params.set("take", liteMode ? "18" : "36");
           if (searchQuery.trim()) params.set("q", searchQuery.trim());
           if (userLocation) {
             params.set("lat", String(userLocation.lat));
@@ -105,7 +108,7 @@ export default function CustomerHomePage() {
           setTours([]);
         } else {
           const params = new URLSearchParams();
-          params.set("take", "24");
+          params.set("take", liteMode ? "12" : "24");
           if (searchQuery.trim()) params.set("q", searchQuery.trim());
           const res = await fetch(`/api/customer/tours?${params.toString()}`, {
             signal: controller.signal,
@@ -138,6 +141,7 @@ export default function CustomerHomePage() {
     searchType,
     searchQuery,
     userLocation, // Use entire object instead of conditional properties
+    liteMode,
   ]);
 
   const filteredPois = useMemo(() => {
@@ -176,9 +180,14 @@ export default function CustomerHomePage() {
       {/* Hero Header with Gradient */}
       <header className="gradient-animated px-4 pt-6 pb-8 text-white">
         <div className="flex items-center justify-between">
-          <div className="animate-fade-in-up">
+          <div className={liteMode ? "" : "animate-fade-in-up"}>
             <h1 className="text-2xl font-bold tracking-tight">Khám phá</h1>
             <p className="text-sm text-white/80">Tìm POI hoặc TOUR gần bạn</p>
+            {liteMode ? (
+              <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-1 text-xs font-semibold text-amber-700">
+                <Zap className="h-3 w-3" /> Lite mode
+              </span>
+            ) : null}
           </div>
           <div className="flex items-center gap-2">
             <Link
@@ -200,8 +209,8 @@ export default function CustomerHomePage() {
 
         {/* Search Type Toggle */}
         <div
-          className="mt-5 grid grid-cols-2 gap-3 animate-fade-in-up"
-          style={{ animationDelay: "100ms" }}
+          className={`mt-5 grid grid-cols-2 gap-3 ${liteMode ? "" : "animate-fade-in-up"}`}
+          style={liteMode ? undefined : { animationDelay: "100ms" }}
         >
           <button
             type="button"
@@ -231,7 +240,10 @@ export default function CustomerHomePage() {
         </div>
 
         {/* Search Bar */}
-        <div className="relative mt-4 animate-fade-in-up" style={{ animationDelay: "200ms" }}>
+        <div
+          className={`relative mt-4 ${liteMode ? "" : "animate-fade-in-up"}`}
+          style={liteMode ? undefined : { animationDelay: "200ms" }}
+        >
           <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-orange-400" />
           <input
             type="text"
@@ -272,7 +284,7 @@ export default function CustomerHomePage() {
         )}
 
         {/* Featured Section - Only on initial load with POI results */}
-        {isInitialLoad && searchType === "poi" && featuredPois.length > 0 && (
+        {!liteMode && isInitialLoad && searchType === "poi" && featuredPois.length > 0 && (
           <section className="animate-fade-in-up" style={{ animationDelay: "400ms" }}>
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-base font-semibold text-slate-800">⭐ Được đánh giá cao</h2>

@@ -16,6 +16,10 @@ function CustomerLoginForm() {
   const searchParams = useSearchParams();
 
   const nextPath = useMemo(() => searchParams.get("next") ?? "/customer/map", [searchParams]);
+  const deviceCheckRedirect = useMemo(
+    () => `/customer/device-check?next=${encodeURIComponent(nextPath)}`,
+    [nextPath]
+  );
   const dotKeys = useMemo(() => Array.from({ length: 12 }, (_, idx) => `dot-${idx}`), []);
 
   const [email, setEmail] = useState("");
@@ -90,7 +94,7 @@ function CustomerLoginForm() {
       });
 
       if (res.ok) {
-        router.replace(nextPath);
+        router.replace(deviceCheckRedirect);
         return;
       }
 
