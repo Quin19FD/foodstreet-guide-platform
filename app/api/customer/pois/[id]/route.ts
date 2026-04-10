@@ -63,6 +63,8 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
       latitude: poi.latitude,
       longitude: poi.longitude,
       rating: poi.rating,
+      updatedAt: poi.updatedAt.toISOString(),
+      version: Date.parse(poi.updatedAt.toISOString()),
       images: poi.images.map((image) => ({
         id: image.id,
         imageUrl: image.imageUrl,
@@ -81,6 +83,7 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
         name: translation.name,
         description: translation.description,
         audioScript: translation.audioScript,
+        updatedAt: translation.updatedAt.toISOString(),
         audios: translation.audios.map((audio) => ({
           id: audio.id,
           audioUrl: audio.audioUrl,

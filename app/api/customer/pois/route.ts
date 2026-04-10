@@ -20,6 +20,8 @@ type PoiSummaryResponseItem = {
   type: "FOOD_STALL" | "SUPPORTING_FACILITY";
   imageUrl: string | null;
   distanceMeters: number | null;
+  updatedAt: string;
+  version: number;
 };
 
 type PoiMapResponseItem = PoiSummaryResponseItem & {
@@ -158,6 +160,7 @@ export async function GET(request: NextRequest) {
       latitude: true,
       longitude: true,
       rating: true,
+      updatedAt: true,
       images: {
         take: 1,
         orderBy: { id: "asc" },
@@ -231,6 +234,8 @@ export async function GET(request: NextRequest) {
           : null;
 
       if (mode !== "map") {
+        const updatedAt = poi.updatedAt.toISOString();
+        const version = Date.parse(updatedAt);
         return {
           id: poi.id,
           name: poi.name,
@@ -238,10 +243,14 @@ export async function GET(request: NextRequest) {
           type: inferPoiType(poi.category),
           imageUrl: poi.images[0]?.imageUrl ?? null,
           distanceMeters,
+          updatedAt,
+          version,
         } satisfies PoiSummaryResponseItem;
       }
 
       const languageBucket = languageMap.get(poi.id);
+      const updatedAt = poi.updatedAt.toISOString();
+      const version = Date.parse(updatedAt);
       const priorityScore =
         distanceMeters != null
           ? distanceMeters - poi.rating * 120 - (poi.menuItems.length > 0 ? 30 : 0)
@@ -265,6 +274,8 @@ export async function GET(request: NextRequest) {
         rating: poi.rating,
         distanceMeters,
         priorityScore,
+        updatedAt,
+        version,
       } satisfies PoiMapResponseItem;
     })
     .sort((a, b) => {

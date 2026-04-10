@@ -1,6 +1,9 @@
 "use client";
 
 import { useLiteMode } from "@/lib/hooks/use-lite-mode";
+import { isOfflineModeEnabled } from "@/lib/offline/flags";
+import { PoiDataProvider } from "@/lib/offline/poi-data-provider";
+import type { OfflineLayerStatus } from "@/lib/offline/types";
 import { speak as ttsSpeak, stopSpeaking as ttsStop } from "@/lib/tts";
 import { MapPin, Navigation, Pause, Play, Search, Square, Wifi, WifiOff, Zap } from "lucide-react";
 import maplibregl from "maplibre-gl";
@@ -22,15 +25,8 @@ type PoiMapItem = {
   imageUrl?: string | null;
   category?: string | null;
   rating?: number | null;
-};
-
-type PoiDetailNarration = {
-  description?: string | null;
-  translations?: Array<{
-    language: string;
-    description?: string | null;
-    audioScript?: string | null;
-  }>;
+  updatedAt?: string;
+  version?: number;
 };
 
 type SpeechChunk = {
@@ -399,11 +395,15 @@ function CustomerMapContent() {
   const currentNarrationPoiRef = useRef<string | null>(null);
 
   const narrationCacheRef = useRef<Record<string, string>>({});
-  const poiDetailCacheRef = useRef<Record<string, PoiDetailNarration>>({});
 
   const watchIdRef = useRef<number | null>(null);
   const lastFetchRef = useRef<{ lat: number; lng: number; q: string; at: number } | null>(null);
   const handledFocusPoiRef = useRef<string | null>(null);
+  const offlineModeEnabledRef = useRef<boolean>(isOfflineModeEnabled());
+  const dataProviderRef = useRef<PoiDataProvider>(
+    new PoiDataProvider(offlineModeEnabledRef.current)
+  );
+  const directAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [isLocating, setIsLocating] = useState(true);
@@ -428,6 +428,7 @@ function CustomerMapContent() {
   const [locationHint, setLocationHint] = useState<string | null>(null);
   const [isLoadingPois, setIsLoadingPois] = useState(false);
   const [isOnline, setIsOnline] = useState<boolean>(true);
+  const [offlineLayerStatus, setOfflineLayerStatus] = useState<OfflineLayerStatus>("online");
   const { liteMode } = useLiteMode();
   const [autoPromptEnabled, setAutoPromptEnabled] = useState(true);
   const [movementMode, setMovementMode] = useState<MovementMode>("walk");
@@ -491,6 +492,7 @@ function CustomerMapContent() {
       text: next.text,
       lang: next.lang.split("-")[0] || next.lang,
       rate: 0.94,
+      offlineOnly: offlineModeEnabledRef.current && !isOnline,
       onStart: () => {
         setIsSpeaking(true);
         setIsPaused(false);
@@ -515,6 +517,11 @@ function CustomerMapContent() {
         queueProcessingRef.current = false;
         currentChunkRef.current = null;
         setCurrentAudioLabel(null);
+        if (offlineModeEnabledRef.current && !isOnline) {
+          setNetworkHint(
+            "Thiết bị không có voice offline phù hợp. Hãy tải trước audio để nghe khi mất mạng."
+          );
+        }
         processSpeechQueue();
       },
     });
@@ -571,6 +578,12 @@ function CustomerMapContent() {
     setCurrentAudioLabel(null);
     updateQueueCount();
 
+    if (directAudioRef.current) {
+      directAudioRef.current.pause();
+      directAudioRef.current.removeAttribute("src");
+      directAudioRef.current = null;
+    }
+
     ttsStop();
   };
 
@@ -596,36 +609,43 @@ function CustomerMapContent() {
   };
 
   const loadNearbyPois = async (lat: number, lng: number, keyword = "") => {
-    const params = new URLSearchParams({
-      lat: String(lat),
-      lng: String(lng),
-      mode: "map",
-      take: liteMode ? "40" : "80",
-    });
-
-    if (keyword.trim()) params.set("q", keyword.trim());
-
     setIsLoadingPois(true);
-    try {
-      const res = await fetchWithTimeout(
-        `/api/customer/pois?${params.toString()}`,
-        { method: "GET" },
-        NETWORK_TIMEOUT_MS
-      );
-      if (!res.ok) throw new Error("network");
+    if (offlineModeEnabledRef.current) {
+      setOfflineLayerStatus("syncing");
+    }
 
-      const data = (await res.json().catch(() => null)) as { pois?: PoiMapItem[] } | null;
-      if (data?.pois) {
-        const merged = data.pois
+    try {
+      const result = await dataProviderRef.current.getNearbyPois({
+        lat,
+        lng,
+        q: keyword.trim(),
+        take: liteMode ? 40 : 80,
+        timeoutMs: NETWORK_TIMEOUT_MS,
+      });
+
+      if (result.pois.length > 0 || result.source === "network") {
+        const merged = result.pois
           .map((poi) => toDistancePriority(poi, lat, lng))
           .sort(sortPoiByPriority);
         setPois(merged);
       }
-      setNetworkHint(null);
+
+      if (result.status === "failed") {
+        setNetworkHint("Không lấy được dữ liệu mới và chưa có cache offline khả dụng.");
+      } else if (result.source === "cache") {
+        setNetworkHint("Bạn đang offline. Hệ thống dùng dữ liệu đã lưu cục bộ.");
+      } else {
+        setNetworkHint(null);
+      }
+
+      setOfflineLayerStatus(result.status);
     } catch {
       setNetworkHint(
         "Mạng yếu, hệ thống đang giữ dữ liệu gần nhất để không gián đoạn trải nghiệm."
       );
+      if (offlineModeEnabledRef.current) {
+        setOfflineLayerStatus("failed");
+      }
     } finally {
       setIsLoadingPois(false);
     }
@@ -646,76 +666,79 @@ function CustomerMapContent() {
       return viFallback;
     }
 
-    if (!isOnline) {
-      return narrationCacheRef.current[`${poi.id}:vi`] || viFallback;
-    }
+    const fromProvider = await dataProviderRef.current.getNarrationText({
+      poiId: poi.id,
+      targetLanguage: lang,
+      viFallback,
+      canUseNetwork: isOnline,
+      timeoutMs: NETWORK_TIMEOUT_MS,
+    });
 
-    let detail: PoiDetailNarration | undefined = poiDetailCacheRef.current[poi.id];
-    if (!detail) {
+    // Keep existing online behavior: if no dedicated narration exists, try translation API.
+    if (fromProvider === viFallback && isOnline) {
       try {
-        const res = await fetchWithTimeout(
-          `/api/customer/pois/${poi.id}`,
-          { method: "GET" },
+        const translate = await fetchWithTimeout(
+          "/api/tools/translate",
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ q: viFallback, source: "vi", target: lang }),
+          },
           NETWORK_TIMEOUT_MS
         );
-        if (res.ok) {
-          const data = (await res.json().catch(() => null)) as { poi?: PoiDetailNarration } | null;
-          detail = data?.poi;
-          if (detail) poiDetailCacheRef.current[poi.id] = detail;
+
+        if (translate.ok) {
+          const translated = (await translate.json().catch(() => null)) as {
+            translatedText?: string;
+          } | null;
+          const text = translated?.translatedText?.trim() || fromProvider;
+          narrationCacheRef.current[cacheKey] = text;
+          return text;
         }
       } catch {
-        // keep fallback
+        // keep fallback text
       }
     }
 
-    const translatedFromSource =
-      detail?.translations
-        ?.find((item) => item.language.toLowerCase() === lang)
-        ?.audioScript?.trim() ||
-      detail?.translations
-        ?.find((item) => item.language.toLowerCase() === lang)
-        ?.description?.trim() ||
-      "";
+    narrationCacheRef.current[cacheKey] = fromProvider;
+    return fromProvider;
+  };
 
-    if (translatedFromSource) {
-      narrationCacheRef.current[cacheKey] = translatedFromSource;
-      return translatedFromSource;
-    }
+  const playPreferredAudio = async (poi: PoiMapItem, targetLanguage: string): Promise<boolean> => {
+    const audioUrl = await dataProviderRef.current.getPreferredAudioUrl({
+      poiId: poi.id,
+      language: targetLanguage,
+      canUseNetwork: isOnline,
+      timeoutMs: NETWORK_TIMEOUT_MS,
+    });
 
-    const viSource =
-      detail?.translations
-        ?.find((item) => item.language.toLowerCase() === "vi")
-        ?.audioScript?.trim() ||
-      detail?.translations
-        ?.find((item) => item.language.toLowerCase() === "vi")
-        ?.description?.trim() ||
-      detail?.description?.trim() ||
-      viFallback;
+    if (!audioUrl) return false;
 
     try {
-      const translate = await fetchWithTimeout(
-        "/api/tools/translate",
-        {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ q: viSource, source: "vi", target: lang }),
-        },
-        NETWORK_TIMEOUT_MS
-      );
+      stopAudioQueue();
+      const audio = directAudioRef.current ?? new Audio();
+      directAudioRef.current = audio;
+      audio.pause();
+      audio.src = audioUrl;
+      audio.preload = "auto";
 
-      if (translate.ok) {
-        const translated = (await translate.json().catch(() => null)) as {
-          translatedText?: string;
-        } | null;
-        const text = translated?.translatedText?.trim() || viSource;
-        narrationCacheRef.current[cacheKey] = text;
-        return text;
-      }
+      audio.onended = () => {
+        setIsSpeaking(false);
+        setCurrentAudioLabel(null);
+      };
+      audio.onerror = () => {
+        setIsSpeaking(false);
+        setCurrentAudioLabel(null);
+      };
+
+      setCurrentAudioLabel(`Audio file: ${poi.name}`);
+      setIsSpeaking(true);
+      setIsPaused(false);
+      await audio.play();
+      return true;
     } catch {
-      // fallback to vi
+      return false;
     }
-
-    return viSource;
   };
 
   const clearRouteLine = () => {
@@ -864,15 +887,20 @@ function CustomerMapContent() {
 
   useEffect(() => {
     setIsOnline(navigator.onLine);
+    if (offlineModeEnabledRef.current) {
+      setOfflineLayerStatus(navigator.onLine ? "online" : "offline");
+    }
 
     const onOnline = () => {
       setIsOnline(true);
       setNetworkHint(null);
+      if (offlineModeEnabledRef.current) setOfflineLayerStatus("syncing");
     };
 
     const onOffline = () => {
       setIsOnline(false);
       setNetworkHint("Bạn đang offline. Hệ thống dùng dữ liệu đã lưu cục bộ.");
+      if (offlineModeEnabledRef.current) setOfflineLayerStatus("offline");
     };
 
     window.addEventListener("online", onOnline);
@@ -948,6 +976,11 @@ function CustomerMapContent() {
 
       if (typeof window !== "undefined") {
         ttsStop();
+      }
+      if (directAudioRef.current) {
+        directAudioRef.current.pause();
+        directAudioRef.current.removeAttribute("src");
+        directAudioRef.current = null;
       }
     };
   }, []);
@@ -1416,9 +1449,6 @@ function CustomerMapContent() {
     setNearPromptPoi(null);
     setPromptClusterInfo(null);
 
-    const text = await getNarrationText(targetPoi, resolvedLanguage);
-    if (!text.trim()) return;
-
     const currentPoiId = currentNarrationPoiRef.current;
     if (currentPoiId && currentPoiId !== targetPoi.id) {
       const currentPoi = pois.find((item) => item.id === currentPoiId);
@@ -1435,6 +1465,14 @@ function CustomerMapContent() {
 
     currentNarrationPoiRef.current = targetPoi.id;
     setSelectedPoiId(targetPoi.id);
+
+    const playedAudio = await playPreferredAudio(targetPoi, resolvedLanguage);
+    if (playedAudio) {
+      return;
+    }
+
+    const text = await getNarrationText(targetPoi, resolvedLanguage);
+    if (!text.trim()) return;
 
     enqueueSpeechBySentence(
       text,
@@ -1534,6 +1572,27 @@ function CustomerMapContent() {
             {isOnline ? <Wifi className="h-3.5 w-3.5" /> : <WifiOff className="h-3.5 w-3.5" />}
             {isOnline ? "Online" : "Offline"}
           </span>
+          {offlineModeEnabledRef.current ? (
+            <span
+              className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 ${
+                offlineLayerStatus === "syncing"
+                  ? "bg-sky-100 text-sky-700"
+                  : offlineLayerStatus === "offline"
+                    ? "bg-amber-100 text-amber-700"
+                    : offlineLayerStatus === "failed"
+                      ? "bg-rose-100 text-rose-700"
+                      : "bg-emerald-100 text-emerald-700"
+              }`}
+            >
+              {offlineLayerStatus === "syncing"
+                ? "Syncing"
+                : offlineLayerStatus === "offline"
+                  ? "Offline cache"
+                  : offlineLayerStatus === "failed"
+                    ? "Offline failed"
+                    : "Offline ready"}
+            </span>
+          ) : null}
           <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1.5 text-blue-700">
             <MapPin className="h-3.5 w-3.5" />
             {isLoadingPois ? "Đang cập nhật..." : `${pois.length} POI`}

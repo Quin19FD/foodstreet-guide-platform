@@ -212,6 +212,7 @@ export interface SpeakOptions {
   text: string;
   lang: string;
   rate?: number;
+  offlineOnly?: boolean;
   onStart?: () => void;
   onEnd?: () => void;
   onError?: () => void;
@@ -223,7 +224,7 @@ export interface SpeakOptions {
  * - Nếu không → dùng Google Translate TTS (miễn phí, hỗ trợ tiếng Việt)
  */
 export function speak(options: SpeakOptions): void {
-  const { text, lang, rate = 1, onStart, onEnd, onError } = options;
+  const { text, lang, rate = 1, offlineOnly = false, onStart, onEnd, onError } = options;
   if (!text.trim()) return;
 
   const speechLang = toSpeechLang(lang);
@@ -242,6 +243,10 @@ export function speak(options: SpeakOptions): void {
     window.speechSynthesis.speak(utterance);
   } else {
     // Không có giọng đọc → fallback Google Translate TTS
+    if (offlineOnly) {
+      onError?.();
+      return;
+    }
     void playGoogleTranslateTts(text, lang, rate, { onStart, onEnd, onError });
   }
 }

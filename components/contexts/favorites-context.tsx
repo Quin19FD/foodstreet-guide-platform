@@ -1,6 +1,20 @@
 "use client";
 
-import { type ReactNode, createContext, useCallback, useContext, useEffect, useState } from "react";
+import {
+  type ReactNode,
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
+import { favoriteCacheRepo } from "@/lib/offline/favorite-cache-repo";
+import { isOfflineModeEnabled } from "@/lib/offline/flags";
+import { flushFavoriteSyncQueue } from "@/lib/offline/sync-engine";
+import { syncQueueRepo } from "@/lib/offline/sync-queue-repo";
+import type { FavoriteSyncStatus } from "@/lib/offline/types";
 
 type FavoritesContextType = {
   isFavorited: (poiId: string) => boolean;
@@ -8,9 +22,14 @@ type FavoritesContextType = {
   favorites: Set<string>;
   isLoading: boolean;
   isAuthenticated: boolean;
+  syncStatus: FavoriteSyncStatus;
+  pendingSyncCount: number;
+  offlineModeEnabled: boolean;
 };
 
 const FavoritesContext = createContext<FavoritesContextType | null>(null);
+const AUTH_SEEN_STORAGE_KEY = "fs_customer_auth_seen";
+const FAVORITES_SYNC_POLL_INTERVAL_MS = 25_000;
 
 export function useFavorites() {
   const context = useContext(FavoritesContext);
@@ -21,12 +40,92 @@ export function useFavorites() {
 }
 
 export function FavoritesProvider({ children }: { children: ReactNode }) {
+  const offlineModeEnabled = useMemo(() => isOfflineModeEnabled(), []);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<FavoriteSyncStatus>("idle");
+  const [pendingSyncCount, setPendingSyncCount] = useState(0);
 
   const isFavorited = useCallback((poiId: string) => favorites.has(poiId), [favorites]);
+
+  const refreshPendingSyncCount = useCallback(() => {
+    setPendingSyncCount(syncQueueRepo.count("favorite"));
+  }, []);
+
+  const setAuthSeen = useCallback((seen: boolean) => {
+    if (typeof window === "undefined") return;
+    if (seen) {
+      window.localStorage.setItem(AUTH_SEEN_STORAGE_KEY, "1");
+      return;
+    }
+    window.localStorage.removeItem(AUTH_SEEN_STORAGE_KEY);
+  }, []);
+
+  const applyFavoriteLocalState = useCallback((poiId: string, nextFavorited: boolean) => {
+    setFavorites((prev) => {
+      const next = new Set(prev);
+      if (nextFavorited) next.add(poiId);
+      else next.delete(poiId);
+      favoriteCacheRepo.replace(next);
+      return next;
+    });
+  }, []);
+
+  const restoreFavoritesFromLocal = useCallback(() => {
+    const cached = favoriteCacheRepo.getAll();
+    setFavorites(new Set(cached));
+
+    if (typeof window !== "undefined") {
+      const authSeen = window.localStorage.getItem(AUTH_SEEN_STORAGE_KEY) === "1";
+      if (authSeen) {
+        setIsAuthenticated(true);
+      }
+    }
+  }, []);
+
+  const redirectToLogin = useCallback(() => {
+    if (typeof window === "undefined") return;
+    window.location.href = `/customer/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+  }, []);
+
+  const flushQueuedFavorites = useCallback(async () => {
+    if (!offlineModeEnabled) return;
+    if (typeof window === "undefined" || !navigator.onLine) return;
+
+    await flushFavoriteSyncQueue({
+      onStatusChange: setSyncStatus,
+      onAuthError: () => {
+        setIsAuthenticated(false);
+        setAuthSeen(false);
+      },
+    });
+    refreshPendingSyncCount();
+  }, [offlineModeEnabled, refreshPendingSyncCount, setAuthSeen]);
+
+  const sendFavoriteMutation = useCallback(
+    async (
+      action: "ADD" | "REMOVE",
+      poiId: string
+    ): Promise<{ ok: boolean; authError: boolean }> => {
+      try {
+        const res = await fetch("/api/customer/favorites", {
+          method: action === "ADD" ? "POST" : "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ poiId }),
+        });
+
+        if (res.status === 401) return { ok: false, authError: true };
+        if (res.ok) return { ok: true, authError: false };
+        if (action === "REMOVE" && res.status === 404) return { ok: true, authError: false };
+        return { ok: false, authError: false };
+      } catch {
+        return { ok: false, authError: false };
+      }
+    },
+    []
+  );
 
   // Load favorites on mount - only if user is authenticated
   const loadFavorites = useCallback(async () => {
@@ -38,6 +137,10 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
       if (res.status === 401) {
         // Not authenticated - this is expected for guest users
         setIsAuthenticated(false);
+        setAuthSeen(false);
+        if (offlineModeEnabled && typeof window !== "undefined" && !navigator.onLine) {
+          restoreFavoritesFromLocal();
+        }
         return;
       }
 
@@ -45,26 +148,60 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
         const data = await res.json();
         const favoriteIds: Set<string> = new Set(data.favorites.map((f: { id: string }) => f.id));
         setFavorites(favoriteIds);
+        favoriteCacheRepo.replace(favoriteIds);
         setIsAuthenticated(true);
+        setAuthSeen(true);
+      } else if (offlineModeEnabled) {
+        restoreFavoritesFromLocal();
       }
     } catch (error) {
-      console.error("Error loading favorites:", error);
+      if (offlineModeEnabled) {
+        restoreFavoritesFromLocal();
+      } else {
+        console.error("Error loading favorites:", error);
+      }
     } finally {
       setIsInitialized(true);
+      refreshPendingSyncCount();
     }
-  }, [isInitialized]);
+  }, [
+    isInitialized,
+    offlineModeEnabled,
+    refreshPendingSyncCount,
+    restoreFavoritesFromLocal,
+    setAuthSeen,
+  ]);
 
   // Load favorites when provider mounts
   useEffect(() => {
-    loadFavorites();
+    void loadFavorites();
   }, [loadFavorites]);
+
+  useEffect(() => {
+    if (!offlineModeEnabled) return;
+
+    const onOnline = () => {
+      void flushQueuedFavorites();
+    };
+
+    void flushQueuedFavorites();
+    window.addEventListener("online", onOnline);
+    const timer = window.setInterval(() => {
+      void flushQueuedFavorites();
+    }, FAVORITES_SYNC_POLL_INTERVAL_MS);
+
+    return () => {
+      window.removeEventListener("online", onOnline);
+      window.clearInterval(timer);
+    };
+  }, [flushQueuedFavorites, offlineModeEnabled]);
 
   const toggleFavorite = useCallback(
     async (poiId: string): Promise<boolean> => {
       // Check authentication first
       if (!isAuthenticated && isInitialized) {
         // Redirect to login or show login modal
-        window.location.href = `/customer/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+        redirectToLogin();
         return false;
       }
 
@@ -72,6 +209,41 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
 
       try {
         const isCurrentlyFavorited = favorites.has(poiId);
+        const nextFavorited = !isCurrentlyFavorited;
+
+        if (offlineModeEnabled) {
+          applyFavoriteLocalState(poiId, nextFavorited);
+
+          const action = nextFavorited ? "ADD" : "REMOVE";
+          const enqueueForLater = () => {
+            syncQueueRepo.enqueue("favorite", action, { poiId });
+            refreshPendingSyncCount();
+            setSyncStatus("failed");
+          };
+
+          if (typeof window !== "undefined" && !navigator.onLine) {
+            enqueueForLater();
+            return nextFavorited;
+          }
+
+          const mutation = await sendFavoriteMutation(action, poiId);
+          if (mutation.authError) {
+            applyFavoriteLocalState(poiId, isCurrentlyFavorited);
+            setIsAuthenticated(false);
+            setAuthSeen(false);
+            redirectToLogin();
+            return isCurrentlyFavorited;
+          }
+
+          if (!mutation.ok) {
+            enqueueForLater();
+            return nextFavorited;
+          }
+
+          setSyncStatus("idle");
+          void flushQueuedFavorites();
+          return nextFavorited;
+        }
 
         if (isCurrentlyFavorited) {
           // Remove from favorites
@@ -82,16 +254,14 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
           });
 
           if (res.ok) {
-            setFavorites((prev) => {
-              const next = new Set(prev);
-              next.delete(poiId);
-              return next;
-            });
+            applyFavoriteLocalState(poiId, false);
             return false; // Removed
           }
           if (res.status === 401) {
             // Session expired - redirect to login
-            window.location.href = `/customer/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+            setIsAuthenticated(false);
+            setAuthSeen(false);
+            redirectToLogin();
             return false;
           }
         } else {
@@ -103,16 +273,14 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
           });
 
           if (res.ok) {
-            setFavorites((prev) => {
-              const next = new Set(prev);
-              next.add(poiId);
-              return next;
-            });
+            applyFavoriteLocalState(poiId, true);
             return true; // Added
           }
           if (res.status === 401) {
             // Session expired - redirect to login
-            window.location.href = `/customer/login?redirect=${encodeURIComponent(window.location.pathname)}`;
+            setIsAuthenticated(false);
+            setAuthSeen(false);
+            redirectToLogin();
             return false;
           }
         }
@@ -124,12 +292,32 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
 
       return favorites.has(poiId);
     },
-    [favorites, isAuthenticated, isInitialized]
+    [
+      applyFavoriteLocalState,
+      favorites,
+      flushQueuedFavorites,
+      isAuthenticated,
+      isInitialized,
+      offlineModeEnabled,
+      redirectToLogin,
+      refreshPendingSyncCount,
+      sendFavoriteMutation,
+      setAuthSeen,
+    ]
   );
 
   return (
     <FavoritesContext.Provider
-      value={{ isFavorited, toggleFavorite, favorites, isLoading, isAuthenticated }}
+      value={{
+        isFavorited,
+        toggleFavorite,
+        favorites,
+        isLoading,
+        isAuthenticated,
+        syncStatus,
+        pendingSyncCount,
+        offlineModeEnabled,
+      }}
     >
       {children}
     </FavoritesContext.Provider>
