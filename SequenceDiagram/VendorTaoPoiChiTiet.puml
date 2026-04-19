@@ -1,0 +1,38 @@
+@startuml
+title Sequence - Vendor tạo POI và chờ duyệt 
+
+actor Vendor
+participant "Vendor UI" as VendorUI
+participant "Vendor API" as VendorAPI
+participant "Database" as DB
+participant "Email Service" as Email
+
+Vendor -> VendorUI : Mở form tạo POI
+VendorUI --> Vendor : Hiển thị form
+
+Vendor -> VendorUI : Nhập thông tin + submit
+VendorUI -> VendorAPI : POST /pois
+
+VendorAPI -> VendorAPI : Xác thực & validate
+alt Không hợp lệ
+    VendorAPI --> VendorUI : Error
+    VendorUI --> Vendor : Thông báo lỗi
+else Hợp lệ
+
+    VendorAPI -> DB : Lưu POI (status=PENDING)
+    DB --> VendorAPI : OK
+
+    VendorAPI -> Email : Gửi thông báo admin
+
+   VendorAPI--> VendorUI : 201 Created
+    VendorUI --> Vendor : Tạo thành công
+end
+
+Vendor -> VendorUI : Xem POI
+VendorUI ->VendorAPI: GET POI
+VendorAPI -> DB : Lấy dữ liệu
+DB -->VendorAPI: POI
+VendorAPI --> VendorUI : 200 OK
+VendorUI --> Vendor : Hiển thị "Chờ duyệt"
+
+@enduml

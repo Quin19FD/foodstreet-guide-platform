@@ -1,4 +1,5 @@
 ﻿import { createHash } from "node:crypto";
+import { config } from "@/shared/config";
 
 type CloudinaryUploadInput = {
   file: File;
@@ -15,12 +16,12 @@ type CloudinaryUploadResult = {
 };
 
 function getCloudinaryEnv() {
-  const cloudName = process.env.CLOUDINARY_CLOUD_NAME?.trim() ?? "";
-  const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET?.trim() ?? "";
-  const apiKey = process.env.CLOUDINARY_API_KEY?.trim() ?? "";
-  const apiSecret = process.env.CLOUDINARY_API_SECRET?.trim() ?? "";
-
-  return { cloudName, uploadPreset, apiKey, apiSecret };
+  return {
+    cloudName: config.cloudinary.cloudName,
+    uploadPreset: config.cloudinary.uploadPreset,
+    apiKey: config.cloudinary.apiKey,
+    apiSecret: config.cloudinary.apiSecret,
+  };
 }
 
 function sha1(input: string): string {

@@ -42,8 +42,23 @@ export default async function AdminActivityLogsPage({ searchParams }: PageProps)
     where,
     orderBy: { createdAt: "desc" },
     take: 200,
-    include: { user: { select: { id: true, email: true, name: true, role: true } } },
+    select: {
+      id: true,
+      action: true,
+      targetType: true,
+      targetId: true,
+      createdAt: true,
+      userId: true,
+    },
   });
+
+  const userIds = [...new Set(logs.map((log) => log.userId).filter(Boolean))];
+  const users = await prisma.user.findMany({
+    where: { id: { in: userIds } },
+    select: { id: true, name: true, email: true },
+  });
+
+  const userMap = new Map(users.map((user) => [user.id, user]));
 
   return (
     <AdminLayout>
@@ -81,8 +96,12 @@ export default async function AdminActivityLogsPage({ searchParams }: PageProps)
                         {log.createdAt.toLocaleString("vi-VN")}
                       </td>
                       <td className="px-4 py-3">
-                        <div className="font-medium text-slate-900">{log.user.name}</div>
-                        <div className="text-xs text-slate-500">{log.user.email}</div>
+                        <div className="font-medium text-slate-900">
+                          {userMap.get(log.userId)?.name ?? "-"}
+                        </div>
+                        <div className="text-xs text-slate-500">
+                          {userMap.get(log.userId)?.email ?? "-"}
+                        </div>
                       </td>
                       <td className="px-4 py-3">
                         <span className="inline-flex rounded-full bg-orange-50 px-2 py-0.5 text-xs font-semibold text-orange-700">

@@ -3,43 +3,31 @@ title Activity Diagram - Tự động phát thuyết minh khi đến gần POI
 
 start
 
-:Ứng dụng chạy nền;
-:Liên tục theo dõi vị trí User;
+:Customer mở trang map;
+:Ứng dụng lấy vị trí hiện tại của user;
+:GET /api/customer/pois?mode=map&lat={lat}&lng={lng};
 
-if (User bật định vị?) then (Có)
-    :Lấy vị trí hiện tại của User;
-else (Không)
-    :Không thể xác định vị trí;
-    stop
-endif
+:Map tính khoảng cách đến từng POI;
 
-:So sánh vị trí User với danh sách POI;
+if (auto prompt enabled và không có active route?) then (Có)
+    if (Có POI trong vùng cảnh báo?) then (Có)
+        :Chọn POI gần nhất hoặc cụm POI;
+        :Hiển thị prompt "Bạn đang đến gần POI";
 
-if (User đến gần POI?) then (Có)
-
-    :Xác định POI hợp lệ gần nhất;
-
-    if (Có nhiều POI gần nhau?) then (Có)
-        :Ưu tiên POI hợp lệ nhất;
-    endif
-
-    :Hiển thị thông báo;
-    note right
-      "Bạn đang đến gần POI,
-      bạn có muốn nghe thuyết minh không?"
-    end note
-
-    if (User đồng ý nghe?) then (Có)
-        :Lấy ngôn ngữ User đã chọn;
-        :Phát audio thuyết minh;
-        :Hiển thị hình ảnh & menu POI;
+        if (Customer chọn "Nghe thuyết minh"?) then (Có)
+            :Phát thuyết minh với audio file hoặc TTS;
+        elseif (Customer chọn "Xem chi tiết"?) then (Có)
+            :Chuyển tới /customer/pois/{id};
+        else (Bỏ qua)
+            :Tắt prompt;
+        endif
     else (Không)
-        :Không phát audio;
+        :Tiếp tục theo dõi vị trí;
     endif
-
 else (Không)
-    :Tiếp tục theo dõi vị trí;
+    :Không kích hoạt prompt tự động;
 endif
 
 stop
+
 @enduml

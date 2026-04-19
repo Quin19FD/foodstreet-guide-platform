@@ -20,23 +20,23 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: public; Type: SCHEMA; Schema: -; Owner: foodstreet_user
+-- Name: public; Type: SCHEMA; Schema: -; Owner: postgres
 --
 
 -- *not* creating schema, since initdb creates it
 
 
-ALTER SCHEMA public OWNER TO foodstreet_user;
+ALTER SCHEMA public OWNER TO postgres;
 
 --
--- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: foodstreet_user
+-- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: postgres
 --
 
 COMMENT ON SCHEMA public IS '';
 
 
 --
--- Name: POIStatus; Type: TYPE; Schema: public; Owner: foodstreet_user
+-- Name: POIStatus; Type: TYPE; Schema: public; Owner: postgres
 --
 
 CREATE TYPE public."POIStatus" AS ENUM (
@@ -46,10 +46,10 @@ CREATE TYPE public."POIStatus" AS ENUM (
 );
 
 
-ALTER TYPE public."POIStatus" OWNER TO foodstreet_user;
+ALTER TYPE public."POIStatus" OWNER TO postgres;
 
 --
--- Name: UserRole; Type: TYPE; Schema: public; Owner: foodstreet_user
+-- Name: UserRole; Type: TYPE; Schema: public; Owner: postgres
 --
 
 CREATE TYPE public."UserRole" AS ENUM (
@@ -59,10 +59,10 @@ CREATE TYPE public."UserRole" AS ENUM (
 );
 
 
-ALTER TYPE public."UserRole" OWNER TO foodstreet_user;
+ALTER TYPE public."UserRole" OWNER TO postgres;
 
 --
--- Name: UserStatus; Type: TYPE; Schema: public; Owner: foodstreet_user
+-- Name: UserStatus; Type: TYPE; Schema: public; Owner: postgres
 --
 
 CREATE TYPE public."UserStatus" AS ENUM (
@@ -72,14 +72,14 @@ CREATE TYPE public."UserStatus" AS ENUM (
 );
 
 
-ALTER TYPE public."UserStatus" OWNER TO foodstreet_user;
+ALTER TYPE public."UserStatus" OWNER TO postgres;
 
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
 --
--- Name: _prisma_migrations; Type: TABLE; Schema: public; Owner: foodstreet_user
+-- Name: _prisma_migrations; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public._prisma_migrations (
@@ -94,10 +94,10 @@ CREATE TABLE public._prisma_migrations (
 );
 
 
-ALTER TABLE public._prisma_migrations OWNER TO foodstreet_user;
+ALTER TABLE public._prisma_migrations OWNER TO postgres;
 
 --
--- Name: favorite_pois; Type: TABLE; Schema: public; Owner: foodstreet_user
+-- Name: favorite_pois; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.favorite_pois (
@@ -108,10 +108,10 @@ CREATE TABLE public.favorite_pois (
 );
 
 
-ALTER TABLE public.favorite_pois OWNER TO foodstreet_user;
+ALTER TABLE public.favorite_pois OWNER TO postgres;
 
 --
--- Name: menu_items; Type: TABLE; Schema: public; Owner: foodstreet_user
+-- Name: menu_items; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.menu_items (
@@ -127,10 +127,10 @@ CREATE TABLE public.menu_items (
 );
 
 
-ALTER TABLE public.menu_items OWNER TO foodstreet_user;
+ALTER TABLE public.menu_items OWNER TO postgres;
 
 --
--- Name: page_views; Type: TABLE; Schema: public; Owner: foodstreet_user
+-- Name: page_views; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.page_views (
@@ -143,10 +143,10 @@ CREATE TABLE public.page_views (
 );
 
 
-ALTER TABLE public.page_views OWNER TO foodstreet_user;
+ALTER TABLE public.page_views OWNER TO postgres;
 
 --
--- Name: poi_audios; Type: TABLE; Schema: public; Owner: foodstreet_user
+-- Name: poi_audios; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.poi_audios (
@@ -158,10 +158,10 @@ CREATE TABLE public.poi_audios (
 );
 
 
-ALTER TABLE public.poi_audios OWNER TO foodstreet_user;
+ALTER TABLE public.poi_audios OWNER TO postgres;
 
 --
--- Name: poi_images; Type: TABLE; Schema: public; Owner: foodstreet_user
+-- Name: poi_images; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.poi_images (
@@ -172,10 +172,10 @@ CREATE TABLE public.poi_images (
 );
 
 
-ALTER TABLE public.poi_images OWNER TO foodstreet_user;
+ALTER TABLE public.poi_images OWNER TO postgres;
 
 --
--- Name: poi_translations; Type: TABLE; Schema: public; Owner: foodstreet_user
+-- Name: poi_translations; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.poi_translations (
@@ -189,10 +189,10 @@ CREATE TABLE public.poi_translations (
 );
 
 
-ALTER TABLE public.poi_translations OWNER TO foodstreet_user;
+ALTER TABLE public.poi_translations OWNER TO postgres;
 
 --
--- Name: poi_views; Type: TABLE; Schema: public; Owner: foodstreet_user
+-- Name: poi_views; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.poi_views (
@@ -204,10 +204,10 @@ CREATE TABLE public.poi_views (
 );
 
 
-ALTER TABLE public.poi_views OWNER TO foodstreet_user;
+ALTER TABLE public.poi_views OWNER TO postgres;
 
 --
--- Name: pois; Type: TABLE; Schema: public; Owner: foodstreet_user
+-- Name: pois; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.pois (
@@ -232,10 +232,10 @@ CREATE TABLE public.pois (
 );
 
 
-ALTER TABLE public.pois OWNER TO foodstreet_user;
+ALTER TABLE public.pois OWNER TO postgres;
 
 --
--- Name: reviews; Type: TABLE; Schema: public; Owner: foodstreet_user
+-- Name: reviews; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.reviews (
@@ -248,10 +248,10 @@ CREATE TABLE public.reviews (
 );
 
 
-ALTER TABLE public.reviews OWNER TO foodstreet_user;
+ALTER TABLE public.reviews OWNER TO postgres;
 
 --
--- Name: search_history; Type: TABLE; Schema: public; Owner: foodstreet_user
+-- Name: search_history; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.search_history (
@@ -262,10 +262,10 @@ CREATE TABLE public.search_history (
 );
 
 
-ALTER TABLE public.search_history OWNER TO foodstreet_user;
+ALTER TABLE public.search_history OWNER TO postgres;
 
 --
--- Name: tour_pois; Type: TABLE; Schema: public; Owner: foodstreet_user
+-- Name: tour_pois; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.tour_pois (
@@ -276,10 +276,10 @@ CREATE TABLE public.tour_pois (
 );
 
 
-ALTER TABLE public.tour_pois OWNER TO foodstreet_user;
+ALTER TABLE public.tour_pois OWNER TO postgres;
 
 --
--- Name: tours; Type: TABLE; Schema: public; Owner: foodstreet_user
+-- Name: tours; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.tours (
@@ -294,10 +294,10 @@ CREATE TABLE public.tours (
 );
 
 
-ALTER TABLE public.tours OWNER TO foodstreet_user;
+ALTER TABLE public.tours OWNER TO postgres;
 
 --
--- Name: user_activity; Type: TABLE; Schema: public; Owner: foodstreet_user
+-- Name: user_activity; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.user_activity (
@@ -310,10 +310,10 @@ CREATE TABLE public.user_activity (
 );
 
 
-ALTER TABLE public.user_activity OWNER TO foodstreet_user;
+ALTER TABLE public.user_activity OWNER TO postgres;
 
 --
--- Name: users; Type: TABLE; Schema: public; Owner: foodstreet_user
+-- Name: users; Type: TABLE; Schema: public; Owner: postgres
 --
 
 CREATE TABLE public.users (
@@ -339,10 +339,10 @@ CREATE TABLE public.users (
 );
 
 
-ALTER TABLE public.users OWNER TO foodstreet_user;
+ALTER TABLE public.users OWNER TO postgres;
 
 --
--- Data for Name: _prisma_migrations; Type: TABLE DATA; Schema: public; Owner: foodstreet_user
+-- Data for Name: _prisma_migrations; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public._prisma_migrations (id, checksum, finished_at, migration_name, logs, rolled_back_at, started_at, applied_steps_count) FROM stdin;
@@ -355,7 +355,7 @@ caa339b8-2b87-4310-82c9-dcca6bdb36fd	8dc4fc0aa2205b20badd785c71f32fd30e8f4f40d5f
 
 
 --
--- Data for Name: favorite_pois; Type: TABLE DATA; Schema: public; Owner: foodstreet_user
+-- Data for Name: favorite_pois; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.favorite_pois (id, user_id, poi_id, created_at) FROM stdin;
@@ -363,15 +363,23 @@ COPY public.favorite_pois (id, user_id, poi_id, created_at) FROM stdin;
 
 
 --
--- Data for Name: menu_items; Type: TABLE DATA; Schema: public; Owner: foodstreet_user
+-- Data for Name: menu_items; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.menu_items (id, poi_id, name, description, price, image_url, is_available, created_at, updated_at) FROM stdin;
+7bc39a13-d2bc-4c11-9ba6-15d9d4ad40f1	6267466c-c926-484e-b425-a78089218f1c	Há Cảo Đoàn Viên	Thanh tao , nhẹ nhàng	1500000	https://res.cloudinary.com/dxy2gp1lg/image/upload/v1774368322/foodstreet/vendor/images/w8zdquozcynhyujgowkt.jpg	t	2026-03-24 16:05:25.226	2026-03-24 16:05:25.226
+ff5fae51-5247-4514-a551-140f9450f938	6267466c-c926-484e-b425-a78089218f1c	Há Cảo Chiên	Đậm đà . Chuẩn vị Bắc Kinh	2000000	https://res.cloudinary.com/dxy2gp1lg/image/upload/v1774368323/foodstreet/vendor/images/xgu4zan6gb9khd8xk78d.jpg	t	2026-03-24 16:05:25.226	2026-03-24 16:05:25.226
+adf227e4-99d5-4019-915c-ec12832465a0	6267466c-c926-484e-b425-a78089218f1c	Mì Trương Hà Tây	Nhẹ nhàng	1500000	https://res.cloudinary.com/dxy2gp1lg/image/upload/v1774368321/foodstreet/vendor/images/opdsgckzkc7bf51o4ulj.jpg	t	2026-03-24 16:05:25.226	2026-03-24 16:05:25.226
+1c14092e-5b00-4056-b932-0918f2120ebe	6267466c-c926-484e-b425-a78089218f1c	Heo Quay Hoàng Gia	Đậm đà	1300000	https://res.cloudinary.com/dxy2gp1lg/image/upload/v1774368325/foodstreet/vendor/images/hmvbtegzry4rzlw4xbm6.jpg	t	2026-03-24 16:05:25.226	2026-03-24 16:05:25.226
+6bd35678-ca70-4ea4-8ee6-63510f87b0bf	6267466c-c926-484e-b425-a78089218f1c	Chả Cuốn	Giòn rụm , vàng óng	1200000	https://res.cloudinary.com/dxy2gp1lg/image/upload/v1774368323/foodstreet/vendor/images/jwvdktidtg7jvt119au9.jpg	t	2026-03-24 16:05:25.226	2026-03-24 16:05:25.226
+eaef692c-58e4-4247-8b7a-b31a603e3d8d	6267466c-c926-484e-b425-a78089218f1c	Hồng Bao	Bánh bao màu hồng	2400000	https://res.cloudinary.com/dxy2gp1lg/image/upload/v1774368323/foodstreet/vendor/images/rswcc5rlrjf2rheyx0xm.jpg	t	2026-03-24 16:05:25.226	2026-03-24 16:05:25.226
+da26be90-a5d3-42b3-b4ff-95b1078bca3d	6267466c-c926-484e-b425-a78089218f1c	Hải Sản	Đậm đà	2300000	https://res.cloudinary.com/dxy2gp1lg/image/upload/v1774368322/foodstreet/vendor/images/kzlit5skd8vpl8ogmweq.jpg	t	2026-03-24 16:05:25.226	2026-03-24 16:05:25.226
+ba3d200b-e25c-45d9-953a-db1914b5a9a7	703466bf-e4f8-4698-a6c9-b3ec14d21093	Món 1	MÔ TẢ	1500000	https://res.cloudinary.com/dxy2gp1lg/image/upload/v1774448981/foodstreet/vendor/images/mx7hzxxtl7rhjnnvednz.jpg	t	2026-03-25 14:29:41.759	2026-03-25 14:29:41.759
 \.
 
 
 --
--- Data for Name: page_views; Type: TABLE DATA; Schema: public; Owner: foodstreet_user
+-- Data for Name: page_views; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.page_views (id, path, user_id, session_id, metadata, created_at) FROM stdin;
@@ -379,7 +387,7 @@ COPY public.page_views (id, path, user_id, session_id, metadata, created_at) FRO
 
 
 --
--- Data for Name: poi_audios; Type: TABLE DATA; Schema: public; Owner: foodstreet_user
+-- Data for Name: poi_audios; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.poi_audios (id, translation_id, audio_url, is_active, created_at) FROM stdin;
@@ -387,23 +395,29 @@ COPY public.poi_audios (id, translation_id, audio_url, is_active, created_at) FR
 
 
 --
--- Data for Name: poi_images; Type: TABLE DATA; Schema: public; Owner: foodstreet_user
+-- Data for Name: poi_images; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.poi_images (id, poi_id, image_url, description) FROM stdin;
+d7133dd5-cc92-4c47-96c4-7f15d47d115b	6267466c-c926-484e-b425-a78089218f1c	https://res.cloudinary.com/dxy2gp1lg/image/upload/v1774368309/foodstreet/vendor/images/ly1suardzvystsww9i44.jpg	Nhà hàng kiến trúc kiểu Trung Hoa
+96bc34fa-256f-46a8-8c7f-8e2c0a6b5b22	6267466c-c926-484e-b425-a78089218f1c	https://res.cloudinary.com/dxy2gp1lg/image/upload/v1774368310/foodstreet/vendor/images/jrg6n0chruknuoj3ayau.jpg	Tone chủ đạo màu đỏ , kiến trúc truyền thống cổ điển
+25c6262e-8264-4a58-932b-816f1c10dfcd	6267466c-c926-484e-b425-a78089218f1c	https://res.cloudinary.com/dxy2gp1lg/image/upload/v1774368313/foodstreet/vendor/images/y8mh7bisa1rabr7vq5r2.jpg	Nơi ăn uống rộng rãi riêng tư, phục vụ tận tâm
+0e9fd362-6f75-4e50-b560-c8f7368415d2	703466bf-e4f8-4698-a6c9-b3ec14d21093	https://res.cloudinary.com/dxy2gp1lg/image/upload/v1774448980/foodstreet/vendor/images/kht2wcwptgrxep2i1ixc.jpg	mô tả
 \.
 
 
 --
--- Data for Name: poi_translations; Type: TABLE DATA; Schema: public; Owner: foodstreet_user
+-- Data for Name: poi_translations; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.poi_translations (id, poi_id, language, name, description, audio_script, updated_at) FROM stdin;
+1b03dbcb-9b0a-48f9-8a7e-f37fdc5619c9	6267466c-c926-484e-b425-a78089218f1c	vi	Nhà Hàng Hồng Bao Bảo	Nhà hàng là điểm dừng chân lý tưởng dành cho thực khách yêu thích ẩm thực ngon và không gian thoải mái. Với phong cách phục vụ thân thiện và chuyên nghiệp, nhà hàng luôn chú trọng mang đến trải nghiệm dễ chịu cho mọi đối tượng khách hàng. Không gian được thiết kế gọn gàng, sạch sẽ, tạo cảm giác ấm cúng nhưng vẫn đủ thoải mái cho các buổi gặp gỡ gia đình, bạn bè hoặc đồng nghiệp.\n\nThực đơn của nhà hàng khá đa dạng, bao gồm nhiều món ăn được chế biến từ nguyên liệu tươi ngon, lựa chọn kỹ lưỡng mỗi ngày. Các món ăn được nêm nếm vừa vị, phù hợp với khẩu vị của nhiều thực khách khác nhau, từ những người yêu thích hương vị truyền thống cho đến những ai muốn trải nghiệm sự mới mẻ trong cách chế biến. Bên cạnh chất lượng món ăn, nhà hàng cũng chú trọng đến cách trình bày, mang lại cảm giác ngon miệng ngay từ cái nhìn đầu tiên.\n\nĐội ngũ nhân viên tại nhà hàng luôn sẵn sàng hỗ trợ và phục vụ khách hàng một cách tận tâm. Từ khâu đón tiếp đến lúc dùng bữa, mọi trải nghiệm đều được chăm chút cẩn thận nhằm mang lại sự hài lòng tối đa. Nhà hàng không chỉ là nơi thưởng thức ẩm thực mà còn là không gian để thư giãn, trò chuyện và tận hưởng những khoảnh khắc dễ chịu trong cuộc sống hàng ngày.	\N	2026-03-24 16:05:25.231
+11d6e92a-e254-4c77-be0b-722e7edcd79d	703466bf-e4f8-4698-a6c9-b3ec14d21093	vi	Nhà hàng Hồng Thiên Bảo CS2	Nhà hàng là điểm dừng chân lý tưởng dành cho thực khách yêu thích ẩm thực ngon và không gian thoải mái. Với phong cách phục vụ thân thiện và chuyên nghiệp, nhà hàng luôn chú trọng mang đến trải nghiệm dễ chịu cho mọi đối tượng khách hàng. Không gian được thiết kế gọn gàng, sạch sẽ, tạo cảm giác ấm cúng nhưng vẫn đủ thoải mái cho các buổi gặp gỡ gia đình, bạn bè hoặc đồng nghiệp.\n\nThực đơn của nhà hàng khá đa dạng, bao gồm nhiều món ăn được chế biến từ nguyên liệu tươi ngon, lựa chọn kỹ lưỡng mỗi ngày. Các món ăn được nêm nếm vừa vị, phù hợp với khẩu vị của nhiều thực khách khác nhau, từ những người yêu thích hương vị truyền thống cho đến những ai muốn trải nghiệm sự mới mẻ trong cách chế biến. Bên cạnh chất lượng món ăn, nhà hàng cũng chú trọng đến cách trình bày, mang lại cảm giác ngon miệng ngay từ cái nhìn đầu tiên.	\N	2026-03-25 14:29:41.763
 \.
 
 
 --
--- Data for Name: poi_views; Type: TABLE DATA; Schema: public; Owner: foodstreet_user
+-- Data for Name: poi_views; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.poi_views (id, poi_id, user_id, duration, created_at) FROM stdin;
@@ -411,15 +425,17 @@ COPY public.poi_views (id, poi_id, user_id, duration, created_at) FROM stdin;
 
 
 --
--- Data for Name: pois; Type: TABLE DATA; Schema: public; Owner: foodstreet_user
+-- Data for Name: pois; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.pois (id, name, slug, category, latitude, longitude, price_min, price_max, rating, created_at, updated_at, approved_at, approved_by, owner_id, rejection_reason, status, "submitCount", is_active) FROM stdin;
+6267466c-c926-484e-b425-a78089218f1c	Nhà Hàng Hồng Bao Bảo	\N	Nhà hàng	10.783285	106.706392	1500000	2500000	0	2026-03-24 16:05:25.207	2026-03-25 09:27:52.041	2026-03-25 08:28:33.723	774881f9-131a-470f-b759-11418f05fdc5	2b8867e7-ce0b-4946-9b37-435a3bffb688	\N	APPROVED	1	t
+703466bf-e4f8-4698-a6c9-b3ec14d21093	Nhà hàng Hồng Thiên Bảo CS2	\N	Nhà Hàng	10.831013	106.567205	1500000	2400000	0	2026-03-25 14:29:41.74	2026-03-25 14:30:08.073	2026-03-25 14:30:08.068	774881f9-131a-470f-b759-11418f05fdc5	2b8867e7-ce0b-4946-9b37-435a3bffb688	\N	APPROVED	1	t
 \.
 
 
 --
--- Data for Name: reviews; Type: TABLE DATA; Schema: public; Owner: foodstreet_user
+-- Data for Name: reviews; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.reviews (id, user_id, poi_id, rating, comment, created_at) FROM stdin;
@@ -427,7 +443,7 @@ COPY public.reviews (id, user_id, poi_id, rating, comment, created_at) FROM stdi
 
 
 --
--- Data for Name: search_history; Type: TABLE DATA; Schema: public; Owner: foodstreet_user
+-- Data for Name: search_history; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.search_history (id, user_id, keyword, created_at) FROM stdin;
@@ -435,23 +451,26 @@ COPY public.search_history (id, user_id, keyword, created_at) FROM stdin;
 
 
 --
--- Data for Name: tour_pois; Type: TABLE DATA; Schema: public; Owner: foodstreet_user
+-- Data for Name: tour_pois; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.tour_pois (id, tour_id, poi_id, stop_order) FROM stdin;
+068c0585-2c99-4112-a566-3fd39c48fee0	597bd6d6-adfd-4d4e-8ecb-50a2ee0b17e7	6267466c-c926-484e-b425-a78089218f1c	1
+6639f5b7-699e-4693-b8a7-2d204cd3ee99	597bd6d6-adfd-4d4e-8ecb-50a2ee0b17e7	703466bf-e4f8-4698-a6c9-b3ec14d21093	2
 \.
 
 
 --
--- Data for Name: tours; Type: TABLE DATA; Schema: public; Owner: foodstreet_user
+-- Data for Name: tours; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.tours (id, name, description, image_url, duration_minutes, created_at, updated_at, is_active) FROM stdin;
+597bd6d6-adfd-4d4e-8ecb-50a2ee0b17e7	TOUR DU LỊCH 1	Nhà hàng là điểm dừng chân lý tưởng dành cho thực khách yêu thích ẩm thực ngon và không gian thoải mái. Với phong cách phục vụ thân thiện và chuyên nghiệp, nhà hàng luôn chú trọng mang đến trải nghiệm dễ chịu cho mọi đối tượng khách hàng. Không gian được thiết kế gọn gàng, sạch sẽ, tạo cảm giác ấm cúng nhưng vẫn đủ thoải mái cho các buổi gặp gỡ gia đình, bạn bè hoặc đồng nghiệp.	https://res.cloudinary.com/dxy2gp1lg/image/upload/v1774450043/foodstreet/tours/ispz1vec24v2t6vtq5jb.jpg	150	2026-03-25 14:47:23.171	2026-03-25 14:48:32.927	t
 \.
 
 
 --
--- Data for Name: user_activity; Type: TABLE DATA; Schema: public; Owner: foodstreet_user
+-- Data for Name: user_activity; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.user_activity (id, user_id, action, target_type, target_id, created_at) FROM stdin;
@@ -494,15 +513,19 @@ fb287636-34a5-4b1d-9a6f-e01d4068b2ab	774881f9-131a-470f-b759-11418f05fdc5	ADMIN_
 
 
 --
--- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: foodstreet_user
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 COPY public.users (id, email, password, name, phone_number, avatar_url, role, is_active, created_at, updated_at, last_login, refresh_token_hash, refresh_token_expiry, reset_password_token_hash, reset_password_token_expiry, approved_at, approved_by, rejection_reason, status) FROM stdin;
+6cd6baf2-ecb3-4697-9a95-3406a64f11d4	domaianhh20@gmail.com	scrypt$qIuZYoG2wgJSSlPjrS2zLA$IlTF1njBDkl2pvz4njBoWjx3M1GwNvwk8vZjWJej0efq8kC-Q33KgeCXAFGahcYYQOh620BdKPDmurI1tYtvhQ	Nhà hàng Thịnh Phước	\N	\N	VENDOR	t	2026-03-19 15:49:35.232	2026-03-19 15:53:44.524	2026-03-19 15:53:44.519	3ea1a971b954927983092178e6bbb8f2ccb87faa0e2445bcdcb9960b55a8ca5d	2026-04-18 15:53:44.519	\N	\N	2026-03-19 15:52:21.481	774881f9-131a-470f-b759-11418f05fdc5	\N	APPROVED
+774881f9-131a-470f-b759-11418f05fdc5	maianhdo20042303@gmail.com	scrypt$jcPOaLJe8dTL8fjTTLcMgg$73tWGI_nTqqdPe2p56TjY2PSybZgwKfXWi-hucx1Hmsmdoiay6MAXNDj86pNA7ba-UHcl77NqMJ2OFJAQelizw	Đỗ Mai Anh	\N	\N	ADMIN	t	2026-03-14 16:19:35.45	2026-03-25 08:37:22.309	2026-03-25 08:37:22.306	a36749ec3a9a03f9eeabc205ebb405c0385f1b03d3c7bd3c589233bd25b7c15a	2026-04-24 08:37:22.306	\N	\N	2026-03-14 16:19:35.236	\N	\N	APPROVED
+2b8867e7-ce0b-4946-9b37-435a3bffb688	manhmanh2332004@gmail.com	scrypt$GtN5HjGoY1Ns7qv3smN98A$NnfNILR8FI4TRnUjMUy-AprGCu3kgYRbqEJQAbqBE7kPxP4vzfsxUGmuGMP0jYlsnD8pMxKmHS2nnFwsZC6CoA	Nhà hàng MAnhMAnh	\N	\N	VENDOR	t	2026-03-24 12:51:22.108	2026-03-25 09:27:52.041	2026-03-25 08:40:31.345	\N	\N	\N	\N	2026-03-24 12:52:17.952	774881f9-131a-470f-b759-11418f05fdc5	\N	APPROVED
+2c62f63e-6ceb-4fb5-aa07-eae2cb41776f	manhh23021004@gmail.com	scrypt$LYXdCjXxAuvAJd73mYFQQQ$coi67_ZoPU-E5f5BAgb6zcSrpFThliLpKtPajklYkNk1Rh_NqydgXcGi488F37DJOHFvIKu_BBlyuPtIyrK_CQ	Mai Anh	\N	\N	USER	t	2026-03-26 06:36:41.212	2026-03-26 06:36:41.212	2026-03-26 06:36:41.147	dcb00135e67b4bd068c8280bde86d9a20268692a4750ea155dd0085b4c1a8d5e	2026-04-25 06:36:41.147	\N	\N	2026-03-26 06:36:41.147	\N	\N	APPROVED
 \.
 
 
 --
--- Name: _prisma_migrations _prisma_migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: foodstreet_user
+-- Name: _prisma_migrations _prisma_migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public._prisma_migrations
@@ -510,7 +533,7 @@ ALTER TABLE ONLY public._prisma_migrations
 
 
 --
--- Name: favorite_pois favorite_pois_pkey; Type: CONSTRAINT; Schema: public; Owner: foodstreet_user
+-- Name: favorite_pois favorite_pois_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.favorite_pois
@@ -518,7 +541,7 @@ ALTER TABLE ONLY public.favorite_pois
 
 
 --
--- Name: menu_items menu_items_pkey; Type: CONSTRAINT; Schema: public; Owner: foodstreet_user
+-- Name: menu_items menu_items_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.menu_items
@@ -526,7 +549,7 @@ ALTER TABLE ONLY public.menu_items
 
 
 --
--- Name: page_views page_views_pkey; Type: CONSTRAINT; Schema: public; Owner: foodstreet_user
+-- Name: page_views page_views_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.page_views
@@ -534,7 +557,7 @@ ALTER TABLE ONLY public.page_views
 
 
 --
--- Name: poi_audios poi_audios_pkey; Type: CONSTRAINT; Schema: public; Owner: foodstreet_user
+-- Name: poi_audios poi_audios_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.poi_audios
@@ -542,7 +565,7 @@ ALTER TABLE ONLY public.poi_audios
 
 
 --
--- Name: poi_images poi_images_pkey; Type: CONSTRAINT; Schema: public; Owner: foodstreet_user
+-- Name: poi_images poi_images_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.poi_images
@@ -550,7 +573,7 @@ ALTER TABLE ONLY public.poi_images
 
 
 --
--- Name: poi_translations poi_translations_pkey; Type: CONSTRAINT; Schema: public; Owner: foodstreet_user
+-- Name: poi_translations poi_translations_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.poi_translations
@@ -558,7 +581,7 @@ ALTER TABLE ONLY public.poi_translations
 
 
 --
--- Name: poi_views poi_views_pkey; Type: CONSTRAINT; Schema: public; Owner: foodstreet_user
+-- Name: poi_views poi_views_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.poi_views
@@ -566,7 +589,7 @@ ALTER TABLE ONLY public.poi_views
 
 
 --
--- Name: pois pois_pkey; Type: CONSTRAINT; Schema: public; Owner: foodstreet_user
+-- Name: pois pois_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.pois
@@ -574,7 +597,7 @@ ALTER TABLE ONLY public.pois
 
 
 --
--- Name: reviews reviews_pkey; Type: CONSTRAINT; Schema: public; Owner: foodstreet_user
+-- Name: reviews reviews_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.reviews
@@ -582,7 +605,7 @@ ALTER TABLE ONLY public.reviews
 
 
 --
--- Name: search_history search_history_pkey; Type: CONSTRAINT; Schema: public; Owner: foodstreet_user
+-- Name: search_history search_history_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.search_history
@@ -590,7 +613,7 @@ ALTER TABLE ONLY public.search_history
 
 
 --
--- Name: tour_pois tour_pois_pkey; Type: CONSTRAINT; Schema: public; Owner: foodstreet_user
+-- Name: tour_pois tour_pois_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.tour_pois
@@ -598,7 +621,7 @@ ALTER TABLE ONLY public.tour_pois
 
 
 --
--- Name: tours tours_pkey; Type: CONSTRAINT; Schema: public; Owner: foodstreet_user
+-- Name: tours tours_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.tours
@@ -606,7 +629,7 @@ ALTER TABLE ONLY public.tours
 
 
 --
--- Name: user_activity user_activity_pkey; Type: CONSTRAINT; Schema: public; Owner: foodstreet_user
+-- Name: user_activity user_activity_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.user_activity
@@ -614,7 +637,7 @@ ALTER TABLE ONLY public.user_activity
 
 
 --
--- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: foodstreet_user
+-- Name: users users_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.users
@@ -622,105 +645,105 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: favorite_pois_user_id_poi_id_key; Type: INDEX; Schema: public; Owner: foodstreet_user
+-- Name: favorite_pois_user_id_poi_id_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE UNIQUE INDEX favorite_pois_user_id_poi_id_key ON public.favorite_pois USING btree (user_id, poi_id);
 
 
 --
--- Name: page_views_created_at_idx; Type: INDEX; Schema: public; Owner: foodstreet_user
+-- Name: page_views_created_at_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX page_views_created_at_idx ON public.page_views USING btree (created_at);
 
 
 --
--- Name: poi_views_created_at_idx; Type: INDEX; Schema: public; Owner: foodstreet_user
+-- Name: poi_views_created_at_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX poi_views_created_at_idx ON public.poi_views USING btree (created_at);
 
 
 --
--- Name: poi_views_poi_id_idx; Type: INDEX; Schema: public; Owner: foodstreet_user
+-- Name: poi_views_poi_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX poi_views_poi_id_idx ON public.poi_views USING btree (poi_id);
 
 
 --
--- Name: pois_status_idx; Type: INDEX; Schema: public; Owner: foodstreet_user
+-- Name: pois_status_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX pois_status_idx ON public.pois USING btree (status);
 
 
 --
--- Name: pois_status_is_active_idx; Type: INDEX; Schema: public; Owner: foodstreet_user
+-- Name: pois_status_is_active_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX pois_status_is_active_idx ON public.pois USING btree (status, is_active);
 
 
 --
--- Name: reviews_poi_id_idx; Type: INDEX; Schema: public; Owner: foodstreet_user
+-- Name: reviews_poi_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX reviews_poi_id_idx ON public.reviews USING btree (poi_id);
 
 
 --
--- Name: search_history_created_at_idx; Type: INDEX; Schema: public; Owner: foodstreet_user
+-- Name: search_history_created_at_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX search_history_created_at_idx ON public.search_history USING btree (created_at);
 
 
 --
--- Name: search_history_keyword_idx; Type: INDEX; Schema: public; Owner: foodstreet_user
+-- Name: search_history_keyword_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX search_history_keyword_idx ON public.search_history USING btree (keyword);
 
 
 --
--- Name: tour_pois_poi_id_idx; Type: INDEX; Schema: public; Owner: foodstreet_user
+-- Name: tour_pois_poi_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX tour_pois_poi_id_idx ON public.tour_pois USING btree (poi_id);
 
 
 --
--- Name: tour_pois_tour_id_idx; Type: INDEX; Schema: public; Owner: foodstreet_user
+-- Name: tour_pois_tour_id_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX tour_pois_tour_id_idx ON public.tour_pois USING btree (tour_id);
 
 
 --
--- Name: tour_pois_tour_id_poi_id_key; Type: INDEX; Schema: public; Owner: foodstreet_user
+-- Name: tour_pois_tour_id_poi_id_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE UNIQUE INDEX tour_pois_tour_id_poi_id_key ON public.tour_pois USING btree (tour_id, poi_id);
 
 
 --
--- Name: tours_is_active_idx; Type: INDEX; Schema: public; Owner: foodstreet_user
+-- Name: tours_is_active_idx; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE INDEX tours_is_active_idx ON public.tours USING btree (is_active);
 
 
 --
--- Name: users_email_key; Type: INDEX; Schema: public; Owner: foodstreet_user
+-- Name: users_email_key; Type: INDEX; Schema: public; Owner: postgres
 --
 
 CREATE UNIQUE INDEX users_email_key ON public.users USING btree (email);
 
 
 --
--- Name: favorite_pois favorite_pois_poi_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: foodstreet_user
+-- Name: favorite_pois favorite_pois_poi_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.favorite_pois
@@ -728,7 +751,7 @@ ALTER TABLE ONLY public.favorite_pois
 
 
 --
--- Name: favorite_pois favorite_pois_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: foodstreet_user
+-- Name: favorite_pois favorite_pois_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.favorite_pois
@@ -736,7 +759,7 @@ ALTER TABLE ONLY public.favorite_pois
 
 
 --
--- Name: menu_items menu_items_poi_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: foodstreet_user
+-- Name: menu_items menu_items_poi_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.menu_items
@@ -744,7 +767,7 @@ ALTER TABLE ONLY public.menu_items
 
 
 --
--- Name: page_views page_views_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: foodstreet_user
+-- Name: page_views page_views_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.page_views
@@ -752,7 +775,7 @@ ALTER TABLE ONLY public.page_views
 
 
 --
--- Name: poi_audios poi_audios_translation_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: foodstreet_user
+-- Name: poi_audios poi_audios_translation_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.poi_audios
@@ -760,7 +783,7 @@ ALTER TABLE ONLY public.poi_audios
 
 
 --
--- Name: poi_images poi_images_poi_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: foodstreet_user
+-- Name: poi_images poi_images_poi_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.poi_images
@@ -768,7 +791,7 @@ ALTER TABLE ONLY public.poi_images
 
 
 --
--- Name: poi_translations poi_translations_poi_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: foodstreet_user
+-- Name: poi_translations poi_translations_poi_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.poi_translations
@@ -776,7 +799,7 @@ ALTER TABLE ONLY public.poi_translations
 
 
 --
--- Name: poi_views poi_views_poi_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: foodstreet_user
+-- Name: poi_views poi_views_poi_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.poi_views
@@ -784,7 +807,7 @@ ALTER TABLE ONLY public.poi_views
 
 
 --
--- Name: poi_views poi_views_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: foodstreet_user
+-- Name: poi_views poi_views_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.poi_views
@@ -792,7 +815,7 @@ ALTER TABLE ONLY public.poi_views
 
 
 --
--- Name: pois pois_owner_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: foodstreet_user
+-- Name: pois pois_owner_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.pois
@@ -800,7 +823,7 @@ ALTER TABLE ONLY public.pois
 
 
 --
--- Name: reviews reviews_poi_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: foodstreet_user
+-- Name: reviews reviews_poi_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.reviews
@@ -808,7 +831,7 @@ ALTER TABLE ONLY public.reviews
 
 
 --
--- Name: reviews reviews_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: foodstreet_user
+-- Name: reviews reviews_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.reviews
@@ -816,7 +839,7 @@ ALTER TABLE ONLY public.reviews
 
 
 --
--- Name: search_history search_history_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: foodstreet_user
+-- Name: search_history search_history_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.search_history
@@ -824,7 +847,7 @@ ALTER TABLE ONLY public.search_history
 
 
 --
--- Name: tour_pois tour_pois_poi_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: foodstreet_user
+-- Name: tour_pois tour_pois_poi_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.tour_pois
@@ -832,7 +855,7 @@ ALTER TABLE ONLY public.tour_pois
 
 
 --
--- Name: tour_pois tour_pois_tour_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: foodstreet_user
+-- Name: tour_pois tour_pois_tour_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.tour_pois
@@ -840,7 +863,7 @@ ALTER TABLE ONLY public.tour_pois
 
 
 --
--- Name: user_activity user_activity_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: foodstreet_user
+-- Name: user_activity user_activity_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.user_activity
@@ -848,7 +871,7 @@ ALTER TABLE ONLY public.user_activity
 
 
 --
--- Name: SCHEMA public; Type: ACL; Schema: -; Owner: foodstreet_user
+-- Name: SCHEMA public; Type: ACL; Schema: -; Owner: postgres
 --
 
 REVOKE USAGE ON SCHEMA public FROM PUBLIC;
