@@ -10,7 +10,7 @@ function getEnv(name: string): string | null {
   const value = process.env[name];
   return value?.trim() ? value.trim() : null;
 }
-
+// Gửi email OTP đặt lại mật khẩu cho người dùng
 export async function sendPasswordResetOtpEmail(input: SendOtpEmailInput): Promise<void> {
   const host = getEnv("SMTP_HOST");
   const portRaw = getEnv("SMTP_PORT");
