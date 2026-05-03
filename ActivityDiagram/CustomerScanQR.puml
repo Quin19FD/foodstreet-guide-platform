@@ -1,0 +1,63 @@
+@startuml
+title Activity Diagram - Customer scan QR code
+
+start
+
+:Customer mở trang scan QR;
+:Customer nhấn "Bật camera";
+
+if (Trình duyệt hỗ trợ camera?) then (Không)
+    :Hiển thị lỗi "Không hỗ trợ camera";
+    :Cho phép nhập manual QR payload;
+else (Có)
+    :Yêu cầu quyền camera;
+    if (Người dùng cấp quyền?) then (Không)
+        :Hiển thị lỗi "Từ chối quyền camera";
+        :Cho phép nhập manual QR payload;
+    else (Có)
+        :Khởi động camera;
+        :Bắt đầu quét QR realtime;
+        :Hiển thị preview camera;
+    endif
+endif
+
+if (Camera đang chạy?) then (Có)
+    :Theo dõi frame camera;
+    if (Phát hiện QR code?) then (Có)
+        :Lấy raw payload từ QR;
+        :Parse payload (poi:<id> hoặc URL);
+        if (Parse thành công?) then (Có)
+            :Gọi API GET /api/customer/pois/{id};
+            if (POI tồn tại và active?) then (Có)
+                :Chuyển đến trang chi tiết POI;
+                stop
+            else (Không)
+                :Hiển thị lỗi "POI không tồn tại";
+            endif
+        else (Không)
+            :Hiển thị lỗi "QR không đúng định dạng";
+        endif
+    else (Không)
+        :Tiếp tục quét;
+    endif
+endif
+
+if (Người dùng nhập manual payload?) then (Có)
+    :Lấy payload từ input;
+    :Parse payload;
+    if (Parse thành công?) then (Có)
+        :Gọi API GET /api/customer/pois/{id};
+        if (POI tồn tại và active?) then (Có)
+            :Chuyển đến trang chi tiết POI;
+            stop
+        else (Không)
+            :Hiển thị lỗi "POI không tồn tại";
+        endif
+    else (Không)
+        :Hiển thị lỗi "QR không đúng định dạng";
+    endif
+endif
+
+stop
+
+@enduml

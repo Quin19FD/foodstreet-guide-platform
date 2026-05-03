@@ -1,0 +1,45 @@
+@startuml
+title Sequence - Customer scan QR code
+
+actor Customer
+participant "Scan UI" as UI
+participant "Scanner" as Scanner
+participant API
+participant DB
+
+
+
+Customer -> UI : Mở màn hình scan
+UI -> Scanner : Bật camera
+
+loop Quét QR liên tục
+    Scanner -> Scanner : Detect QR
+    alt QR hợp lệ
+        Scanner -> UI : Trả về poiId
+        UI -> API : GET /pois/{poiId}
+
+        API -> DB : Kiểm tra POI
+        DB --> API : poi
+
+        alt POI tồn tại
+            API --> UI : 200 OK
+            UI -> Customer : Chuyển đến trang chi tiết
+        else Không tồn tại
+            API --> UI : 404 Not Found
+            UI -> Customer : Hiển thị lỗi
+        end
+    else Không hợp lệ
+        UI -> Customer : QR không đúng
+    end
+end
+
+alt Nhập thủ công
+    Customer -> UI : Nhập mã POI
+    UI -> API : GET /pois/{id}
+    API -> DB : Lấy POI
+    DB --> API : poi
+    API --> UI : 200 OK
+    UI -> Customer : Hiển thị chi tiết
+end
+
+@enduml

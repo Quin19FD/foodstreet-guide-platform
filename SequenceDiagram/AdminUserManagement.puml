@@ -1,0 +1,24 @@
+@startuml
+title Sequence - Admin quản lý User 
+actor Admin
+participant "Admin UI" as AdminUI
+participant "Admin API" as AdminAPI
+participant "Database" as DB
+
+== Xem danh sách ==
+Admin -> AdminUI : Mở quản lý user
+AdminUI -> AdminAPI : GET /users
+AdminAPI -> DB : Lấy danh sách user
+DB --> AdminAPI : users
+AdminAPI --> AdminUI : 200 OK
+AdminUI --> Admin : Hiển thị danh sách
+
+== Khóa / Mở khóa ==
+Admin -> AdminUI : Chọn user + hành động
+AdminUI -> AdminAPI : PATCH /users/{id}
+
+AdminAPI -> DB : Update isActive
+AdminAPI --> AdminUI : 200 OK
+AdminUI --> Admin : Cập nhật thành công
+
+@enduml

@@ -1,0 +1,34 @@
+@startuml
+title Sequence - Vendor đăng nhập
+
+actor Vendor
+participant "Vendor UI" as App
+participant "Vendor API" as API
+participant "Database" as DB
+
+
+Vendor -> App : Nhập email, password
+App -> API : POST /vendor/login
+
+API -> API : Validate
+alt Không hợp lệ
+    API --> App : Error
+else Hợp lệ
+    API -> DB : Tìm user theo email
+    DB --> API : user
+
+    alt Không tồn tại / sai thông tin
+        API --> App : 401 Unauthorized
+    else Hợp lệ
+        API -> API : Kiểm tra quyền & trạng thái
+        alt Không hợp lệ
+            API --> App : 403 Forbidden
+        else Thành công
+            API -> DB : Cập nhật login
+            API --> App : 200 OK (token)
+            App --> Vendor : Vào dashboard
+        end
+    end
+end
+
+@enduml

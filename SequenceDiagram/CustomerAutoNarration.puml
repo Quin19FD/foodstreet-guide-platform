@@ -1,0 +1,42 @@
+@startuml
+title Sequence - Customer đến gần POI và tự động thuyết minh
+
+actor Customer
+participant Map
+participant GPS
+participant API
+participant DB
+participant Audio
+
+
+
+loop Cập nhật vị trí liên tục
+    GPS -> Map : Gửi vị trí (lat, lng)
+    Map -> API : GET /pois?lat,lng
+
+    API -> DB : Lấy POI gần
+    DB --> API : pois[]
+    API --> Map : 200 OK
+
+    Map -> Map : Tính khoảng cách
+
+    alt Có POI gần
+        Map -> Customer : Hiển thị gợi ý
+
+        alt Nghe thuyết minh
+            Customer -> Map : Chọn nghe
+            Map -> Audio : Phát audio
+            Audio --> Customer : Nghe
+        else Xem chi tiết
+            Customer -> Map : Chọn POI
+            Map -> Customer : Mở trang chi tiết
+        else Bỏ qua
+            Customer -> Map : Bỏ qua
+        end
+
+    else Không có POI gần
+        Map -> Map : Tiếp tục theo dõi
+    end
+end
+
+@enduml

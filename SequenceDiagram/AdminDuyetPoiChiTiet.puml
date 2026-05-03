@@ -1,0 +1,46 @@
+@startuml
+title Sequence - Admin duyệt / từ chối POI 
+
+actor Admin
+participant "Admin UI" as AdminUI
+participant "API" as API
+participant "Database" as DB
+participant "Email Service" as Email
+
+== Xem danh sách POI ==
+Admin -> AdminUI : Mở quản lý POI
+AdminUI -> API : GET /pois?status=PENDING
+API -> DB : Lấy danh sách POI
+DB --> API : pois
+API --> AdminUI : 200 OK
+AdminUI --> Admin : Hiển thị danh sách
+
+== Xem chi tiết ==
+Admin -> AdminUI : Chọn POI
+AdminUI -> API : GET /pois/{id}
+API -> DB : Lấy chi tiết
+DB --> API : poi
+API --> AdminUI : 200 OK
+AdminUI --> Admin : Hiển thị chi tiết
+
+== Xử lý POI ==
+alt Duyệt
+    Admin -> AdminUI : Click "Duyệt"
+    AdminUI -> API : PATCH /approve
+    API -> DB : Update status = APPROVED
+    API -> Email : Gửi thông báo
+    API --> AdminUI : 200 OK
+    AdminUI --> Admin : Thành công
+else Từ chối
+    Admin -> AdminUI : Click "Từ chối"
+    AdminUI --> Admin : Hiển thị modal nhập lý do từ chối
+    Admin -> AdminUI : Nhập lý do từ chối
+    Admin -> AdminUI : Click "Gửi"
+    AdminUI -> API : PATCH /reject
+    API -> DB : Update status = REJECTED
+    API -> Email : Gửi thông báo
+    API --> AdminUI : 200 OK
+    AdminUI --> Admin : Thành công
+end
+
+@enduml

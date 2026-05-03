@@ -1,0 +1,35 @@
+@startuml
+title Sequence Diagram - Admin đăng nhập hệ thống
+
+actor Admin
+participant "Browser" as Browser
+participant "Login Page" as UI
+participant "API" as API
+participant "Database" as DB
+
+Admin -> Browser: Mở ứng dụng
+Browser -> UI: Load trang đăng nhập admin
+UI --> Browser: Hiển thị form (email, password, rememberMe?)
+
+Admin -> UI: Nhập email & password
+UI -> API: POST /api/admin/session/login\n{ email, password, rememberMe }
+
+API -> API: Validate input
+
+alt Input không hợp lệ
+    API --> UI: 400 Bad Request
+    UI --> Admin: Hiển thị lỗi validation
+else Hợp lệ
+    API -> DB: Kiểm tra tài khoản
+    DB --> API: Trả về user
+
+    alt Sai thông tin
+        API --> UI: 401 Unauthorized
+        UI --> Admin: Sai email hoặc password
+    else Đúng
+        API --> UI: 200 OK + token
+        UI --> Admin: Đăng nhập thành công
+    end
+end
+
+@enduml

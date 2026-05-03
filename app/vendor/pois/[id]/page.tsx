@@ -157,7 +157,7 @@ export default function VendorPoiDetailPage() {
           <button
             type="button"
             className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
-            onClick={() => router.push("/vendor")}
+            onClick={() => router.push("/vendor/pois")}
           >
             <ArrowLeft className="h-4 w-4" />
             Quay lại danh sách POI
