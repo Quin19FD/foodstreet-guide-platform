@@ -71,19 +71,43 @@ export default function AdminDashboardPage() {
     totalPageViews: 0,
     totalPOIViews: 0,
   });
+  const [onlineCount, setOnlineCount] = useState(0);
   const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const loadOnlineCount = useCallback(async () => {
+    const onlineRes = await fetch("/api/socket", {
+      method: "GET",
+      credentials: "include",
+      cache: "no-store",
+    }).catch(() => null);
+
+    const onlineData =
+      onlineRes && onlineRes.ok
+        ? ((await onlineRes.json().catch(() => null)) as { total?: number } | null)
+        : null;
+
+    setOnlineCount(typeof onlineData?.total === "number" ? onlineData.total : 0);
+  }, []);
 
   const loadDashboardData = useCallback(async () => {
     setIsLoading(true);
     setErrorMessage(null);
 
     try {
-      const res = await fetch("/api/admin/stats", {
-        method: "GET",
-        credentials: "include",
-      });
+      const [res, onlineRes] = await Promise.all([
+        fetch("/api/admin/stats", {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+        }),
+        fetch("/api/socket", {
+          method: "GET",
+          credentials: "include",
+          cache: "no-store",
+        }).catch(() => null),
+      ]);
 
       if (!res.ok) {
         throw new Error("Không thể tải dữ liệu dashboard");
@@ -91,6 +115,12 @@ export default function AdminDashboardPage() {
 
       const data = await res.json();
       const fetchedStats = data.stats ?? {};
+
+      const onlineData =
+        onlineRes && onlineRes.ok
+          ? ((await onlineRes.json().catch(() => null)) as { total?: number } | null)
+          : null;
+      setOnlineCount(typeof onlineData?.total === "number" ? onlineData.total : 0);
 
       setStats({
         totalPOIs: fetchedStats.totalPOIs ?? 0,
@@ -157,6 +187,18 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     void loadDashboardData();
   }, [loadDashboardData]);
+
+  useEffect(() => {
+    void loadOnlineCount();
+
+    const interval = window.setInterval(() => {
+      void loadOnlineCount();
+    }, 5000);
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [loadOnlineCount]);
 
   const formatNumber = (num: number): string => {
     return new Intl.NumberFormat("vi-VN").format(num);
@@ -260,7 +302,24 @@ export default function AdminDashboardPage() {
         ) : null}
 
         {/* Stats Cards */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">         
+          <div className="group relative overflow-hidden rounded-2xl border-2 border-slate-200 bg-white p-4 shadow-sm transition-all hover:border-slate-400 hover:shadow-lg hover:shadow-slate-500/20">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider group-hover:text-slate-700 transition-colors">
+                  Tổng người truy cập
+                </p>
+                <p className="mt-1 text-3xl font-bold text-slate-800 group-hover:text-slate-900 transition-colors">
+                  <strong>{onlineCount}</strong>
+                </p>
+                <p className="mt-1 text-xs text-slate-500"> người</p>
+              </div>
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 group-hover:bg-slate-200 transition-colors">
+                <Users className="h-6 w-6 text-slate-500 group-hover:text-slate-700 transition-colors" />
+              </div>
+            </div>
+          </div>
+
           <div className="group relative overflow-hidden rounded-2xl border-2 border-slate-200 bg-white p-4 shadow-sm transition-all hover:border-slate-400 hover:shadow-lg hover:shadow-slate-500/20">
             <div className="flex items-center justify-between">
               <div>

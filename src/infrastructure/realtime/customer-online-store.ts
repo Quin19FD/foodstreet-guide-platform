@@ -1,5 +1,7 @@
 type CustomerOnlineStore = {
+    // đếm user
   socketsByUserId: Map<string, Set<string>>;
+  // xử lý khi socket disconnect để xóa userId khỏi socketsByUserId
   userIdBySocketId: Map<string, string>;
 };
 
@@ -8,6 +10,7 @@ declare global {
   var __customerOnlineStore: CustomerOnlineStore | undefined;
 }
 
+// Lấy danh sách socketId của userId, nếu chưa có thì tạo mới một Set
 function createStore(): CustomerOnlineStore {
   return {
     socketsByUserId: new Map<string, Set<string>>(),
@@ -21,6 +24,7 @@ if (process.env.NODE_ENV !== "production") {
   globalThis.__customerOnlineStore = store;
 }
 
+// Đăng ký socketId cho userId, trả về tổng số user đang online
 export function registerCustomerSocket(userId: string, socketId: string): number {
   const current = store.socketsByUserId.get(userId) ?? new Set<string>();
   current.add(socketId);
@@ -29,6 +33,7 @@ export function registerCustomerSocket(userId: string, socketId: string): number
   return store.socketsByUserId.size;
 }
 
+// Hủy đăng ký socketId cho userId, trả về tổng số user đang online
 export function unregisterCustomerSocket(socketId: string): number {
   const userId = store.userIdBySocketId.get(socketId);
   if (!userId) return store.socketsByUserId.size;
