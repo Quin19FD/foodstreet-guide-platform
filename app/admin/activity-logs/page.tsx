@@ -52,7 +52,7 @@ export default async function AdminActivityLogsPage({ searchParams }: PageProps)
     },
   });
 
-  const userIds = [...new Set(logs.map((log) => log.userId).filter(Boolean))];
+  const userIds = [...new Set(logs.map((log: { userId: string }) => log.userId).filter(Boolean))];
   const users = await prisma.user.findMany({
     where: { id: { in: userIds } },
     select: { id: true, name: true, email: true },
