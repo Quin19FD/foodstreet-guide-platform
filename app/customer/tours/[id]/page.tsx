@@ -27,7 +27,7 @@ type TourDetail = {
 export default function TourDetailPage() {
   const router = useRouter();
   const params = useParams();
-  const tourId = params.id as string;
+  const tourId = (params?.id ?? "") as string;
 
   const [tour, setTour] = useState<TourDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);

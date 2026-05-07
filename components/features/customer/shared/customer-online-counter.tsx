@@ -3,6 +3,8 @@
 import { Users } from "lucide-react";
 import { useEffect, useState } from "react";
 
+// Socket.IO requires a persistent Node.js server (not compatible with Vercel serverless).
+// We fall back to HTTP polling which works everywhere.
 export function CustomerOnlineCounter() {
   const [onlineCount, setOnlineCount] = useState(0);
 
@@ -124,3 +126,4 @@ export function CustomerOnlineCounter() {
     </div>
   );
 }
+

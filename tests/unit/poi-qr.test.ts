@@ -8,8 +8,7 @@ describe("getPoiQrInfo", () => {
     expect(qr).toEqual({
       poiId: "cma9abc123xyz",
       payload: "poi:cma9abc123xyz",
-      imageUrl:
-        "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=poi%3Acma9abc123xyz",
+      imageUrl: "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=poi%3Acma9abc123xyz",
       customerPath: "/customer/pois/cma9abc123xyz",
     });
   });

@@ -14,7 +14,7 @@ function VendorRegisterForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const nextPath = useMemo(() => searchParams.get("next") ?? "/vendor/login", [searchParams]);
+  const nextPath = useMemo(() => searchParams?.get("next") ?? "/vendor/login", [searchParams]);
   const dotKeys = useMemo(() => Array.from({ length: 12 }, (_, idx) => `dot-${idx}`), []);
 
   const [name, setName] = useState("");

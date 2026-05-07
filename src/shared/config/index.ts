@@ -32,31 +32,21 @@ if (!_databaseUrl) {
   );
 }
 
-// --- Validate Cloudinary configuration ---
-// Cloudinary is required for vendor/admin file uploads
+// --- Cloudinary configuration ---
+// Optional for local development.
+// Upload-related features should validate configuration at runtime and surface a clear error.
 
-const _cloudinaryCloudName = process.env.CLOUDINARY_CLOUD_NAME?.trim();
-const _cloudinaryUploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET?.trim();
-const _cloudinaryApiKey = process.env.CLOUDINARY_API_KEY?.trim();
-const _cloudinaryApiSecret = process.env.CLOUDINARY_API_SECRET?.trim();
+const _cloudinaryCloudName = process.env.CLOUDINARY_CLOUD_NAME?.trim() ?? "";
+const _cloudinaryUploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET?.trim() ?? "";
+const _cloudinaryApiKey = process.env.CLOUDINARY_API_KEY?.trim() ?? "";
+const _cloudinaryApiSecret = process.env.CLOUDINARY_API_SECRET?.trim() ?? "";
 
-if (!_cloudinaryCloudName) {
-  throw new Error(
-    "[config] CLOUDINARY_CLOUD_NAME environment variable is required for file uploads. " +
-      "Get it from https://cloudinary.com and set it in your .env file."
-  );
-}
-
-// At least one auth method is needed: either API key+secret or upload preset
-const hasApiAuth = _cloudinaryApiKey && _cloudinaryApiSecret;
-const hasUploadPreset = _cloudinaryUploadPreset;
-
-if (!hasApiAuth && !hasUploadPreset) {
-  throw new Error(
-    "[config] Cloudinary authentication is not configured. " +
-      "Either set (CLOUDINARY_API_KEY + CLOUDINARY_API_SECRET) or CLOUDINARY_UPLOAD_PRESET in your .env file."
-  );
-}
+export const cloudinaryConfigStatus = {
+  enabled:
+    Boolean(_cloudinaryCloudName) &&
+    (Boolean(_cloudinaryUploadPreset) ||
+      (Boolean(_cloudinaryApiKey) && Boolean(_cloudinaryApiSecret))),
+} as const;
 
 // --- Configuration object ---
 

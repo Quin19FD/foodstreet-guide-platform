@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "prisma generate && next build",
+    "postinstall": "prisma generate",
     "start": "next start",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
@@ -33,7 +34,7 @@
     "lucide-react": "^0.563.0",
     "mapbox-gl": "^3.8.0",
     "maplibre-gl": "^5.21.0",
-    "next": "^15.1.4",
+    "next": "^16.2.5",
     "nodemailer": "^8.0.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

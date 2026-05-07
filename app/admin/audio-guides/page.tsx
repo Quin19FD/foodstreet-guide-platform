@@ -149,8 +149,10 @@ export default function AdminAudioGuidesPage() {
     }
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: loadAudioGuides depends on take/skip
   useEffect(() => {
     loadAudioGuides();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [take, skip]);
 
   // Get language badge color
