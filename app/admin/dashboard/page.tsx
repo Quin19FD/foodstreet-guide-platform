@@ -191,11 +191,22 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     void loadOnlineCount();
 
+    const source = new EventSource("/api/socket-stream");
+    source.addEventListener("count", (event) => {
+      const next = Number.parseInt((event as MessageEvent<string>).data, 10);
+      if (!Number.isFinite(next)) return;
+      setOnlineCount(next);
+    });
+    source.onerror = () => {
+      source.close();
+    };
+
     const interval = window.setInterval(() => {
       void loadOnlineCount();
     }, 5000);
 
     return () => {
+      source.close();
       window.clearInterval(interval);
     };
   }, [loadOnlineCount]);

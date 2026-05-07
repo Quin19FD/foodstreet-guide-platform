@@ -1,12 +1,9 @@
-import type { NextApiRequest } from "next";
-import type { NextApiResponseServerIO } from "@/types/next-socket";
-import { CUSTOMER_AUTH_COOKIES, verifyCustomerAccessToken } from "@/infrastructure/security/auth";
 import {
   getOnlineCustomerCount,
-  registerCustomerSocket,
-  unregisterCustomerSocket,
+  markCustomerOnline,
 } from "@/infrastructure/realtime/customer-online-store";
-import { Server as IOServer } from "socket.io";
+import { CUSTOMER_AUTH_COOKIES, verifyCustomerAccessToken } from "@/infrastructure/security/auth";
+import type { NextApiRequest, NextApiResponse } from "next";
 
 function parseCookies(cookieHeader?: string): Record<string, string> {
   if (!cookieHeader) return {};
@@ -19,42 +16,51 @@ function parseCookies(cookieHeader?: string): Record<string, string> {
   }, {});
 }
 
-export default function handler(_req: NextApiRequest, res: NextApiResponseServerIO) {
-  if (!res.socket.server.io) {
-    const io = new IOServer(res.socket.server, {
-      path: "/api/socket_io",
-      addTrailingSlash: false,
-    });
+function resolveCustomerUserId(req: NextApiRequest): string | null {
+  const cookies = parseCookies(req.headers.cookie);
+  const accessToken = cookies[CUSTOMER_AUTH_COOKIES.access];
+  if (!accessToken) return null;
 
-    io.on("connection", (socket) => {
-      const cookies = parseCookies(socket.handshake.headers.cookie);
-      const accessToken = cookies[CUSTOMER_AUTH_COOKIES.access];
+  try {
+    const payload = verifyCustomerAccessToken(accessToken);
+    return payload.sub;
+  } catch {
+    return null;
+  }
+}
 
-      if (!accessToken) {
-        socket.disconnect();
-        return;
-      }
-
-      try {
-        const payload = verifyCustomerAccessToken(accessToken);
-        const total = registerCustomerSocket(payload.sub, socket.id);
-        io.emit("customer_online_count", total);
-
-        socket.on("customer_online_count_request", () => {
-          socket.emit("customer_online_count", getOnlineCustomerCount());
-        });
-
-        socket.on("disconnect", () => {
-          const nextTotal = unregisterCustomerSocket(socket.id);
-          io.emit("customer_online_count", nextTotal);
-        });
-      } catch {
-        socket.disconnect();
-      }
-    });
-
-    res.socket.server.io = io;
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method === "GET") {
+    const total = await getOnlineCustomerCount();
+    res.status(200).json({ ok: true, total });
+    return;
   }
 
-  res.status(200).json({ ok: true, total: getOnlineCustomerCount() });
+  if (req.method === "POST") {
+    const userId = resolveCustomerUserId(req);
+    if (!userId) {
+      res.status(401).json({ ok: false, error: "Unauthorized" });
+      return;
+    }
+
+    const rawPresenceId = req.headers["x-presence-id"];
+    const presenceId =
+      typeof rawPresenceId === "string"
+        ? rawPresenceId.trim()
+        : Array.isArray(rawPresenceId)
+          ? rawPresenceId[0]?.trim()
+          : "";
+
+    if (!presenceId) {
+      res.status(400).json({ ok: false, error: "Missing presence id" });
+      return;
+    }
+
+    const total = await markCustomerOnline(userId, presenceId);
+    res.status(200).json({ ok: true, total });
+    return;
+  }
+
+  res.setHeader("Allow", "GET, POST");
+  res.status(405).json({ ok: false, error: "Method not allowed" });
 }
