@@ -436,8 +436,8 @@ function CustomerMapContent() {
   const [routeInfo, setRouteInfo] = useState<RouteInfo | null>(null);
   const [isRouting, setIsRouting] = useState(false);
 
-  const focusPoiId = searchParams.get("focusPoi");
-  const routeToPoiId = searchParams.get("routeTo");
+  const focusPoiId = searchParams?.get("focusPoi");
+  const routeToPoiId = searchParams?.get("routeTo");
 
   const selectedPoi = useMemo(
     () => pois.find((poi) => poi.id === selectedPoiId) ?? null,

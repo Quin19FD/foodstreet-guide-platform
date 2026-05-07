@@ -2,56 +2,33 @@
 
 import { Users } from "lucide-react";
 import { useEffect, useState } from "react";
-import { io, type Socket } from "socket.io-client";
 
-let clientSocket: Socket | null = null;
-
+// Socket.IO requires a persistent Node.js server (not compatible with Vercel serverless).
+// We fall back to HTTP polling which works everywhere.
 export function CustomerOnlineCounter() {
   const [onlineCount, setOnlineCount] = useState(0);
 
   useEffect(() => {
     let mounted = true;
 
-    const setupSocket = async () => {
-      const boot = await fetch("/api/socket", { method: "GET" }).catch(() => null);
-      const bootData = (await boot?.json().catch(() => null)) as { total?: number } | null;
-      if (typeof bootData?.total === "number" && mounted) {
-        setOnlineCount(bootData.total);
+    const fetchCount = async () => {
+      try {
+        const res = await fetch("/api/socket", { method: "GET" });
+        const data = (await res.json()) as { total?: number };
+        if (typeof data?.total === "number" && mounted) {
+          setOnlineCount(data.total);
+        }
+      } catch {
+        // silently ignore — counter is non-critical
       }
-
-      if (!clientSocket) {
-        clientSocket = io({
-          path: "/api/socket_io",
-          transports: ["websocket", "polling"],
-          autoConnect: false,
-        });
-      }
-
-      const onCount = (count: number) => {
-        if (mounted) setOnlineCount(count);
-      };
-
-      const onConnect = () => {
-        clientSocket?.emit("customer_online_count_request");
-      };
-
-      clientSocket.on("customer_online_count", onCount);
-      clientSocket.on("connect", onConnect);
-      clientSocket.connect();
-
-      return () => {
-        clientSocket?.off("customer_online_count", onCount);
-        clientSocket?.off("connect", onConnect);
-      };
     };
 
-    const cleanupPromise = setupSocket();
+    fetchCount();
+    const interval = setInterval(fetchCount, 30_000); // poll every 30s
 
     return () => {
       mounted = false;
-      void cleanupPromise.then((cleanup) => cleanup?.());
-      clientSocket?.disconnect();
-      clientSocket = null;
+      clearInterval(interval);
     };
   }, []);
 
@@ -66,3 +43,4 @@ export function CustomerOnlineCounter() {
     </div>
   );
 }
+

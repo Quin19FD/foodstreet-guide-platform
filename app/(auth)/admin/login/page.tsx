@@ -15,7 +15,7 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const nextPath = useMemo(() => searchParams.get("next") ?? "/admin/dashboard", [searchParams]);
+  const nextPath = useMemo(() => searchParams?.get("next") ?? "/admin/dashboard", [searchParams]);
   const dotKeys = useMemo(() => Array.from({ length: 12 }, (_, idx) => `dot-${idx}`), []);
 
   const [email, setEmail] = useState("");

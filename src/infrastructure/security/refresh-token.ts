@@ -8,11 +8,7 @@ import { createHash, randomBytes } from "node:crypto";
 import type { PrismaClient } from "@prisma/client";
 
 function base64UrlEncode(buffer: Buffer): string {
-  return buffer
-    .toString("base64")
-    .replaceAll("+", "-")
-    .replaceAll("/", "_")
-    .replaceAll("=", "");
+  return buffer.toString("base64").replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
 }
 
 /**

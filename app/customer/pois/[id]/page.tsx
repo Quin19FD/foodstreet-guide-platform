@@ -96,7 +96,7 @@ function formatPrice(value?: number | null): string {
 export default function POIDetailPage() {
   const router = useRouter();
   const params = useParams();
-  const poiId = params.id as string;
+  const poiId = (params?.id ?? "") as string;
 
   const [poi, setPoi] = useState<PoiDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -231,7 +231,8 @@ export default function POIDetailPage() {
     }
 
     const vi = poi.translations.find((item) => normalizeLanguageCode(item.language) === "vi");
-    const viText = vi?.audioScript?.trim() || vi?.description?.trim() || poi.description?.trim() || "";
+    const viText =
+      vi?.audioScript?.trim() || vi?.description?.trim() || poi.description?.trim() || "";
     if (!viText) return null;
 
     if (targetLanguage === "vi") {
@@ -493,7 +494,9 @@ export default function POIDetailPage() {
                         {formatPrice(item.price)}
                       </span>
                     </div>
-                    <p className="mt-1 text-sm text-slate-500">{item.description ?? "Không mô tả"}</p>
+                    <p className="mt-1 text-sm text-slate-500">
+                      {item.description ?? "Không mô tả"}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -569,9 +572,13 @@ export default function POIDetailPage() {
             <track kind="captions" />
           </audio>
 
-          <p className="mt-3 text-xs text-slate-500">{isSpeaking ? "Đang phát..." : "Sẵn sàng phát"}</p>
+          <p className="mt-3 text-xs text-slate-500">
+            {isSpeaking ? "Đang phát..." : "Sẵn sàng phát"}
+          </p>
           {audioSourceLabel ? (
-            <p className="mt-1 text-xs font-semibold text-orange-600">Nguồn phát: {audioSourceLabel}</p>
+            <p className="mt-1 text-xs font-semibold text-orange-600">
+              Nguồn phát: {audioSourceLabel}
+            </p>
           ) : null}
           <p className="mt-2 text-sm text-slate-600">
             {audioText ??
@@ -598,7 +605,10 @@ export default function POIDetailPage() {
                   </p>
                   <div className="space-y-2">
                     {translationItem.audios.map((audio) => (
-                      <div key={audio.id} className="rounded-lg border border-slate-100 bg-slate-50 p-2">
+                      <div
+                        key={audio.id}
+                        className="rounded-lg border border-slate-100 bg-slate-50 p-2"
+                      >
                         <audio controls preload="none" className="w-full">
                           <track kind="captions" />
                           <source src={audio.audioUrl} />

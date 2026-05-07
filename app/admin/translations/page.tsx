@@ -156,8 +156,10 @@ export default function AdminTranslationsPage() {
     }
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: loadTranslations depends on take/skip
   useEffect(() => {
     loadTranslations();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [take, skip]);
 
   // Get language badge color

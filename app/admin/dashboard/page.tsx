@@ -83,10 +83,9 @@ export default function AdminDashboardPage() {
       cache: "no-store",
     }).catch(() => null);
 
-    const onlineData =
-      onlineRes && onlineRes.ok
-        ? ((await onlineRes.json().catch(() => null)) as { total?: number } | null)
-        : null;
+    const onlineData = onlineRes?.ok
+      ? ((await onlineRes.json().catch(() => null)) as { total?: number } | null)
+      : null;
 
     setOnlineCount(typeof onlineData?.total === "number" ? onlineData.total : 0);
   }, []);
@@ -116,10 +115,9 @@ export default function AdminDashboardPage() {
       const data = await res.json();
       const fetchedStats = data.stats ?? {};
 
-      const onlineData =
-        onlineRes && onlineRes.ok
-          ? ((await onlineRes.json().catch(() => null)) as { total?: number } | null)
-          : null;
+      const onlineData = onlineRes?.ok
+        ? ((await onlineRes.json().catch(() => null)) as { total?: number } | null)
+        : null;
       setOnlineCount(typeof onlineData?.total === "number" ? onlineData.total : 0);
 
       setStats({
@@ -302,7 +300,7 @@ export default function AdminDashboardPage() {
         ) : null}
 
         {/* Stats Cards */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">         
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           <div className="group relative overflow-hidden rounded-2xl border-2 border-slate-200 bg-white p-4 shadow-sm transition-all hover:border-slate-400 hover:shadow-lg hover:shadow-slate-500/20">
             <div className="flex items-center justify-between">
               <div>

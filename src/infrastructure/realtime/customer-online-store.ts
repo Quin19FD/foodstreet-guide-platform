@@ -1,5 +1,5 @@
 type CustomerOnlineStore = {
-    // đếm user
+  // đếm user
   socketsByUserId: Map<string, Set<string>>;
   // xử lý khi socket disconnect để xóa userId khỏi socketsByUserId
   userIdBySocketId: Map<string, string>;

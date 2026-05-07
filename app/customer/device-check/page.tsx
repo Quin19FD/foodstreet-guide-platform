@@ -1,10 +1,10 @@
 "use client";
 
+import { useLiteMode } from "@/lib/hooks/use-lite-mode";
 import { Cpu, Gauge, Languages, MapPin, Mic, Volume2 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useLiteMode } from "@/lib/hooks/use-lite-mode";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 
 type CheckStatus = "ok" | "warn" | "fail";
 
@@ -34,9 +34,9 @@ function getOverallStatus(items: CheckItem[]): CheckStatus {
   return "ok";
 }
 
-export default function CustomerDeviceCheckPage() {
+function DeviceCheckContent() {
   const searchParams = useSearchParams();
-  const nextPath = searchParams.get("next") || "/customer/map";
+  const nextPath = searchParams?.get("next") || "/customer/map";
 
   const [checks, setChecks] = useState<CheckItem[]>([]);
   const { liteMode, setLiteMode } = useLiteMode();
@@ -271,5 +271,13 @@ export default function CustomerDeviceCheckPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function CustomerDeviceCheckPage() {
+  return (
+    <Suspense>
+      <DeviceCheckContent />
+    </Suspense>
   );
 }

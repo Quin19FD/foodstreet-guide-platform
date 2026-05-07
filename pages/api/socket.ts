@@ -1,11 +1,11 @@
-import type { NextApiRequest } from "next";
-import type { NextApiResponseServerIO } from "@/types/next-socket";
-import { CUSTOMER_AUTH_COOKIES, verifyCustomerAccessToken } from "@/infrastructure/security/auth";
 import {
   getOnlineCustomerCount,
   registerCustomerSocket,
   unregisterCustomerSocket,
 } from "@/infrastructure/realtime/customer-online-store";
+import { CUSTOMER_AUTH_COOKIES, verifyCustomerAccessToken } from "@/infrastructure/security/auth";
+import type { NextApiResponseServerIO } from "@/types/next-socket";
+import type { NextApiRequest } from "next";
 import { Server as IOServer } from "socket.io";
 
 function parseCookies(cookieHeader?: string): Record<string, string> {

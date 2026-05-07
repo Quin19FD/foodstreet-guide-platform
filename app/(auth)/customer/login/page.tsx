@@ -15,7 +15,7 @@ function CustomerLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const nextPath = useMemo(() => searchParams.get("next") ?? "/customer/map", [searchParams]);
+  const nextPath = useMemo(() => searchParams?.get("next") ?? "/customer/map", [searchParams]);
   const deviceCheckRedirect = useMemo(
     () => `/customer/device-check?next=${encodeURIComponent(nextPath)}`,
     [nextPath]
