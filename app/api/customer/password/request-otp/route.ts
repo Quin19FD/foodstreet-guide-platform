@@ -49,7 +49,12 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  await sendPasswordResetOtpEmail({ to: user.email, otp, ttlSeconds: OTP_TTL_MS / 1000 });
+  try {
+    await sendPasswordResetOtpEmail({ to: user.email, otp, ttlSeconds: OTP_TTL_MS / 1000 });
+  } catch (error) {
+    console.error("[CUSTOMER_PASSWORD_REQUEST_OTP] send mail failed", error);
+    return jsonError(500, "Không thể gửi OTP qua email lúc này. Vui lòng thử lại sau.");
+  }
 
   await logUserActivity({
     userId: user.id,

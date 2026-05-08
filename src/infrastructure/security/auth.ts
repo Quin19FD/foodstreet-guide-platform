@@ -56,7 +56,7 @@ export function createAccessToken(
   role: UserRole,
   input: { userId: string; email: string }
 ): string {
-  const expiresInSeconds = parseDurationToSeconds(config.auth.jwtExpiresIn);
+  const expiresInSeconds = config.auth.jwtExpiresInSeconds;
   return signJwtHs256({
     payload: {
       sub: input.userId,
@@ -91,8 +91,8 @@ export function setAuthCookies(
   const cookies = AUTH_COOKIES[role];
   const isProduction = process.env.NODE_ENV === "production";
 
-  const accessMaxAge = parseDurationToSeconds(config.auth.jwtExpiresIn);
-  const refreshMaxAge = parseDurationToSeconds(config.auth.refreshTokenExpiresIn);
+  const accessMaxAge = config.auth.jwtExpiresInSeconds;
+  const refreshMaxAge = config.auth.refreshTokenExpiresInSeconds;
 
   response.cookies.set(cookies.access, input.accessToken, {
     httpOnly: true,

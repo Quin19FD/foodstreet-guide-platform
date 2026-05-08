@@ -19,7 +19,13 @@ export async function sendPasswordResetOtpEmail(input: SendOtpEmailInput): Promi
   const passRaw = getEnv("SMTP_PASS");
   const pass =
     host === "smtp.gmail.com" && passRaw?.includes(" ") ? passRaw.replaceAll(" ", "") : passRaw;
-  const from = fromEnv ?? user ?? "no-reply@foodstreet.local";
+  const from = fromEnv
+    ? fromEnv.includes("@")
+      ? fromEnv
+      : user
+        ? `${fromEnv} <${user}>`
+        : fromEnv
+    : user ?? "no-reply@foodstreet.local";
 
   const subject = "Mã OTP đặt lại mật khẩu (hiệu lực 2 phút)";
   const text = `Mã OTP của bạn là: ${input.otp}
@@ -28,6 +34,9 @@ Hiệu lực: ${Math.ceil(input.ttlSeconds / 60)} phút.
 Nếu bạn không yêu cầu đặt lại mật khẩu, hãy bỏ qua email này.`;
 
   if (!host || !portRaw || !user || !pass) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("SMTP chưa cấu hình đầy đủ cho tính năng gửi OTP");
+    }
     console.log(`[DEV][OTP] to=${input.to} otp=${input.otp}`);
     console.warn("[DEV][OTP] SMTP chưa cấu hình đầy đủ → không gửi mail thật");
     return;

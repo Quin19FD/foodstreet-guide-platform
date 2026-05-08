@@ -115,14 +115,14 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     let isMounted = true;
 
     (async () => {
-      const me = await fetch("/api/admin/session/me").catch(() => null);
+      const me = await fetch("/api/admin/session/me", { credentials: "include" }).catch(() => null);
       if (me?.ok) {
         const data = (await me.json().catch(() => null)) as AdminMeResponse | null;
         if (isMounted && data?.user) setAdmin(data.user);
         return;
       }
 
-      const refreshed = await fetch("/api/admin/session/refresh", { method: "POST" }).catch(
+      const refreshed = await fetch("/api/admin/session/refresh", { method: "POST", credentials: "include" }).catch(
         () => null
       );
       if (!refreshed?.ok) {
@@ -130,7 +130,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      const meAfter = await fetch("/api/admin/session/me").catch(() => null);
+      const meAfter = await fetch("/api/admin/session/me", { credentials: "include" }).catch(() => null);
       if (!meAfter?.ok) {
         router.replace("/admin/login");
         return;
@@ -162,7 +162,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   }, []);
 
   const handleLogout = async () => {
-    await fetch("/api/admin/session/logout", { method: "POST" }).catch(() => null);
+    await fetch("/api/admin/session/logout", { method: "POST", credentials: "include" }).catch(() => null);
     router.replace("/admin/login");
   };
 

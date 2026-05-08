@@ -56,7 +56,13 @@ async function sendMailOrDevLog(input: {
   text: string;
 }): Promise<void> {
   const { host, portRaw, fromEnv, user, pass } = getSmtpConfig();
-  const from = fromEnv ?? user ?? "no-reply@foodstreet.local";
+  const from = fromEnv
+    ? fromEnv.includes("@")
+      ? fromEnv
+      : user
+        ? `${fromEnv} <${user}>`
+        : fromEnv
+    : user ?? "no-reply@foodstreet.local";
 
   if (!host || !portRaw || !user || !pass) {
     console.log(`[DEV][VENDOR_MAIL] to=${input.to} subject=${input.subject}`);

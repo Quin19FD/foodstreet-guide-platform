@@ -53,13 +53,13 @@ function CustomerLoginForm() {
       setErrorMessage(null);
 
       try {
-        const me = await fetch("/api/customer/auth/me", { method: "GET" });
+        const me = await fetch("/api/customer/auth/me", { method: "GET", credentials: "include" });
         if (me.ok) {
           router.replace(nextPath);
           return;
         }
 
-        const refreshed = await fetch("/api/customer/auth/refresh", { method: "POST" });
+        const refreshed = await fetch("/api/customer/auth/refresh", { method: "POST", credentials: "include" });
         if (refreshed.ok) {
           router.replace(nextPath);
         }
@@ -89,6 +89,7 @@ function CustomerLoginForm() {
     try {
       const res = await fetch("/api/customer/auth/login", {
         method: "POST",
+        credentials: "include",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ email: emailTrimmed, password, rememberMe }),
       });

@@ -51,13 +51,13 @@ function LoginForm() {
       setErrorMessage(null);
 
       try {
-        const me = await fetch("/api/admin/session/me", { method: "GET" });
+        const me = await fetch("/api/admin/session/me", { method: "GET", credentials: "include" });
         if (me.ok) {
           router.replace(nextPath);
           return;
         }
 
-        const refreshed = await fetch("/api/admin/session/refresh", { method: "POST" });
+        const refreshed = await fetch("/api/admin/session/refresh", { method: "POST", credentials: "include" });
         if (refreshed.ok) {
           router.replace(nextPath);
         }
@@ -87,6 +87,7 @@ function LoginForm() {
     try {
       const res = await fetch("/api/admin/session/login", {
         method: "POST",
+        credentials: "include",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ email: emailTrimmed, password, rememberMe }),
       });

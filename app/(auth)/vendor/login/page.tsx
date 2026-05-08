@@ -49,13 +49,13 @@ function VendorLoginForm() {
       setErrorMessage(null);
 
       try {
-        const me = await fetch("/api/vendor/auth/me", { method: "GET" });
+        const me = await fetch("/api/vendor/auth/me", { method: "GET", credentials: "include" });
         if (me.ok) {
           router.replace(nextPath);
           return;
         }
 
-        const refreshed = await fetch("/api/vendor/auth/refresh", { method: "POST" });
+        const refreshed = await fetch("/api/vendor/auth/refresh", { method: "POST", credentials: "include" });
         if (refreshed.ok) {
           router.replace(nextPath);
         }
@@ -85,6 +85,7 @@ function VendorLoginForm() {
     try {
       const res = await fetch("/api/vendor/auth/login", {
         method: "POST",
+        credentials: "include",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ email: emailTrimmed, password, rememberMe }),
       });

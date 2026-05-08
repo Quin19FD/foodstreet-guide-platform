@@ -61,14 +61,14 @@ export function VendorLayout({ children }: { children: React.ReactNode }) {
     let isMounted = true;
 
     (async () => {
-      const me = await fetch("/api/vendor/auth/me").catch(() => null);
+      const me = await fetch("/api/vendor/auth/me", { credentials: "include" }).catch(() => null);
       if (me?.ok) {
         const data = (await me.json().catch(() => null)) as VendorMeResponse | null;
         if (isMounted && data?.user) setVendor(data.user);
         return;
       }
 
-      const refreshed = await fetch("/api/vendor/auth/refresh", { method: "POST" }).catch(
+      const refreshed = await fetch("/api/vendor/auth/refresh", { method: "POST", credentials: "include" }).catch(
         () => null
       );
       if (!refreshed?.ok) {
@@ -76,7 +76,7 @@ export function VendorLayout({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      const meAfter = await fetch("/api/vendor/auth/me").catch(() => null);
+      const meAfter = await fetch("/api/vendor/auth/me", { credentials: "include" }).catch(() => null);
       if (!meAfter?.ok) {
         router.replace("/vendor/login");
         return;
@@ -92,7 +92,7 @@ export function VendorLayout({ children }: { children: React.ReactNode }) {
   }, [router]);
 
   const handleLogout = async () => {
-    await fetch("/api/vendor/auth/logout", { method: "POST" }).catch(() => null);
+    await fetch("/api/vendor/auth/logout", { method: "POST", credentials: "include" }).catch(() => null);
     router.replace("/vendor/login");
   };
 

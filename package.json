@@ -2,6 +2,7 @@
   "name": "foodstreet-guide-platform",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "pnpm@10.28.2",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "prisma generate && next build",
@@ -63,6 +64,6 @@
   },
   "engines": {
     "node": ">=22.0.0",
-    "pnpm": ">=9.0.0"
+    "pnpm": ">=10.0.0"
   }
 }
