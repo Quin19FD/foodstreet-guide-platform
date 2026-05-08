@@ -26,19 +26,27 @@ type SendPoiRejectedEmailInput = {
   reason: string;
 };
 
+type SmtpConfig = {
+  host: string;
+  port: number;
+  secure: boolean;
+  user: string;
+  pass: string;
+  from: string;
+};
+
+declare global {
+  // eslint-disable-next-line no-var
+  var __vendorMailerTransporter: nodemailer.Transporter | undefined;
+}
+
 function getEnv(name: string): string | null {
   const value = process.env[name];
   const trimmed = value?.trim();
   return trimmed ? trimmed : null;
 }
 
-function getSmtpConfig(): {
-  host: string | null;
-  portRaw: string | null;
-  fromEnv: string | null;
-  user: string | null;
-  pass: string | null;
-} {
+function resolveSmtpConfig(): { ok: true; config: SmtpConfig } | { ok: false; missing: string[] } {
   const host = getEnv("SMTP_HOST");
   const portRaw = getEnv("SMTP_PORT");
   const fromEnv = getEnv("SMTP_FROM");
@@ -47,7 +55,56 @@ function getSmtpConfig(): {
   const pass =
     host === "smtp.gmail.com" && passRaw?.includes(" ") ? passRaw.replaceAll(" ", "") : passRaw;
 
-  return { host, portRaw, fromEnv, user, pass: pass ?? null };
+  const missing = [
+    !host ? "SMTP_HOST" : null,
+    !portRaw ? "SMTP_PORT" : null,
+    !user ? "SMTP_USER/SMTP_FROM" : null,
+    !pass ? "SMTP_PASS" : null,
+  ].filter((value): value is string => Boolean(value));
+
+  if (missing.length > 0) {
+    return { ok: false, missing };
+  }
+
+  const port = Number(portRaw);
+  const secure = port === 465;
+  const resolvedUser = user as string;
+  const from = fromEnv
+    ? fromEnv.includes("@")
+      ? fromEnv
+      : `${fromEnv} <${resolvedUser}>`
+    : resolvedUser;
+
+  return {
+    ok: true,
+    config: {
+      host: host as string,
+      port,
+      secure,
+      user: resolvedUser,
+      pass: pass as string,
+      from,
+    },
+  };
+}
+
+function getTransporter(config: SmtpConfig): nodemailer.Transporter {
+  if (globalThis.__vendorMailerTransporter) {
+    return globalThis.__vendorMailerTransporter;
+  }
+
+  const transporter = nodemailer.createTransport({
+    host: config.host,
+    port: config.port,
+    secure: config.secure,
+    auth: { user: config.user, pass: config.pass },
+    connectionTimeout: 10_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 15_000,
+  });
+
+  globalThis.__vendorMailerTransporter = transporter;
+  return transporter;
 }
 
 async function sendMailOrDevLog(input: {
@@ -55,34 +112,38 @@ async function sendMailOrDevLog(input: {
   subject: string;
   text: string;
 }): Promise<void> {
-  const { host, portRaw, fromEnv, user, pass } = getSmtpConfig();
-  const from = fromEnv
-    ? fromEnv.includes("@")
-      ? fromEnv
-      : user
-        ? `${fromEnv} <${user}>`
-        : fromEnv
-    : user ?? "no-reply@foodstreet.local";
+  const smtp = resolveSmtpConfig();
 
-  if (!host || !portRaw || !user || !pass) {
+  if (!smtp.ok) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        `SMTP chưa cấu hình đầy đủ cho mail vendor: ${smtp.missing.join(", ")}`
+      );
+    }
+
     console.log(`[DEV][VENDOR_MAIL] to=${input.to} subject=${input.subject}`);
     console.log(input.text);
-    console.warn("[DEV][VENDOR_MAIL] SMTP chưa cấu hình đầy đủ -> không gửi mail thật");
+    console.warn(
+      `[DEV][VENDOR_MAIL] SMTP chưa cấu hình đầy đủ (${smtp.missing.join(", ")}) -> không gửi mail thật`
+    );
     return;
   }
 
-  const port = Number(portRaw);
-  const secure = port === 465;
+  const transporter = getTransporter(smtp.config);
 
-  const transport = nodemailer.createTransport({
-    host,
-    port,
-    secure,
-    auth: { user, pass },
-  });
-
-  await transport.verify();
-  await transport.sendMail({ from, to: input.to, subject: input.subject, text: input.text });
+  try {
+    await transporter.sendMail({
+      from: smtp.config.from,
+      to: input.to,
+      subject: input.subject,
+      text: input.text,
+    });
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    throw new Error(
+      `Gửi mail vendor qua SMTP thất bại (${smtp.config.host}:${smtp.config.port}, secure=${smtp.config.secure ? "yes" : "no"}): ${reason}`
+    );
+  }
 }
 
 export async function sendVendorApprovedEmail(input: SendVendorApprovedEmailInput): Promise<void> {

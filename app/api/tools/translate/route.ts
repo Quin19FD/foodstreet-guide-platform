@@ -3,6 +3,9 @@ import type { NextRequest } from "next/server";
 
 export const runtime = "nodejs";
 
+const MAX_CHUNK_CHARS = 700;
+const MAX_DIRECT_PROVIDER_CHARS = 1200;
+
 type TranslateBody = {
   q?: string;
   source?: string;
@@ -35,7 +38,6 @@ async function fetchWithTimeout(url: string, init: RequestInit, timeoutMs = 1500
 function normalizeLanguageCode(code: string): string {
   const normalized = code.trim().toLowerCase();
 
-  // ISO 639-2/3 to ISO 639-1 mapping
   const iso639Map: Record<string, string> = {
     vie: "vi",
     eng: "en",
@@ -75,22 +77,116 @@ function normalizeLanguageCode(code: string): string {
     ron: "ro",
   };
 
-  // If it's a 3-letter code, map it
   if (normalized.length === 3 && iso639Map[normalized]) {
     return iso639Map[normalized];
   }
 
-  // Handle locale codes like zh-CN, en-US, pt-BR
   const baseCode = normalized.split("-")[0];
 
-  // Special handling for Chinese variants
   if (baseCode === "zh" || baseCode === "chinese") {
     if (normalized === "zh-tw" || normalized === "zh-hant") return "zh-TW";
     return "zh";
   }
 
-  // Return the base 2-letter code
   return baseCode.length === 2 ? baseCode : normalized.slice(0, 2);
+}
+
+function splitLongSentence(sentence: string, maxChars: number): string[] {
+  const parts: string[] = [];
+  let remaining = sentence.trim();
+
+  while (remaining.length > maxChars) {
+    let splitAt = remaining.lastIndexOf(" ", maxChars);
+    if (splitAt < Math.floor(maxChars * 0.5)) {
+      splitAt = maxChars;
+    }
+    parts.push(remaining.slice(0, splitAt).trim());
+    remaining = remaining.slice(splitAt).trim();
+  }
+
+  if (remaining) parts.push(remaining);
+  return parts;
+}
+
+function splitTextIntoChunks(text: string, maxChars: number): string[] {
+  const paragraphs = text
+    .split(/\n{2,}/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  const chunks: string[] = [];
+  let current = "";
+
+  const pushPiece = (piece: string) => {
+    const trimmed = piece.trim();
+    if (!trimmed) return;
+
+    if (!current) {
+      current = trimmed;
+      return;
+    }
+
+    const candidate = `${current}\n\n${trimmed}`;
+    if (candidate.length <= maxChars) {
+      current = candidate;
+      return;
+    }
+
+    chunks.push(current);
+    current = trimmed;
+  };
+
+  const pushSentence = (sentence: string) => {
+    const trimmed = sentence.trim();
+    if (!trimmed) return;
+
+    if (trimmed.length > maxChars) {
+      for (const part of splitLongSentence(trimmed, maxChars)) {
+        pushPiece(part);
+      }
+      return;
+    }
+
+    if (!current) {
+      current = trimmed;
+      return;
+    }
+
+    const candidate = `${current} ${trimmed}`;
+    if (candidate.length <= maxChars) {
+      current = candidate;
+      return;
+    }
+
+    chunks.push(current);
+    current = trimmed;
+  };
+
+  for (const paragraph of paragraphs.length > 0 ? paragraphs : [text.trim()]) {
+    if (paragraph.length <= maxChars) {
+      pushPiece(paragraph);
+      continue;
+    }
+
+    const sentences = paragraph
+      .split(/(?<=[.!?。！？])\s+/)
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+    if (sentences.length <= 1) {
+      for (const part of splitLongSentence(paragraph, maxChars)) {
+        pushPiece(part);
+      }
+      continue;
+    }
+
+    for (const sentence of sentences) {
+      pushSentence(sentence);
+    }
+  }
+
+  if (current) chunks.push(current);
+  return chunks.filter(Boolean);
 }
 
 async function tryMyMemory(
@@ -99,7 +195,6 @@ async function tryMyMemory(
   target: string
 ): Promise<TranslateResult | null> {
   try {
-    // Normalize language codes
     const normalizedSource = normalizeLanguageCode(source);
     const normalizedTarget = normalizeLanguageCode(target);
 
@@ -116,7 +211,6 @@ async function tryMyMemory(
       matches?: Array<{ translation: string }>;
     } | null;
 
-    // Check for quota exceeded or errors
     const status = data?.responseStatus;
     if (status === 403 || status === "403") {
       return null;
@@ -124,14 +218,12 @@ async function tryMyMemory(
 
     let translatedText = data?.responseData?.translatedText?.trim();
 
-    // If main response is empty or looks like an error, try matches
     if (!translatedText || translatedText.includes("MYMEMORY WARNING")) {
       if (data?.matches && data.matches.length > 0) {
         translatedText = data.matches[0].translation.trim();
       }
     }
 
-    // Filter out obvious bad translations
     if (
       !translatedText ||
       translatedText.includes("MYMEMORY WARNING") ||
@@ -154,7 +246,6 @@ async function tryLibreTranslate(
 ): Promise<TranslateResult | null> {
   const configured = process.env.LIBRETRANSLATE_BASE_URL?.trim() ?? "";
 
-  // Updated endpoints - more reliable ones
   const defaultEndpoints = [
     "https://libretranslate.com",
     "https://translate.argosopentech.com",
@@ -170,8 +261,6 @@ async function tryLibreTranslate(
     : defaultEndpoints;
 
   const apiKey = process.env.LIBRETRANSLATE_API_KEY?.trim() ?? "";
-
-  // Normalize language codes for LibreTranslate
   const normalizedSource = normalizeLanguageCode(source);
   const normalizedTarget = normalizeLanguageCode(target);
 
@@ -190,7 +279,7 @@ async function tryLibreTranslate(
             ...(apiKey ? { api_key: apiKey } : {}),
           }),
         },
-        3000 // 3 second timeout per endpoint to avoid blocking route
+        5000
       );
 
       if (!res.ok) continue;
@@ -216,11 +305,9 @@ async function tryLingvaTranslate(
     let normalizedSource = normalizeLanguageCode(source);
     let normalizedTarget = normalizeLanguageCode(target);
 
-    // Lingva ML uses specific codes for Chinese variants
     if (normalizedSource === "zh-TW") normalizedSource = "zh_HANT";
     if (normalizedTarget === "zh-TW") normalizedTarget = "zh_HANT";
 
-    // Lingva ML is a free, open-source alternative
     const url = `https://lingva.ml/api/v1/${encodeURIComponent(normalizedSource)}/${encodeURIComponent(normalizedTarget)}/${encodeURIComponent(q)}`;
 
     const res = await fetchWithTimeout(url, { method: "GET" }, 15000);
@@ -236,11 +323,39 @@ async function tryLingvaTranslate(
   }
 }
 
-/**
- * Google Gemini Translation Provider
- * Uses Google AI Studio (Gemini) for translation
- * Free tier available - check limits in AI Studio
- */
+async function tryGoogleTranslateWeb(
+  q: string,
+  source: string,
+  target: string
+): Promise<TranslateResult | null> {
+  try {
+    const normalizedSource = normalizeLanguageCode(source);
+    const normalizedTarget = normalizeLanguageCode(target);
+
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${encodeURIComponent(normalizedSource)}&tl=${encodeURIComponent(normalizedTarget)}&dt=t&q=${encodeURIComponent(q)}`;
+
+    const res = await fetchWithTimeout(url, { method: "GET" }, 10000);
+    if (!res.ok) return null;
+
+    const data = (await res.json().catch(() => null)) as
+      | [Array<[string, string?, unknown?, unknown?]>, ...unknown[]]
+      | null;
+
+    const parts = data?.[0];
+    if (!Array.isArray(parts) || parts.length === 0) return null;
+
+    const translatedText = parts
+      .map((item) => (Array.isArray(item) ? String(item[0] ?? "") : ""))
+      .join("")
+      .trim();
+
+    if (!translatedText || translatedText === q) return null;
+    return { translatedText, provider: "google-web" };
+  } catch {
+    return null;
+  }
+}
+
 async function tryGeminiTranslate(
   q: string,
   source: string,
@@ -249,14 +364,13 @@ async function tryGeminiTranslate(
   const apiKey = process.env.GOOGLE_API_KEY?.trim();
 
   if (!apiKey) {
-    return null; // Skip if no API key configured
+    return null;
   }
 
   try {
     const normalizedSource = normalizeLanguageCode(source);
     const normalizedTarget = normalizeLanguageCode(target);
 
-    // Language name mapping for better prompts
     const languageNames: Record<string, string> = {
       vi: "Vietnamese",
       en: "English",
@@ -273,16 +387,14 @@ async function tryGeminiTranslate(
       th: "Thai",
       id: "Indonesian",
       ms: "Malay",
+      hi: "Hindi",
+      it: "Italian",
     };
 
     const sourceName = languageNames[normalizedSource] || normalizedSource;
     const targetName = languageNames[normalizedTarget] || normalizedTarget;
 
-    const prompt = `Translate the following text from ${sourceName} to ${targetName}. 
-Only provide the translation, no explanations or additional text.
-
-Text to translate:
-${q}`;
+    const prompt = `Translate the following text from ${sourceName} to ${targetName}.\nOnly provide the translation, no explanations or additional text.\n\nText to translate:\n${q}`;
 
     const response = await fetchWithTimeout(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
@@ -292,7 +404,7 @@ ${q}`;
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: {
-            temperature: 0.1, // Low temperature for more consistent translations
+            temperature: 0.1,
             maxOutputTokens: 2048,
           },
         }),
@@ -302,13 +414,13 @@ ${q}`;
 
     if (!response.ok) return null;
 
-    const data = (await response.json()) as {
+    const data = (await response.json().catch(() => null)) as {
       candidates?: Array<{
         content?: {
           parts?: Array<{ text?: string }>;
         };
       }>;
-    };
+    } | null;
 
     const translatedText = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
 
@@ -322,10 +434,66 @@ ${q}`;
   }
 }
 
-/**
- * POST /api/tools/translate
- * body: { q, source, target }
- */
+async function translateSingleSegment(
+  q: string,
+  source: string,
+  target: string
+): Promise<TranslateResult | null> {
+  const preferPostOnly = q.length > MAX_DIRECT_PROVIDER_CHARS;
+
+  const tries = preferPostOnly
+    ? [
+        () => tryGeminiTranslate(q, source, target),
+        () => tryLibreTranslate(q, source, target),
+      ]
+    : [
+        () => tryGeminiTranslate(q, source, target),
+        () => tryGoogleTranslateWeb(q, source, target),
+        () => tryLingvaTranslate(q, source, target),
+        () => tryMyMemory(q, source, target),
+        () => tryLibreTranslate(q, source, target),
+      ];
+
+  for (const run of tries) {
+    const result = await run();
+    if (result?.translatedText) return result;
+  }
+
+  return null;
+}
+
+async function translateWithChunking(
+  q: string,
+  source: string,
+  target: string
+): Promise<TranslateResult | null> {
+  if (q.length <= MAX_CHUNK_CHARS) {
+    return translateSingleSegment(q, source, target);
+  }
+
+  const chunks = splitTextIntoChunks(q, MAX_CHUNK_CHARS);
+  if (chunks.length <= 1) {
+    return translateSingleSegment(q, source, target);
+  }
+
+  const translatedChunks: string[] = [];
+  const providers = new Set<string>();
+
+  for (const chunk of chunks) {
+    const result = await translateSingleSegment(chunk, source, target);
+    if (!result?.translatedText) {
+      return null;
+    }
+    translatedChunks.push(result.translatedText);
+    providers.add(result.provider);
+  }
+
+  return {
+    translatedText: translatedChunks.join("\n\n"),
+    provider: providers.size === 1 ? `${Array.from(providers)[0]}:chunked` : "mixed:chunked",
+  };
+}
+
 export async function POST(request: NextRequest) {
   const body = (await request.json().catch(() => null)) as TranslateBody | null;
 
@@ -348,17 +516,9 @@ export async function POST(request: NextRequest) {
   const normalizedSource = normalizeLanguageCode(source);
   const normalizedTarget = normalizeLanguageCode(target);
 
-  // Order: Gemini (Best Quality MT), Lingva (Google Translate MT), MyMemory (Memory/TM), LibreTranslate
-  const tries = [
-    () => tryGeminiTranslate(q, normalizedSource, normalizedTarget),
-    () => tryLingvaTranslate(q, normalizedSource, normalizedTarget),
-    () => tryMyMemory(q, normalizedSource, normalizedTarget),
-    () => tryLibreTranslate(q, normalizedSource, normalizedTarget),
-  ];
-
-  for (const run of tries) {
-    const result = await run();
-    if (result?.translatedText) return NextResponse.json(result);
+  const result = await translateWithChunking(q, normalizedSource, normalizedTarget);
+  if (result?.translatedText) {
+    return NextResponse.json(result);
   }
 
   return jsonError(
