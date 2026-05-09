@@ -3,8 +3,7 @@
 import { Users } from "lucide-react";
 import { useEffect, useState } from "react";
 
-// Socket.IO requires a persistent Node.js server (not compatible with Vercel serverless).
-// We fall back to HTTP polling which works everywhere.
+// Hiển thị số lượng khách hàng đang truy cập
 export function CustomerOnlineCounter() {
   const [onlineCount, setOnlineCount] = useState(0);
 
@@ -35,6 +34,7 @@ export function CustomerOnlineCounter() {
 
     const presenceId = resolvePresenceId();
 
+    // Mở kết nối SSE để nhận cập nhật số lượng online theo thời gian thực(5s reset 1 lần)
     const openStream = () => {
       if (typeof window === "undefined") return;
       eventSource?.close();
@@ -48,6 +48,7 @@ export function CustomerOnlineCounter() {
 
     const loadCount = async () => {
       const res = await fetch("/api/socket", {
+        //Lây số lượng online hiện tại - không dùng cache để đảm bảo luôn mới nhất
         method: "GET",
         cache: "no-store",
       }).catch(() => null);
@@ -60,6 +61,7 @@ export function CustomerOnlineCounter() {
     const refreshCount = async () => {
       if (shouldHeartbeat) {
         const res = await fetch("/api/socket", {
+          // Gửi tín hiệu heartbeat để đánh dấu khách hàng vẫn đang truy cập
           method: "POST",
           credentials: "include",
           cache: "no-store",
@@ -85,6 +87,7 @@ export function CustomerOnlineCounter() {
     void refreshCount();
     openStream();
 
+    // Gửi tín hiệu offline khi khách hàng rời đi hoặc đóng trang
     const sendOfflineSignal = () => {
       const url = `/api/socket-offline?presenceId=${encodeURIComponent(presenceId)}`;
       const queued = navigator.sendBeacon?.(url);
