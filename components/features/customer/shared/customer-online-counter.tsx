@@ -13,6 +13,7 @@ export function CustomerOnlineCounter() {
     let eventSource: EventSource | null = null;
     const storageKey = "customer_presence_id";
 
+    // Tạo ID duy nhất cho khách hàng để theo dõi trạng thái online/offline
     const createPresenceId = () => {
       if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
         return crypto.randomUUID();
@@ -20,6 +21,7 @@ export function CustomerOnlineCounter() {
       return `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
     };
 
+    // Lấy hoặc tạo presenceId duy nhất cho khách hàng để gửi cùng tín hiệu heartbeat
     const resolvePresenceId = () => {
       try {
         const current = window.localStorage.getItem(storageKey);
