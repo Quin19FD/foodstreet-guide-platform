@@ -8,6 +8,7 @@ import {
 import { CUSTOMER_AUTH_COOKIES } from "@/infrastructure/security/auth-cookies";
 import { verifyCustomerAccessToken } from "@/infrastructure/security/auth";
 
+// Hàm tiện ích để parse cookies từ header
 function parseCookies(header: string | undefined): Record<string, string> {
   if (!header) return {};
 
@@ -26,6 +27,7 @@ function parseCookies(header: string | undefined): Record<string, string> {
   }, {});
 }
 
+// Hàm tiện ích để lấy token từ header Authorization nếu có
 function getBearerToken(req: NextApiRequest): string | null {
   const raw = req.headers.authorization;
   if (!raw) return null;
@@ -33,6 +35,7 @@ function getBearerToken(req: NextApiRequest): string | null {
   return match?.[1] ?? null;
 }
 
+// Hàm này sẽ giải mã presence id từ query hoặc header của request
 function resolvePresenceId(req: NextApiRequest): string {
   const rawHeader = req.headers["x-presence-id"];
   if (typeof rawHeader === "string") return rawHeader.trim();
@@ -40,6 +43,7 @@ function resolvePresenceId(req: NextApiRequest): string {
   return "";
 }
 
+// Hàm này sẽ giải mã user id của khách hàng từ token trong cookie hoặc header, nếu có
 async function resolveCustomerUserId(req: NextApiRequest): Promise<string | null> {
   const cookies = parseCookies(req.headers.cookie);
   const token = cookies[CUSTOMER_AUTH_COOKIES.access] ?? getBearerToken(req);
@@ -54,6 +58,7 @@ async function resolveCustomerUserId(req: NextApiRequest): Promise<string | null
   }
 }
 
+// API này sẽ được gọi khi một khách hàng kết nối, nó sẽ đánh dấu họ online và trả về tổng số khách hàng online hiện tại
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   res.setHeader("Cache-Control", "no-store");
 

@@ -6,11 +6,15 @@ import {
 } from "@/infrastructure/realtime/customer-online-store";
 import type { NextApiRequest, NextApiResponse } from "next";
 
+// Viết sự kiện SSE theo định dạng:
+// event: <event-name>
+// data: <payload>
 function writeEvent(res: NextApiResponse, event: string, payload: string) {
   res.write(`event: ${event}\n`);
   res.write(`data: ${payload}\n\n`);
 }
 
+// Phân tích dòng dữ liệu từ Upstash subscribe event để lấy số lượng online
 function parseCountFromUpstashLine(line: string): number | null {
   if (!line.startsWith("data:")) return null;
   const raw = line.slice(5).trim();
@@ -26,6 +30,7 @@ function parseCountFromUpstashLine(line: string): number | null {
   return Number.isFinite(count) ? count : null;
 }
 
+// API route này cung cấp một stream SSE để gửi cập nhật số lượng khách hàng online theo thời gian thực
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
@@ -47,6 +52,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.write(": ping\n\n");
   }, 15_000);
 
+  // Hàm này sẽ lấy số lượng online mới nhất và gửi đến client nếu có sự thay đổi
   const pushCount = async () => {
     const count = await getOnlineCustomerCount();
     if (count === lastCount || stopped) return;
@@ -57,6 +63,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   await pushCount();
 
   let fallbackTimer: NodeJS.Timeout | null = null;
+  // Nếu Upstash không được cấu hình hoặc có lỗi xảy ra, chúng ta sẽ sử dụng polling để cập nhật số lượng online mỗi 2 giây
   const startPollingFallback = () => {
     if (fallbackTimer || stopped) return;
     fallbackTimer = setInterval(() => {
@@ -64,6 +71,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }, 2_000);
   };
 
+  // Hàm này sẽ dọn dẹp tài nguyên khi client ngắt kết nối
   const stop = () => {
     stopped = true;
     clearInterval(pingTimer);
@@ -79,6 +87,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return;
   }
 
+  //Cập nhật số lượng online theo thời gian thực bằng cách subscribe vào kênh của Upstash
   const config = getUpstashConfig();
   if (!config) {
     startPollingFallback();
@@ -110,6 +119,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const decoder = new TextDecoder();
     let buffer = "";
 
+    // Đọc dữ liệu từ stream của Upstash và gửi sự kiện đến client khi có cập nhật số lượng online mới
     while (!stopped) {
       const { done, value } = await reader.read();
       if (done) break;
